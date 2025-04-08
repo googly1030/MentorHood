@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.banner {
+  background-color: #CCFF00;
+  color: black;
+  text-align: center;
+  padding: 8px;
+  font-weight: 500;
+}
+
+.banner a {
+  text-decoration: underline;
+}
+
+.hero-section {
+  background: linear-gradient(180deg, rgba(204, 255, 0, 0.2) 0%, rgba(204, 255, 0, 0.05) 100%);
+  min-height: calc(100vh - 75px);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-button {
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-button:hover {
+  transform: translateY(-1px);
+}
+
+.start-now-btn {
+  background-color: #F4FFD6;
+  color: black;
+}
+
+.dashboard-btn {
+  background-color: #CCFF00;
+  color: black;
+}
+
+.get-started-btn {
+  background-color: black;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 100px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.get-started-btn:hover {
+  transform: translateY(-2px);
+}
+
+.trusted-badge {
+  background-color: rgba(204, 255, 0, 0.3);
+  padding: 8px 16px;
+  border-radius: 100px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-stack {
+  display: flex;
+  margin-right: 8px;
+}
+
+.avatar-stack img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(204, 255, 0, 0.3);
+  margin-left: -8px;
+}
+
+/* Smooth scrolling for parallax effect */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Card animations */
+.mentor-card {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mentor-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mentor-card:nth-child(2) {
+  transition-delay: 0.2s;
+}
+
+.mentor-card:nth-child(3) {
+  transition-delay: 0.4s;
+}
+
+/* View All button animation */
+.view-all-btn {
+  background-color: black;
+  color: white;
+  padding: 16px 48px;
+  border-radius: 100px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.view-all-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.view-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.view-all-btn:hover::after {
+  transform: translateX(100%);
+}
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
