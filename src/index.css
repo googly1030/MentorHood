@@ -26,6 +26,10 @@
   border-radius: 100px;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
 .nav-button:hover {
@@ -52,6 +56,10 @@
   align-items: center;
   gap: 8px;
   transition: transform 0.2s ease-in-out;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
 .get-started-btn:hover {
@@ -87,14 +95,19 @@ html {
 
 /* Card animations */
 .mentor-card {
+  transform: translateY(30px);
   opacity: 0;
-  transform: translateY(50px);
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
 .mentor-card.visible {
-  opacity: 1;
   transform: translateY(0);
+  opacity: 1;
 }
 
 .mentor-card:nth-child(2) {
@@ -103,6 +116,34 @@ html {
 
 .mentor-card:nth-child(3) {
   transition-delay: 0.4s;
+}
+
+/* Emoji Animation */
+@keyframes floatEmoji {
+  0% {
+    transform: translateY(20px) scale(0);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-60px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.emoji-container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 50;
+  animation: floatEmoji 1s ease-in-out forwards;
+  will-change: transform, opacity;
 }
 
 /* View All button animation */
@@ -118,6 +159,10 @@ html {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
 .view-all-btn::after {
@@ -140,6 +185,7 @@ html {
 .view-all-btn:hover::after {
   transform: translateX(100%);
 }
+
 @keyframes blob {
   0% { transform: translate(0px, 0px) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
@@ -157,4 +203,87 @@ html {
 
 .animation-delay-4000 {
   animation-delay: 4s;
+}
+
+/* Journey Cards Animation */
+.journey-card {
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 20;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+}
+
+.journey-section:not(.in-view) .journey-card {
+  transform: translate(-50%, -50%) !important;
+  opacity: 0.6;
+}
+
+.journey-section.in-view .journey-card {
+  opacity: 1;
+}
+
+/* Position cards in a perfect circle around the center */
+.journey-section.in-view .journey-card:nth-child(1) {
+  transform: translate(calc(-50% - 300px), calc(-50% - 300px));
+}
+
+.journey-section.in-view .journey-card:nth-child(2) {
+  transform: translate(calc(-50% + 300px), calc(-50% - 300px));
+}
+
+.journey-section.in-view .journey-card:nth-child(3) {
+  transform: translate(calc(-50% - 300px), calc(-50% + 300px));
+}
+
+.journey-section.in-view .journey-card:nth-child(4) {
+  transform: translate(calc(-50% + 300px), calc(-50% + 300px));
+}
+
+.journey-card:hover {
+  transform: scale(1.05) !important;
+  z-index: 30;
+}
+
+.journey-center-card {
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 25;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+}
+
+.journey-section:not(.in-view) .journey-center-card {
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+}
+
+.journey-section.in-view .journey-center-card {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* Pulse animation for the center card */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.journey-center-card {
+  animation: pulse 3s infinite;
 }
