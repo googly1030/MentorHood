@@ -14,12 +14,7 @@
   text-decoration: underline;
 }
 
-.hero-section {
-  /* background: linear-gradient(180deg, rgba(244, 255, 214, 0.4) 0%, rgba(244, 255, 214, 0.1) 100%); */
-  min-height: calc(100vh - 75px);
-  position: relative;
-  overflow: hidden;
-}
+
 
 .nav-button {
   padding: 12px 24px;
@@ -249,9 +244,6 @@ html {
   transition-delay: 0.4s;
 }
 
-.journey-section {
-  background: linear-gradient(to right, rgba(244, 255, 214, 0.3), white, rgba(244, 255, 214, 0.3)) !important;
-}
 
 .journey-center-card {
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -472,5 +464,50 @@ footer a::after {
 
 footer a:hover::after {
   transform: translateX(0);
+}
+
+/* Question Section Styles */
+.question-card {
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.question-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.upvote-button {
+  transition: all 0.2s ease;
+}
+
+.upvote-button.active {
+  color: #9333ea;
+  border-color: #9333ea;
+}
+
+/* Modal animations */
+.modal-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 

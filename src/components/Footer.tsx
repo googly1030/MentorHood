@@ -21,7 +21,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand column */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#3730A3] to-blue-500 bg-clip-text text-transparent">
               Mentor<span className="text-white">Hood</span>
             </h2>
             <p className="text-gray-400 leading-relaxed">
@@ -33,7 +33,7 @@ const Footer = () => {
                   key={social.name}
                   href={social.link}
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center 
-                    hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-500 
+                    hover:bg-gradient-to-r hover:from-[#3730A3] hover:to-blue-500 
                     transform hover:scale-110 transition-all duration-300 group"
                 >
                   <span className="sr-only">{social.name}</span>
@@ -49,7 +49,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-[#3730A3] to-blue-500 bg-clip-text text-transparent">
               Quick Links
             </h3>
             <ul className="space-y-4">
@@ -59,7 +59,7 @@ const Footer = () => {
                     href={`#${link}`}
                     className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 transform scale-0 group-hover:scale-100 transition-transform duration-200" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#3730A3] transform scale-0 group-hover:scale-100 transition-transform duration-200" />
                     {link}
                   </a>
                 </li>
@@ -69,7 +69,7 @@ const Footer = () => {
 
           {/* Resources */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-[#3730A3] to-blue-500 bg-clip-text text-transparent">
               Resources
             </h3>
             <ul className="space-y-4">
@@ -79,7 +79,7 @@ const Footer = () => {
                     href={`#${resource}`}
                     className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 transform scale-0 group-hover:scale-100 transition-transform duration-200" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#3730A3] transform scale-0 group-hover:scale-100 transition-transform duration-200" />
                     {resource}
                   </a>
                 </li>
@@ -89,7 +89,7 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold mb-6 bg-gradient-to-r from-[#3730A3] to-blue-500 bg-clip-text text-transparent">
               Stay Updated
             </h3>
             <div className="space-y-4">
@@ -98,9 +98,9 @@ const Footer = () => {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#3730A3] focus:border-transparent transition-all duration-300"
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#3730A3] to-blue-500 text-white px-4 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Join
                 </button>
               </div>
@@ -130,7 +130,7 @@ const Footer = () => {
       </div>
 
       {/* Decorative gradient orbs */}
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-600/20 rounded-full filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#3730A3]/20 rounded-full filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute top-0 right-0 w-72 h-72 bg-blue-600/20 rounded-full filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
     </footer>
   );

@@ -1,269 +1,458 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Star, Clock, BookOpen, Users2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users , Sun, Moon, Star } from 'lucide-react';
 
 export interface Service {
   id: number;
   title: string;
-  rating: number;
   duration: string;
-  price: string;
   type: string;
-  isPopular?: boolean;
-}
-
-export interface Review {
-  id: number;
-  user: string;
-  rating: number;
-  comment: string;
-  date: string;
-  userImage: string;
+  frequency: string;
+  sessions: number;
+  price: number;
+  rating?: number;
 }
 
 export const services: Service[] = [
   {
     id: 1,
-    title: "1:1 Mentorship",
-    rating: 5,
-    duration: "30 mins",
-    price: "₹800",
-    type: "Video Meeting",
-    isPopular: true
+    title: 'Performance Boost',
+    duration: '20 minutes',
+    type: 'Video Call',
+    frequency: 'Weekly',
+    sessions: 6,
+    price: 360,
+    rating: 4.9
   },
   {
     id: 2,
-    title: "Mock Interview - System Design",
-    rating: 5,
-    duration: "60 mins",
-    price: "₹800",
-    type: "Video Meeting"
+    title: 'Mentorship session',
+    duration: '20 minutes',
+    type: 'Video Call',
+    frequency: 'Weekly',
+    sessions: 2,
+    price: 50,
+    rating: 4.8
   },
   {
     id: 3,
-    title: "Mock Interview - Managerial",
-    rating: 5,
-    duration: "60 mins",
-    price: "₹800",
-    type: "Video Meeting"
-  },
-  {
-    id: 4,
-    title: "Resume Review",
-    rating: 4.8,
-    duration: "15 mins",
-    price: "₹100",
-    type: "Video Meeting"
+    title: 'Momentum Overview',
+    duration: '20 minutes',
+    type: 'Video Call',
+    frequency: 'Fortnightly',
+    sessions: 2,
+    price: 56,
+    rating: 4.7
   }
 ];
 
-const UserProfile = () => {
-  const { id } = useParams();
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
+enum TabType {
+  OVERVIEW = 'overview',
+  REVIEWS = 'reviews',
+  ACHIEVEMENTS = 'achievements',
+  GROUP_SESSIONS = 'groupSessions'
+}
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+interface Review {
+  id: number;
+  user: {
+    name: string;
+    image: string;
+    role: string;
+  };
+  rating: number;
+  comment: string;
+  date: string;
+}
 
-  console.log("User ID from URL:", id); // Use the id for debugging or further logic
+// interface Achievement {
+//   id: number;
+//   title: string;
+//   description: string;
+//   icon: React.ReactNode;
+//   date: string;
+// }
 
-  // Mock data - in a real app, you would fetch this based on the ID
-  const mentorData = {
-    id: 1,
-    name: "Sarah Johnson",
-    role: "Senior Product Manager at Google",
-    experience: "8+ years",
-    rating: 4.8,
-    totalReviews: 156,
-    sessionsCompleted: 1228,
-    hourlyRate: 150,
-    about: "Passionate about helping people transition into product management roles. With 8+ years of experience at Google, I've helped launch multiple successful products and mentored numerous PMs.",
-    expertise: ["Product Strategy", "Career Transitions", "Technical Product Management", "User Research", "Agile Methodologies"],
-    education: [
-      {
-        degree: "MBA",
-        school: "Stanford University",
-        year: "2015"
-      },
-      {
-        degree: "BS Computer Science",
-        school: "MIT",
-        year: "2012"
-      }
-    ],
-    availableTimes: [
-      "Mon-Fri: 6:00 PM - 9:00 PM PST",
-      "Sat: 10:00 AM - 2:00 PM PST"
-    ],
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-    reviews: [
-      {
-        id: 1,
-        user: "Alex Chen",
-        rating: 5,
-        comment: "Sarah provided invaluable insights for my PM interview preparation. Her practical examples and feedback were extremely helpful.",
-        date: "March 15, 2024",
-        userImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"
-      },
-      {
-        id: 2,
-        user: "Emily Rodriguez",
-        rating: 5,
-        comment: "Great session! Sarah helped me understand product prioritization frameworks better.",
-        date: "March 10, 2024",
-        userImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50"
-      }
-    ]
+// interface GroupSession {
+//   id: number;
+//   title: string;
+//   date: string;
+//   time: string;
+//   participants: number;
+//   maxParticipants: number;
+//   price: number;
+// }
+
+function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>(TabType.OVERVIEW);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
-  const ReviewCard = ({ review }: { review: Review }) => (
-    <div className="bg-white rounded-xl p-6 shadow-md">
-      <div className="flex items-start gap-4 mb-4">
-        <img src={review.userImage} alt={review.user} className="w-12 h-12 rounded-full" />
-        <div className="flex-1">
-          <h4 className="font-medium">{review.user}</h4>
-          <div className="flex items-center gap-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={16} 
-                  className={i < review.rating ? "text-yellow-500 fill-current" : "text-gray-300"} 
-                />
-              ))}
-            </div>
-            <span className="text-gray-500 text-sm">{review.date}</span>
+  const textColor = isDarkMode ? 'text-white' : 'text-gray-700';
+  const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
+  const cardBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
+
+  const reviews: Review[] = [
+    {
+      id: 1,
+      user: {
+        name: "John Doe",
+        image: "https://randomuser.me/api/portraits/men/1.jpg",
+        role: "Product Manager"
+      },
+      rating: 5,
+      comment: "Exceptional mentorship session! Ney provided invaluable insights...",
+      date: "2025-03-15"
+    },
+    {
+      id: 2,
+      user: {
+        name: "Sarah Smith",
+        image: "https://randomuser.me/api/portraits/women/1.jpg",
+        role: "UX Designer"
+      },
+      rating: 4.8,
+      comment: "Great session focused on product strategy and execution...",
+      date: "2025-03-10"
+    }
+  ];
+
+  const achievements = [
+    {
+      id: 1,
+      title: "Top 50 in Program Management",
+      description: "Recognized among the top 50 program managers globally",
+      icon: <Trophy className="w-12 h-12 text-yellow-500" />,
+      date: "Jan 2025 - Mar 2025"
+    },
+  ];
+
+  const groupSessions = [
+    {
+      id: 1,
+      title: "Product Strategy Workshop",
+      date: "2025-04-15",
+      time: "10:00 AM - 11:30 AM",
+      participants: 8,
+      maxParticipants: 12,
+      price: 99
+    },
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case TabType.REVIEWS:
+        return (
+          <div className="space-y-6">
+            {reviews.map(review => (
+              <div key={review.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                <div className="flex items-start gap-4">
+                  <img src={review.user.image} alt={review.user.name} className="w-12 h-12 rounded-full" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`font-medium ${textColor}`}>{review.user.name}</h3>
+                      <span className="flex items-center gap-1">
+                        <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                        <span className={textColor}>{review.rating}</span>
+                      </span>
+                    </div>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{review.user.role}</p>
+                    <p className={`mt-3 ${textColor}`}>{review.comment}</p>
+                    <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{review.date}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-      <p className="text-gray-600">{review.comment}</p>
-    </div>
-  );
+        );
+
+      case TabType.ACHIEVEMENTS:
+        return (
+          <div className="space-y-6">
+            {achievements.map(achievement => (
+              <div key={achievement.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                <div className="flex items-center gap-4">
+                  {achievement.icon}
+                  <div>
+                    <h3 className={`font-medium ${textColor}`}>{achievement.title}</h3>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{achievement.description}</p>
+                    <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{achievement.date}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case TabType.GROUP_SESSIONS:
+        return (
+          <div className="space-y-6">
+            {groupSessions.map(session => (
+              <div key={session.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className={`font-medium ${textColor}`}>{session.title}</h3>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                      {session.date} • {session.time}
+                    </p>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                      {session.participants}/{session.maxParticipants} participants
+                    </p>
+                  </div>
+                  <button className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm">
+                    Join • ${session.price}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-8">
+            {/* About Section */}
+            <div>
+              <p className={textColor}>
+                Worked in organizations such as Circles.Life, Alibaba Group, Lazada Group and Dafiti Group.
+              </p>
+              <p className={`${textColor} mt-4`}>
+                I'm a seasoned executive in the e-commerce and telecom industries, bringing and building high-performance organizations with process solutions
+                within commercial constraints - local, cross-boundary, and remote teams; complemented by an MBA in Strategic and Economic Project Management...
+              </p>
+              <button className="text-teal-600 mt-2">Show more</button>
+            </div>
+
+            {/* Experience Section */}
+            <div>
+              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Experience</h2>
+              <div className="space-y-4">
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <div className="flex justify-between">
+                    <div>
+                      <h3 className={`font-medium ${textColor}`}>Senior Product Manager</h3>
+                      <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Stanford Graduate School of Business</p>
+                    </div>
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>2020 - Present</span>
+                  </div>
+                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                    Led cross-functional teams in developing and launching educational products...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Projects Section */}
+            <div>
+              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Projects</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <h3 className={`font-medium ${textColor}`}>Digital Transformation Initiative</h3>
+                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Led the digital transformation of legacy systems...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Resources Section */}
+            <div>
+              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Resources</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <h3 className={`font-medium ${textColor}`}>Product Management Toolkit</h3>
+                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    A comprehensive guide for product managers...
+                  </p>
+                  <button className="text-teal-600 mt-2">Download →</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonials Section */}
+            <div>
+              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Testimonials</h2>
+              <div className="space-y-4">
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <div className="flex items-start gap-4">
+                    <img 
+                      src="https://randomuser.me/api/portraits/men/1.jpg"
+                      alt="Testimonial"
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div>
+                      <h3 className={`font-medium ${textColor}`}>John Doe</h3>
+                      <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        "Ney's mentorship was instrumental in helping me transition into product management..."
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left Column - Profile Info */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <div className="flex items-start gap-6">
-                <img 
-                  src={mentorData.image} 
-                  alt={mentorData.name}
-                  className="w-32 h-32 rounded-xl object-cover"
-                />
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">{mentorData.name}</h1>
-                  <p className="text-gray-600 mb-4">{mentorData.role}</p>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <Star className="text-yellow-500 fill-current" size={20} />
-                      <span className="font-medium">{mentorData.rating}</span>
-                      <span className="text-gray-500">({mentorData.totalReviews} reviews)</span>
-                    </div>
-                    <div className="text-gray-500">|</div>
-                    <div className="flex items-center gap-1">
-                      <Users2 size={20} className="text-purple-600" />
-                      <span>{mentorData.sessionsCompleted}+ sessions</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className={`min-h-screen ${bgColor} transition-colors duration-200`}>
+      <div className="relative">
+        <div 
+          className="h-64 w-full bg-cover bg-center" 
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1604871000636-074fa5117945?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')"
+          }}
+        />
+        
+        <div className="absolute top-4 right-4 flex gap-3">
+          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
+            <MessageCircle className="w-6 h-6 text-white" />
+          </button>
+          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
+            <Heart className="w-6 h-6 text-white" />
+          </button>
+          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
+            <MoreHorizontal className="w-6 h-6 text-white" />
+          </button>
+        </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-bold mb-4">About</h2>
-              <p className="text-gray-600 mb-6">{mentorData.about}</p>
-              
-              <h3 className="font-bold mb-3">Areas of Expertise</h3>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {mentorData.expertise.map((skill, index) => (
-                  <span 
-                    key={index}
-                    className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    {skill}
+        <div className="absolute top-4 left-4 flex gap-3">
+          <button 
+            onClick={toggleTheme}
+            className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all"
+          >
+            {isDarkMode ? (
+              <Sun className="w-6 h-6 text-white" />
+            ) : (
+              <Moon className="w-6 h-6 text-white" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 pb-[10rem]">
+        <div className="relative -mt-32">
+          <div className="flex items-start">
+            <div className="flex items-end">
+              <img 
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                alt="Profile"
+                className="w-40 h-40 rounded-full border-4 border-white shadow-lg"
+              />
+              <div className="ml-6 mb-4">
+                <h1 className={`text-3xl font-bold ${textColor}`}>
+                  ney batista
+                </h1>
+                <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Product Manager, Program Manager, Project Manager at Stanford Graduate School of Business
+                </p>
+                <div className="mt-2">
+                  <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>
+                    Member of uxfolio
                   </span>
-                ))}
-              </div>
-
-              <h3 className="font-bold mb-3">Education</h3>
-              <div className="space-y-2">
-                {mentorData.education.map((edu, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <BookOpen size={16} className="text-purple-600" />
-                    <span>{edu.degree} - {edu.school}, {edu.year}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-bold mb-6">Reviews</h2>
-              <div className="space-y-4">
-                {mentorData.reviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column - Services & Availability */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-md sticky top-6">
-              <h3 className="text-xl font-bold mb-6">Services Offered</h3>
-              <div className="space-y-4">
-                {services.map((service) => (
-                  <div 
-                    key={service.id} 
-                    className="p-4 border rounded-xl hover:border-purple-400 transition-colors cursor-pointer relative"
-                  >
-                    {service.isPopular && (
-                      <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                        Popular
-                      </span>
-                    )}
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium">{service.title}</h4>
-                      <div className="flex items-center gap-1">
-                        <Star size={14} className="text-yellow-500 fill-current" />
-                        <span className="text-sm text-gray-600">{service.rating}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} className="text-purple-600" />
-                        <span>{service.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <BookOpen size={14} className="text-purple-600" />
-                        <span>{service.type}</span>
-                      </div>
-                    </div>
+          {/* Navigation */}
+          <div className={`flex gap-8 mt-8 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+            <button 
+              onClick={() => setActiveTab(TabType.OVERVIEW)}
+              className={`pb-4 font-medium ${
+                activeTab === TabType.OVERVIEW 
+                  ? 'text-teal-600 border-b-2 border-teal-600' 
+                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }`}
+            >
+              Overview
+            </button>
+            <button 
+              onClick={() => setActiveTab(TabType.REVIEWS)}
+              className={`pb-4 font-medium ${
+                activeTab === TabType.REVIEWS 
+                  ? 'text-teal-600 border-b-2 border-teal-600' 
+                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }`}
+            >
+              Reviews (2)
+            </button>
+            <button 
+              onClick={() => setActiveTab(TabType.ACHIEVEMENTS)}
+              className={`pb-4 font-medium ${
+                activeTab === TabType.ACHIEVEMENTS 
+                  ? 'text-teal-600 border-b-2 border-teal-600' 
+                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }`}
+            >
+              Achievements
+            </button>
+            <button 
+              onClick={() => setActiveTab(TabType.GROUP_SESSIONS)}
+              className={`pb-4 font-medium ${
+                activeTab === TabType.GROUP_SESSIONS 
+                  ? 'text-teal-600 border-b-2 border-teal-600' 
+                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }`}
+            >
+              Group sessions
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-8 mt-8">
+            {/* Left Column - Made scrollable */}
+            <div className="col-span-2 space-y-8 pb-8">
+              {renderTabContent()}
+            </div>
+
+            <div className="relative">
+              <div className="sticky top-[7rem]">
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <h2 className={`text-xl font-bold ${textColor}`}>Community statistics</h2>
+                  <div className="mt-4 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-purple-600">{service.price}</span>
-                      <button 
-                        onClick={() => navigate(`/booking/${service.id}`)}
-                        className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors"
-                      >
-                        Book Now
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <Rocket className="w-5 h-5 text-blue-500" />
+                        <div>
+                          <p className="font-medium">1,170 mins</p>
+                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total mentoring time</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-pink-500" />
+                        <div>
+                          <p className="font-medium">54</p>
+                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Sessions completed</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
 
-              <div className="mt-6 pt-6 border-t">
-                <h4 className="font-medium mb-3">Available Times</h4>
-                <div className="space-y-2">
-                  {mentorData.availableTimes.map((time, index) => (
-                    <div key={index} className="flex items-center gap-2 text-gray-600">
-                      <Clock size={16} className="text-purple-600" />
-                      <span>{time}</span>
-                    </div>
-                  ))}
+                <div className="mt-6">
+                  <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Available sessions</h2>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Book 1:1 sessions from the options based on your needs</p>
+                  
+                  <div className="space-y-4">
+                    {services.map((session) => (
+                      <div key={session.id} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Advance</span>
+                            <h3 className={`font-medium mt-2 ${textColor}`}>{session.title}</h3>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                              {session.duration}, {session.frequency}, {session.sessions} sessions
+                            </p>
+                          </div>
+                          <button className="bg-black text-white px-4 py-1 rounded-lg text-sm">Book</button>
+                        </div>
+                        <p className={`text-lg font-medium mt-2 ${textColor}`}>${session.price}.00</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -272,6 +461,6 @@ const UserProfile = () => {
       </div>
     </div>
   );
-};
+}
 
-export default UserProfile;
+export default App;
