@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { ArrowRight, Star, Phone, Users, Coffee, BookOpen, Award, Clock, Calendar, DollarSign, MessageCircle, Users2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import img from "../image.webp"
+
 interface Suggestion {
   id: number;
   category: string;
@@ -363,7 +365,7 @@ function App() {
       ))}
 
         <img 
-          src="/src/image.webp"
+          src={img}
           alt="Background"
           className="fixed inset-0 w-full h-full object-cover z-[-1] transition-opacity duration-300"
           style={{
