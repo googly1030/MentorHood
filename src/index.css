@@ -15,7 +15,7 @@
 }
 
 .hero-section {
-  background: linear-gradient(180deg, rgba(244, 255, 214, 0.4) 0%, rgba(244, 255, 214, 0.1) 100%);
+  /* background: linear-gradient(180deg, rgba(244, 255, 214, 0.4) 0%, rgba(244, 255, 214, 0.1) 100%); */
   min-height: calc(100vh - 75px);
   position: relative;
   overflow: hidden;
@@ -473,3 +473,4 @@ footer a::after {
 footer a:hover::after {
   transform: translateX(0);
 }
+
