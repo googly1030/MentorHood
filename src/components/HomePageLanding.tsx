@@ -362,14 +362,15 @@ function App() {
         </div>
       ))}
 
-      <div 
-        className="fixed inset-0 z-[-1] bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url("/src/image.webp")',
-          opacity: scrollOpacity,
-          transform: `translateY(${scrollPosition * 0.5}px)`,
-        }}
-      />
+        <img 
+          src="/src/image.webp"
+          alt="Background"
+          className="fixed inset-0 w-full h-full object-cover z-[-1] transition-opacity duration-300"
+          style={{
+            opacity: scrollOpacity,
+            transform: `translateY(${scrollPosition * 0.5}px)`,
+          }}
+        />
       
       <div className="hero-section ">
         <div className="max-w-6xl mx-auto px-8 pt-48 flex justify-center items-center flex-col">
@@ -531,7 +532,8 @@ function App() {
                       <DollarSign size={18} className="text-purple-600" />
                       {session.price}
                     </span>
-                    <button className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
+                    
+                    <button  onClick={() => navigate('/booking/1')} className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
                       hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg">
                       Book Now
                       <ArrowRight size={18} />
