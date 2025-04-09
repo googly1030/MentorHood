@@ -14,12 +14,7 @@
   text-decoration: underline;
 }
 
-.hero-section {
-  /* background: linear-gradient(180deg, rgba(244, 255, 214, 0.4) 0%, rgba(244, 255, 214, 0.1) 100%); */
-  min-height: calc(100vh - 75px);
-  position: relative;
-  overflow: hidden;
-}
+
 
 .nav-button {
   padding: 12px 24px;
@@ -249,9 +244,6 @@ html {
   transition-delay: 0.4s;
 }
 
-.journey-section {
-  background: linear-gradient(to right, rgba(244, 255, 214, 0.3), white, rgba(244, 255, 214, 0.3)) !important;
-}
 
 .journey-center-card {
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
