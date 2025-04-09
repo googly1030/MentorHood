@@ -5,6 +5,7 @@ import BookingDetails from './components/BookingDetails';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import AllMentors from './pages/AllMentors';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<HomePageLanding />} />
             <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/booking/:serviceId" element={<BookingDetails />} />
+            <Route path="/mentors" element={<AllMentors />} />
           </Routes>
         </main>
         <Footer />

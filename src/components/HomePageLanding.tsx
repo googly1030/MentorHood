@@ -13,7 +13,7 @@ const suggestions: Suggestion[] = [
   {
     id: 1,
     category: "LinkedIn-based",
-    title: "Data scientists at FAANG who transitioned from non-CS backgrounds.",
+    title: "Data scientists at FAANG who transitioned from CS backgrounds.",
     icon: "🔍"
   },
   {
@@ -81,7 +81,7 @@ function App() {
       specialization: "Product Management, Career Transitions",
       bookings: 1228,
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-      calendlyLink: "https://calendly.com/sarah-johnson/mentor-session"
+      calendlyLink: "/booking/1"
     },
     {
       id: 2,
@@ -92,7 +92,7 @@ function App() {
       specialization: "Software Architecture, Leadership",
       bookings: 956,
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
-      calendlyLink: "https://calendly.com/michael-chen/mentor-session"
+      calendlyLink: "/booking/2"
     },
     {
       id: 3,
@@ -103,7 +103,7 @@ function App() {
       specialization: "Frontend Development, System Design",
       bookings: 843,
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
-      calendlyLink: "https://calendly.com/emily-rodriguez/mentor-session"
+      calendlyLink: "/booking/3"
     }
   ];
 
@@ -391,7 +391,10 @@ function App() {
             Book personalized 20-45 minute mentoring sessions with industry experts. Get career guidance, technical advice, and actionable insights.
           </p>
           <div className="flex justify-center">
-            <button className="get-started-btn">
+            <button 
+              className="get-started-btn"
+              onClick={() => navigate('/mentors')}
+            >
               SCHEDULE A CALL NOW
               <ArrowRight size={20} />
             </button>
@@ -452,7 +455,10 @@ function App() {
           </div>
           
           <div className="text-center">
-            <button className="view-all-btn">
+            <button 
+              className="view-all-btn"
+              onClick={() => navigate('/mentors')}
+            >
               <Users size={20} />
               View All Mentors
               <ArrowRight size={20} />
@@ -469,7 +475,7 @@ function App() {
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <div>
-              <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                 Upcoming Sessions
               </h2>
               <p className="text-gray-600 text-lg max-w-xl">
@@ -546,8 +552,8 @@ function App() {
 
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-              Ask Me Anything Sessions
+          <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+            Ask Me Anything Sessions
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Join interactive group sessions where industry experts answer your burning questions live
@@ -571,7 +577,7 @@ function App() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  <div className="bg-[#F4FFD6]/30 rounded-xl p-4">
+                  <div className="bg-purple-100/30 rounded-xl p-4">
                     <div className="flex items-center gap-2 text-purple-600 mb-1">
                       <Calendar size={18} />
                       <span className="font-medium">Date & Time</span>
@@ -579,7 +585,7 @@ function App() {
                     <p className="text-gray-600">{session.date}</p>
                     <p className="text-gray-600">{session.time} • {session.duration}</p>
                   </div>
-                  <div className="bg-[#F4FFD6]/30 rounded-xl p-4">
+                  <div className="bg-purple-100/30 rounded-xl p-4">
                     <div className="flex items-center gap-2 text-purple-600 mb-1">
                       <Users2 size={18} />
                       <span className="font-medium">Registrants</span>
@@ -711,7 +717,7 @@ function App() {
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <h2 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+          <h2 className="text-5xl leading-normal font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
             Still looking? Try our AI Search
           </h2>
           <p className="text-gray-600 mb-10 text-lg">
