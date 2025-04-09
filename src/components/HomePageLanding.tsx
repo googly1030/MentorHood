@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Users2,
   Search,
+  Trophy,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,7 +76,7 @@ function App() {
   const [emojis, setEmojis] = useState<
     { id: number; emoji: string; left: number; top: number }[]
   >([]);
-  const [centerCardContent, setCenterCardContent] = useState({
+  const [centerCardContent] = useState({
     icon: (
       <img
         src="https://cdn-icons-png.flaticon.com/512/6009/6009939.png"
@@ -226,27 +227,6 @@ function App() {
   const sessionCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleSessionCards, setVisibleSessionCards] = useState<boolean[]>([]);
 
-  const handleCardClick = (cardId: string) => {
-    if (cardId === "discover-card") {
-      setCenterCardContent({
-        icon: <BookOpen size={80} className="text-gray-800" />,
-        title: "1. Discover",
-        description:
-          "Browse our curated network of industry experts and find mentors who match your career aspirations.",
-        buttonText: "Browse Mentors",
-        bgColor: "from-gray-800 to-blue-500",
-      });
-    } else if (cardId === "connect-card") {
-      setCenterCardContent({
-        icon: <Clock size={80} className="text-[#3730A3]" />,
-        title: "2. Connect",
-        description:
-          "Schedule 20-45 minute personalized sessions that fit your calendar and learning pace.",
-        buttonText: "Schedule Session",
-        bgColor: "from-gray-800 to-blue-500",
-      });
-    }
-  };
 
   const addEmoji = () => {
     const section = document.querySelector(".knowledge-buddies-section");
@@ -430,32 +410,32 @@ function App() {
           {/* Right side images */}
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-            alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            alt="Mentor1"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "2%", top: "23%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-            alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            alt="Mentor2"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "2%", top: "23%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-            alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            alt="Mentor3"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "88%", top: "56%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
-            alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            alt="Mentor4"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "12%", top: "32%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "15%", top: "66%" }}
           />
 
@@ -463,19 +443,19 @@ function App() {
           <img
             src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "88%", top: "56%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "12%", top: "32%" }}
           />
           <img
             src="https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop"
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-20 hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "15%", top: "66%" }}
           />
         </div>
@@ -755,7 +735,8 @@ function App() {
                     <h3 className="text-2xl font-bold mb-2 text-gray-800">
                       {session.title}
                     </h3>
-                    <p className="text-[#3730A3] font-medium">
+                    {/* Changed from text-[#3730A3] to text-gray-800 */}
+                    <p className="text-gray-800 font-medium">
                       {session.mentor.name}
                     </p>
                     <p className="text-gray-500">{session.mentor.role}</p>
@@ -764,8 +745,9 @@ function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                   <div className="bg-gray-100 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-[#3730A3] mb-1">
-                      <Calendar size={18} />
+                    {/* Changed from text-[#3730A3] to text-gray-800 */}
+                    <div className="flex items-center gap-2 text-gray-800 mb-1">
+                      <Calendar size={18} className="text-gray-800" />
                       <span className="font-medium">Date & Time</span>
                     </div>
                     <p className="text-gray-500">{session.date}</p>
@@ -774,8 +756,9 @@ function App() {
                     </p>
                   </div>
                   <div className="bg-gray-100 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-[#3730A3] mb-1">
-                      <Users2 size={18} />
+                    {/* Changed from text-[#3730A3] to text-gray-800 */}
+                    <div className="flex items-center gap-2 text-gray-800 mb-1">
+                      <Users2 size={18} className="text-gray-800" />
                       <span className="font-medium">Registrants</span>
                     </div>
                     <p className="text-gray-500">
@@ -795,8 +778,9 @@ function App() {
                 </div>
 
                 <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                  <div className="flex items-center gap-2 text-[#3730A3] mb-4">
-                    <MessageCircle size={18} />
+                  {/* Changed from text-[#3730A3] to text-gray-800 */}
+                  <div className="flex items-center gap-2 text-gray-800 mb-4">
+                    <MessageCircle size={18} className="text-gray-800" />
                     <span className="font-medium">Sample Questions</span>
                   </div>
                   <ul className="space-y-3">
@@ -805,14 +789,15 @@ function App() {
                         key={qIndex}
                         className="flex items-start gap-3 text-gray-500"
                       >
-                       <span className="w-2 h-2 mt-2 rounded-full bg-[#3730A3]"></span>
+                        {/* Changed from bg-[#3730A3] to bg-gray-800 */}
+                        <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
                         {question}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <button className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2">
+                <button className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"  onClick={() => navigate('/questions')}>
                   Register Now
                   <ArrowRight size={18} />
                 </button>
@@ -839,62 +824,110 @@ function App() {
 
           <div className="relative h-[500px] flex items-center justify-center">
             {/* First Card */}
-            <div
-              className="journey-card"
-              onClick={() => handleCardClick("discover-card")}
-            >
+            <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <BookOpen size={30} className="text-[#3730A3]" />
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-gray-200 p-3 rounded-full inline-block">
+                    <BookOpen size={30} className="text-[#3730A3]" />
+                  </div>
+                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 1</span>
                 </div>
-                <h4 className="font-bold text-lg mb-2">1. Discover</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  Browse our curated network of experts who match your career
-                  goals.
+                <h4 className="font-bold text-lg mb-3">1. Discover</h4>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                  Browse our curated network of experts who match your career goals.
                 </p>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Users size={16} className="text-gray-500" />
+                    <span>500+ Verified Mentors</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Tech Leaders</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Product</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Design</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Second Card */}
-            <div
-              className="journey-card"
-              onClick={() => handleCardClick("connect-card")}
-            >
+            <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Clock size={30} className="text-[#3730A3]" />
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-gray-200 p-3 rounded-full inline-block">
+                    <Clock size={30} className="text-[#3730A3]" />
+                  </div>
+                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 2</span>
                 </div>
-                <h4 className="font-bold text-lg mb-2">2. Connect</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h4 className="font-bold text-lg mb-3">2. Connect</h4>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">
                   Schedule personalized sessions that fit your calendar.
                 </p>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar size={16} className="text-gray-500" />
+                    <span>Flexible Scheduling</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">1:1 Sessions</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Group Sessions</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Chat</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Third Card */}
             <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Coffee size={30} className="text-[#3730A3]" />
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-gray-200 p-3 rounded-full inline-block">
+                    <Coffee size={30} className="text-[#3730A3]" />
+                  </div>
+                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 3</span>
                 </div>
-                <h4 className="font-bold text-lg mb-2">3. Transform</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  Gain insights through interactive sessions with industry
-                  leaders.
+                <h4 className="font-bold text-lg mb-3">3. Transform</h4>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                  Gain insights through interactive sessions with industry leaders.
                 </p>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Star size={16} className="text-gray-500" />
+                    <span>4.9/5 Average Rating</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Live Sessions</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Resources</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Recordings</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Fourth Card */}
             <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Award size={30} className="text-[#3730A3]" />
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-gray-200 p-3 rounded-full inline-block">
+                    <Award size={30} className="text-[#3730A3]" />
+                  </div>
+                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 4</span>
                 </div>
-                <h4 className="font-bold text-lg mb-2">4. Succeed</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h4 className="font-bold text-lg mb-3">4. Succeed</h4>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">
                   Track your progress and celebrate achievements.
                 </p>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Trophy size={16} className="text-gray-500" />
+                    <span>Track Your Growth</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Goals</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Progress</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Milestones</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -909,8 +942,8 @@ function App() {
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-[#4937e8] via-[#4937e8] to-[#4338ca] bg-clip-text text-transparent [text-shadow:_0_1px_1px_rgb(0_0_0_/_10%)]">
-  {centerCardContent.title}
-</h3>
+                {centerCardContent.title}
+              </h3>
               <p className="text-gray-700 text-center mb-6 text-base leading-relaxed">
                 {centerCardContent.description}
               </p>

@@ -466,3 +466,48 @@ footer a:hover::after {
   transform: translateX(0);
 }
 
+/* Question Section Styles */
+.question-card {
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.question-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.upvote-button {
+  transition: all 0.2s ease;
+}
+
+.upvote-button.active {
+  color: #9333ea;
+  border-color: #9333ea;
+}
+
+/* Modal animations */
+.modal-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

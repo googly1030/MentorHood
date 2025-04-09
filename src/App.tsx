@@ -6,6 +6,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import AllMentors from './pages/AllMentors';
+import QuestionSection from './components/QuestionSection';
+import QuestionAnswers from './components/QuestionAnswers';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
             <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/booking/:serviceId" element={<BookingDetails />} />
             <Route path="/mentors" element={<AllMentors />} />
+            <Route path="/questions" element={<QuestionSection />} />
+            <Route path="/questions/:questionId/answers" element={<QuestionAnswers />} />
           </Routes>
         </main>
         <Footer />
