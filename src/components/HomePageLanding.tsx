@@ -238,7 +238,7 @@ function App() {
       });
     } else if (cardId === "connect-card") {
       setCenterCardContent({
-        icon: <Clock size={80} className="text-blue-500" />,
+        icon: <Clock size={80} className="text-[#3730A3]" />,
         title: "2. Connect",
         description:
           "Schedule 20-45 minute personalized sessions that fit your calendar and learning pace.",
@@ -638,7 +638,7 @@ function App() {
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <div>
-              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-gray-800 to-blue-500 bg-clip-text text-transparent">
+              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
                 Upcoming Sessions
               </h2>
               <p className="text-gray-700 text-lg max-w-xl">
@@ -689,11 +689,11 @@ function App() {
 
                   <div className="space-y-3 mb-8">
                     <div className="flex items-center gap-3 text-gray-500">
-                      <Calendar size={18} className="text-blue-500" />
+                      <Calendar size={18} className="text-[#3730A3]" />
                       <span>{session.date}</span>
                     </div>
                     <div className="flex items-center gap-3 text-gray-500">
-                      <Clock size={18} className="text-blue-500" />
+                      <Clock size={18} className="text-[#3730A3]" />
                       <span>
                         {session.time} • {session.duration}
                       </span>
@@ -702,7 +702,7 @@ function App() {
 
                   <div className="flex items-center justify-between">
                     <span className="flex items-center text-xl font-bold text-gray-800">
-                      <DollarSign size={18} className="text-blue-500" />
+                      <DollarSign size={18} className="text-[#3730A3]" />
                       {session.price}
                     </span>
 
@@ -730,7 +730,7 @@ function App() {
 
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-gray-800 to-blue-500 bg-clip-text text-transparent">
+            <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
               Ask Me Anything Sessions
             </h2>
             <p className="text-gray-700 text-lg max-w-2xl mx-auto">
@@ -755,7 +755,7 @@ function App() {
                     <h3 className="text-2xl font-bold mb-2 text-gray-800">
                       {session.title}
                     </h3>
-                    <p className="text-blue-500 font-medium">
+                    <p className="text-[#3730A3] font-medium">
                       {session.mentor.name}
                     </p>
                     <p className="text-gray-500">{session.mentor.role}</p>
@@ -764,7 +764,7 @@ function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                   <div className="bg-gray-100 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-blue-500 mb-1">
+                    <div className="flex items-center gap-2 text-[#3730A3] mb-1">
                       <Calendar size={18} />
                       <span className="font-medium">Date & Time</span>
                     </div>
@@ -774,7 +774,7 @@ function App() {
                     </p>
                   </div>
                   <div className="bg-gray-100 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-blue-500 mb-1">
+                    <div className="flex items-center gap-2 text-[#3730A3] mb-1">
                       <Users2 size={18} />
                       <span className="font-medium">Registrants</span>
                     </div>
@@ -783,7 +783,7 @@ function App() {
                     </p>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                       <div
-                        className="bg-gradient-to-r from-gray-800 to-blue-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
                         style={{
                           width: `${
                             (session.registrants / session.maxRegistrants) * 100
@@ -795,7 +795,7 @@ function App() {
                 </div>
 
                 <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                  <div className="flex items-center gap-2 text-blue-500 mb-4">
+                  <div className="flex items-center gap-2 text-[#3730A3] mb-4">
                     <MessageCircle size={18} />
                     <span className="font-medium">Sample Questions</span>
                   </div>
@@ -805,7 +805,7 @@ function App() {
                         key={qIndex}
                         className="flex items-start gap-3 text-gray-500"
                       >
-                        <span className="w-2 h-2 mt-2 rounded-full bg-blue-500"></span>
+                       <span className="w-2 h-2 mt-2 rounded-full bg-[#3730A3]"></span>
                         {question}
                       </li>
                     ))}
@@ -829,7 +829,7 @@ function App() {
         }`}
       >
         <div className="max-w-5xl mx-auto px-8 relative z-10">
-          <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-gray-800 to-blue-500 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
             Your Growth Journey
           </h2>
           <p className="text-lg text-gray-700 text-center mb-12 max-w-2xl mx-auto">
@@ -845,7 +845,7 @@ function App() {
             >
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <BookOpen size={30} className="text-blue-500" />
+                  <BookOpen size={30} className="text-[#3730A3]" />
                 </div>
                 <h4 className="font-bold text-lg mb-2">1. Discover</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -862,7 +862,7 @@ function App() {
             >
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Clock size={30} className="text-blue-500" />
+                  <Clock size={30} className="text-[#3730A3]" />
                 </div>
                 <h4 className="font-bold text-lg mb-2">2. Connect</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -875,7 +875,7 @@ function App() {
             <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Coffee size={30} className="text-blue-500" />
+                  <Coffee size={30} className="text-[#3730A3]" />
                 </div>
                 <h4 className="font-bold text-lg mb-2">3. Transform</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -889,7 +889,7 @@ function App() {
             <div className="journey-card">
               <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="bg-gray-200 p-3 rounded-full mb-3 inline-block">
-                  <Award size={30} className="text-blue-500" />
+                  <Award size={30} className="text-[#3730A3]" />
                 </div>
                 <h4 className="font-bold text-lg mb-2">4. Succeed</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -901,16 +901,16 @@ function App() {
             {/* Center Card remains unchanged */}
             <div className="journey-center-card w-[400px] bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
               <div
-                className={`h-40 bg-gradient-to-r from-gray-800 to-blue-500 rounded-xl mb-6 overflow-hidden relative p-4 flex items-center justify-center`}
+                className={`h-40 bg-gradient-to-r from-[#4937e8] to-[#4338ca] rounded-xl mb-6 overflow-hidden relative p-4 flex items-center justify-center`}
               >
                 <div className="absolute inset-0 opacity-30 bg-white/95"></div>
                 <div className="relative z-10 transform hover:scale-105 transition-transform">
                   {centerCardContent.icon}
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-center mb-3 text-gray-800 bg-gradient-to-r from-gray-800 to-blue-500 bg-clip-text text-transparent">
-                {centerCardContent.title}
-              </h3>
+              <h3 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-[#4937e8] via-[#4937e8] to-[#4338ca] bg-clip-text text-transparent [text-shadow:_0_1px_1px_rgb(0_0_0_/_10%)]">
+  {centerCardContent.title}
+</h3>
               <p className="text-gray-700 text-center mb-6 text-base leading-relaxed">
                 {centerCardContent.description}
               </p>
@@ -929,8 +929,8 @@ function App() {
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <h2 className="text-5xl leading-normal font-bold bg-gradient-to-r from-gray-800 to-blue-500 bg-clip-text text-transparent">
+        <div className="relative z-10 mx-auto text-center">
+          <h2 className="text-5xl leading-normal font-bold bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
             Still looking? Try our AI Search
           </h2>
           <p className="text-gray-700 mb-10 text-lg">
@@ -974,7 +974,7 @@ function App() {
                   >
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-2xl">{suggestion.icon}</span>
-                      <span className="text-sm text-blue-500 font-medium">
+                      <span className="text-sm text-[#3730A3] font-medium">
                         {suggestion.category}
                       </span>
                     </div>
