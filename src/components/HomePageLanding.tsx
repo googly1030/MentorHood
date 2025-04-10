@@ -19,6 +19,14 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import img from "../image.webp";
+import mentor1 from '../MentoImg/mentor1.jpg'
+import mentor2 from '../MentoImg/mentor2.jpg'
+import mentor3 from '../MentoImg/mentor3.jpg'
+import mentor4 from '../MentoImg/mentor4.jpg'
+import mentor5 from '../MentoImg/mentor5.jpg'
+import mentor6 from '../MentoImg/mentor6.jpg'
+import mentor7 from '../MentoImg/mentor7.jpg'
+import mentor8 from '../MentoImg/mentor8.jpg'
 
 interface Suggestion {
   id: number;
@@ -409,53 +417,53 @@ function App() {
         <div className="absolute inset-0 overflow-hidden">
           {/* Right side images */}
           <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+            src={mentor1}
             alt="Mentor1"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "2%", top: "23%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+            src={mentor2}
             alt="Mentor2"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "2%", top: "23%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+            src={mentor3}
             alt="Mentor3"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "88%", top: "56%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
+            src={mentor4}
             alt="Mentor4"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "12%", top: "32%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
+            src={mentor5}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "15%", top: "66%" }}
           />
 
           {/* Left side images (mirrored) */}
           <img
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+             src={mentor6}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ right: "88%", top: "56%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+             src={mentor7}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "12%", top: "32%" }}
           />
           <img
-            src="https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop"
+            src={mentor8}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.7] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
             style={{ left: "15%", top: "66%" }}
           />
         </div>
@@ -825,7 +833,7 @@ function App() {
           <div className="relative h-[500px] flex items-center justify-center">
             {/* First Card */}
             <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
+              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="bg-gray-200 p-3 rounded-full inline-block">
                     <BookOpen size={30} className="text-[#3730A3]" />
@@ -852,7 +860,7 @@ function App() {
 
             {/* Second Card */}
             <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
+              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="bg-gray-200 p-3 rounded-full inline-block">
                     <Clock size={30} className="text-[#3730A3]" />
@@ -879,7 +887,7 @@ function App() {
 
             {/* Third Card */}
             <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
+              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="bg-gray-200 p-3 rounded-full inline-block">
                     <Coffee size={30} className="text-[#3730A3]" />
@@ -906,7 +914,7 @@ function App() {
 
             {/* Fourth Card */}
             <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[16rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
+              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="bg-gray-200 p-3 rounded-full inline-block">
                     <Award size={30} className="text-[#3730A3]" />
