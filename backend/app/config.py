@@ -1,16 +1,18 @@
 import os
 from pydantic_settings import BaseSettings
-
-class Config:
-    MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-    DATABASE_NAME = os.getenv("DATABASE_NAME", "mydatabase")
-    SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
+from functools import lru_cache
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "mongodb://localhost:27017/mentorhood"
+    MONGODB_URL: str = "mongodb://localhost:27017"
     DATABASE_NAME: str = "mentorhood"
+    SECRET_KEY: str = "your_secret_key"
 
-settings = Settings()
-DATABASE_URL = settings.DATABASE_URL
+    class Config:
+        env_file = ".env"
 
-config = Config()
+@lru_cache()
+def get_settings():
+    return Settings()
+
+settings = get_settings()
+DATABASE_URL = settings.MONGODB_URL

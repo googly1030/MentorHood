@@ -19,17 +19,19 @@ const Register = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+        credentials: 'include',  // Keep this if you need cookies
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate('/');
-      } else {
-        console.error('Registration failed:', data.detail);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Registration failed:', errorData);
+        return;
       }
+
+      const data = await response.json();
+      console.log('Registration successful:', data);
+      navigate('/');
     } catch (error) {
       console.error('Registration error:', error);
     }

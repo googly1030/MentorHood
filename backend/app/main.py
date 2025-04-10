@@ -4,24 +4,22 @@ from app.routes import user as user_routes
 
 app = FastAPI()
 
-# Configure CORS - update the origins list
+# Configure CORS
 origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "*"  # During development only - remove in production
+    "http://localhost:5173",  # React dev server
+    "http://127.0.0.1:5173"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Specify exact origins instead of "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include user routes
-app.include_router(user_routes.router, prefix="/api")  # Add prefix
+# Include routers
+app.include_router(user_routes.router, prefix="/api")
 
 @app.get("/")
 def read_root():
