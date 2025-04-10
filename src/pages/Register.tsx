@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock } from 'lucide-react';
 import { setUserData } from '../utils/auth';
 import toast from 'react-hot-toast';
+import MentorProfileForm from '../components/MentorProfileForm';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -12,11 +13,12 @@ const Register = () => {
     password: '',
     role: 'mentee',
   });
+  const [showMentorForm, setShowMentorForm] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Password validation
     if (formData.password.length < 8) {
       toast.error('Password must be at least 8 characters long');
       return;
@@ -30,7 +32,7 @@ const Register = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',  // Keep this if you need cookies
+        credentials: 'include', 
         body: JSON.stringify(formData),
       });
 
@@ -53,13 +55,19 @@ const Register = () => {
         username: data.username,
         email: data.email,
         role: data.role,
-        token: data.token, 
+        token: data.id, // Store user id as token
       });
 
       toast.success('Account created successfully!', {
         id: loadingToast,
       });
-      navigate('/');
+
+      if (formData.role === 'mentor') {
+        setRegisteredUserId(data.id);
+        setShowMentorForm(true);
+      } else {
+        navigate('/');
+      }
     } catch {
       toast.error('Network error. Please try again.', {
         id: loadingToast,
@@ -73,6 +81,11 @@ const Register = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  // If showing mentor form, render MentorProfileForm instead of registration form
+  if (showMentorForm && registeredUserId) {
+    return <MentorProfileForm />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">

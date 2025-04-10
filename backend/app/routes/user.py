@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
+from typing import List, Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from app.models.user import User, UserModel
-from app.database import get_user, create_user, update_user, delete_user, user_collection
+from app.database import get_user, create_user, update_user, delete_user, user_collection, user_profile_collection
+from bson import ObjectId  # Add this import at the top
 
 # Create password context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -24,6 +26,27 @@ class UserResponse(BaseModel):
     username: str
     role: str
     created_at: datetime
+
+class Experience(BaseModel):
+    years: int
+    months: int
+
+class MentorProfile(BaseModel):
+    user_id: str
+    profilePhoto: str
+    experience: Experience
+    linkedinUrl: str
+    primaryExpertise: str
+    disciplines: List[str]
+    tools: List[str]
+    skills: List[str]
+    bio: str
+    targetMentees: List[str]
+    mentoringTopics: List[str]
+    relationshipType: str
+    aiTools: List[str]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 router = APIRouter(
     prefix="/users",
@@ -96,8 +119,8 @@ async def login(user: UserLogin):
         return {
             "id": str(db_user["_id"]),
             "email": db_user["email"],
-            "username": db_user.get("username", ""),  # Add fallback
-            "role": db_user.get("role", "user"),     # Add fallback
+            "username": db_user.get("username", ""),  
+            "role": db_user.get("role", "user"),     
             "created_at": db_user.get("created_at", datetime.utcnow())
         }
     except HTTPException:
@@ -106,4 +129,64 @@ async def login(user: UserLogin):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Login failed: {str(e)}"
+        )
+
+@router.post("/mentors/profile", status_code=status.HTTP_201_CREATED)
+async def create_mentor_profile(profile: MentorProfile):
+    try:
+        # Convert string user_id to ObjectId
+        user_id = ObjectId(profile.user_id)
+        
+        # Check if user exists
+        user = await user_collection.find_one({"_id": user_id})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        # Check if mentor profile already exists
+        existing_profile = await user_profile_collection.find_one({"user_id": profile.user_id})
+        if existing_profile:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mentor profile already exists for this user"
+            )
+
+        # Add timestamps
+        profile_dict = profile.dict()
+        profile_dict["created_at"] = datetime.utcnow()
+        profile_dict["updated_at"] = datetime.utcnow()
+
+        # Insert the profile
+        result = await user_profile_collection.insert_one(profile_dict)
+        
+        if result.inserted_id:
+            # Update user role to mentor using ObjectId
+            await user_collection.update_one(
+                {"_id": user_id},
+                {"$set": {"role": "mentor"}}
+            )
+            
+            return {
+                "message": "Mentor profile created successfully",
+                "profile_id": str(result.inserted_id)
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create mentor profile"
+            )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid user ID format"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not create mentor profile: {str(e)}"
         )

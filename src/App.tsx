@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import UnauthenticatedRoute from './components/UnauthenticatedRoute';
+import MentorProfileForm from './components/MentorProfileForm';
 
 function App() {
   return (
@@ -70,6 +71,14 @@ function App() {
                 <QuestionAnswers />
               </ProtectedRoute>
             } />
+            <Route 
+              path="/mentor-profile" 
+              element={
+                <ProtectedRoute>
+                  <MentorProfileForm />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
         <Footer />

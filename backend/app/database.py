@@ -7,6 +7,8 @@ try:
     client = AsyncIOMotorClient(DATABASE_URL)
     db = client.mentorhood
     user_collection = db.users
+    user_profile_collection = db.userprofile
+    mentor_profile_collection = db.mentorprofile  # Add this line
 except Exception as e:
     print(f"Failed to connect to MongoDB: {str(e)}")
     raise
