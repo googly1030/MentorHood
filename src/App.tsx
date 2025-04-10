@@ -15,6 +15,7 @@ import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 import MentorProfileForm from './components/MentorProfileForm';
 import Dashboard from './pages/Dashboard';
 import CreateSession from './pages/CreateSession';
+import MenteeDashboard from './pages/MenteeDashboard';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/mentee-dashboard" element={<MenteeDashboard />} />
             <Route 
               path="/register" 
               element={

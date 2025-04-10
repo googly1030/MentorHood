@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, TrendingUp, Building2, Rocket, Grid, Search } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, TrendingUp, Building2, Rocket , Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 interface Mentor {
   id: number;
@@ -191,7 +191,19 @@ const groupSessions: GroupSession[] = [
 const AllMentors = () => {
   const navigate = useNavigate();
   const [activeCategory] = useState<string>('most-visited');
-  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    isPremium: false,
+    quickResponse: false,
+    mostVisited: false,
+    serviceBasedExperts: false,
+    ventureCapital: false,
+    hotSeller: false,
+  });
+
+  // Add sorting state
+  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
+
   // Get the tab from URL parameters
   const searchParams = new URLSearchParams(window.location.search);
   const defaultTab = searchParams.get('tab') === 'group-sessions' ? 'group-sessions' : 'all-mentors';
@@ -211,6 +223,62 @@ const AllMentors = () => {
     { id: 'venture-capital', name: 'Venture Capital', icon: Rocket }
   ];
 
+  // Add this filtering logic function
+  const filterMentors = (mentors: Mentor[]) => {
+    const filtered = mentors.filter(mentor => {
+      // Search query filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch = 
+          mentor.name.toLowerCase().includes(searchLower) ||
+          mentor.role.toLowerCase().includes(searchLower) ||
+          mentor.specialization.toLowerCase().includes(searchLower) ||
+          mentor.location.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Filter buttons logic
+      if (filters.isPremium && mentor.rating < 4.8) return false;
+      if (filters.quickResponse && mentor.availability !== "Next available: Today") return false;
+      if (filters.mostVisited && mentor.category !== 'most-visited') return false;
+      if (filters.serviceBasedExperts && mentor.category !== 'service-based') return false;
+      if (filters.ventureCapital && mentor.category !== 'venture-capital') return false;
+      if (filters.hotSeller && mentor.bookings < 1200) return false;
+
+      return true;
+    });
+
+    // Apply sorting
+    if (sortBy) {
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'rating':
+            return b.rating - a.rating;
+          case 'price':
+            return parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, ''));
+          case 'bookings':
+            return b.bookings - a.bookings;
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  };
+
+  // Add these handler functions
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleFilterClick = (filterName: keyof typeof filters) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: !prev[filterName]
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -237,6 +305,8 @@ const AllMentors = () => {
                 <div className="relative">
                   <input
                     type="text" 
+                    value={searchQuery}
+                    onChange={handleSearchChange}
                     placeholder="Search by skills (e.g. 'System Design') or company..."
                     className="w-full px-6 py-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                   />
@@ -249,21 +319,96 @@ const AllMentors = () => {
           </AnimatePresence>
         </div>
         <div className="flex flex-wrap justify-center gap-3 mb-12 mt-8">
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">
-            <span className="flex items-center gap-2">
-              <Grid className="w-4 h-4" /> Filters
-            </span>
+          {/* Sort dropdown */}
+          <div className="relative group">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="appearance-none px-4 py-2 pr-10 rounded-full border border-gray-300 
+                bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-[#4937e8] focus:border-transparent
+                text-gray-700 font-medium min-w-[140px]"
+            >
+              <option value="" className="text-gray-500">Sort by</option>
+              <option value="rating" className="py-2">⭐ Highest Rated</option>
+              <option value="price" className="py-2">💰 Price: High to Low</option>
+              <option value="bookings" className="py-2">👥 Most Sessions</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none
+              transition-transform duration-200 group-hover:text-gray-600">
+              <ChevronDown size={18} />
+            </div>
+            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 
+              transition-opacity duration-200 pointer-events-none
+              bg-gradient-to-r from-[#4937e8]/5 to-transparent"></div>
+          </div>
+
+          {/* Filter buttons */}
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.isPremium 
+                ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('isPremium')}
+          >
+            Premium Picks ⭐️
           </button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Sort by</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">All</button>
-          <button className="px-4 py-2 rounded-full bg-purple-100 text-purple-700 border border-purple-200">Premium Picks ⭐️</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Referred in 15 mins</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Mock Interview</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">100% Avg Attendance</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Most Visited</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Service Based Company Experts</button>
-          <button className="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50">Venture Capital</button>
-          <button className="px-4 py-2 rounded-full bg-orange-100 text-orange-700 border border-orange-200">Hot Sellers 🔥</button>
+          
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.quickResponse 
+                ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('quickResponse')}
+          >
+            Available Today
+          </button>
+
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.mostVisited 
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('mostVisited')}
+          >
+            Most Visited
+          </button>
+
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.serviceBasedExperts 
+                ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('serviceBasedExperts')}
+          >
+            Service Based
+          </button>
+
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.ventureCapital 
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('ventureCapital')}
+          >
+            Venture Capital
+          </button>
+
+          <button 
+            className={`px-4 py-2 rounded-full ${
+              filters.hotSeller 
+                ? 'bg-orange-100 text-orange-700 border border-orange-200' 
+                : 'border border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+            onClick={() => handleFilterClick('hotSeller')}
+          >
+            Hot Sellers 🔥
+          </button>
         </div>
 
           <div className="flex justify-center space-x-8 mb-12 relative w-full border-b border-gray-200">
@@ -297,18 +442,16 @@ const AllMentors = () => {
         // Mentors Grid
         <>
           <div className="max-w-6xl mx-auto px-4 pb-16">
-            {categories.map(({ id, name }) => (
-              <div
-                key={id}
-                className={`${activeCategory === id ? 'block' : 'hidden'}`}
-              >
-                <h2 className="text-2xl font-bold mb-8 bg-gradient-to-r from-gray-700 to-gray-800 bg-clip-text text-transparent">
-                  {name}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {mentors
-                    .filter(mentor => mentor.category === id)
-                    .map(mentor => (
+            {categories.map(({ id, name }) => {
+              const filteredMentors = filterMentors(mentors.filter(m => m.category === id));
+              
+              return filteredMentors.length > 0 ? (
+                <div key={id} className={`${activeCategory === id ? 'block' : 'hidden'}`}>
+                  <h2 className="text-2xl font-bold mb-8 bg-gradient-to-r from-gray-700 to-gray-800 bg-clip-text text-transparent">
+                    {name}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredMentors.map(mentor => (
                       <div
                         key={mentor.id}
                         className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
@@ -362,9 +505,10 @@ const AllMentors = () => {
                         </button>
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ) : null;
+            })}
           </div>
         </>
       ) : (
