@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users , Sun, Moon, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export interface Service {
   id: number;
@@ -64,30 +65,17 @@ interface Review {
   date: string;
 }
 
-// interface Achievement {
-//   id: number;
-//   title: string;
-//   description: string;
-//   icon: React.ReactNode;
-//   date: string;
-// }
-
-// interface GroupSession {
-//   id: number;
-//   title: string;
-//   date: string;
-//   time: string;
-//   participants: number;
-//   maxParticipants: number;
-//   price: number;
-// }
-
 function App() {
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(TabType.OVERVIEW);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  const handleBooking = (sessionId: number) => {
+    navigate(`/booking/${sessionId}`);
   };
 
   const textColor = isDarkMode ? 'text-white' : 'text-gray-700';
@@ -447,7 +435,12 @@ function App() {
                               {session.duration}, {session.frequency}, {session.sessions} sessions
                             </p>
                           </div>
-                          <button className="bg-black text-white px-4 py-1 rounded-lg text-sm">Book</button>
+                          <button 
+                            onClick={() => handleBooking(session.id)}
+                            className="bg-black text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-800 transition-colors"
+                          >
+                            Book
+                          </button>
                         </div>
                         <p className={`text-lg font-medium mt-2 ${textColor}`}>${session.price}.00</p>
                       </div>
