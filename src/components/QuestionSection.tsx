@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, MessageSquare } from 'lucide-react';
+import { ArrowUp, MessageSquare, Clock, TrendingUp } from 'lucide-react';
 
 interface Author {
   id: string;
@@ -10,14 +10,16 @@ interface Author {
 }
 
 interface Question {
-  id: string;
+  _id: string;
   title: string;
   content: string;
   authors: Author[];
   upvotes: number;
   answers: number;
   timestamp: string;
-  categoryId: string;
+  category_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Category {
@@ -29,42 +31,9 @@ const initialCategories: Category[] = [
   { id: 'all', label: 'All Questions' }
 ];
 
-const initialQuestions: Question[] = [
-  {
-    id: '1',
-    title: 'What do recruiters/hiring managers look for in a design portfolio?',
-    content: 'Recruiters and hiring managers look for several key aspects in a design portfolio, including: Variety: Showcasing a range of projects in different styles and mediums demonstrates your versatility...',
-    authors: [{ id: '1', name: 'John Doe', initials: 'JD' }],
-    upvotes: 657,
-    answers: 381,
-    timestamp: '1 year ago',
-    categoryId: 'career'
-  },
-  {
-    id: '2',
-    title: 'What do recruiters/hiring managers look for in a design portfolio?',
-    content: 'Recruiters and hiring managers look for several key aspects in a design portfolio, including: Variety: Showcasing a range of projects in different styles and mediums demonstrates your versatility...',
-    authors: [{ id: '1', name: 'John Doe', initials: 'JD' }],
-    upvotes: 657,
-    answers: 381,
-    timestamp: '1 year ago',
-    categoryId: 'career'
-  },
-  {
-    id: '3',
-    title: 'What do recruiters/hiring managers look for in a design portfolio?',
-    content: 'Recruiters and hiring managers look for several key aspects in a design portfolio, including: Variety: Showcasing a range of projects in different styles and mediums demonstrates your versatility...',
-    authors: [{ id: '1', name: 'John Doe', initials: 'JD' }],
-    upvotes: 657,
-    answers: 381,
-    timestamp: '1 year ago',
-    categoryId: 'career'
-  },
-];
-
 export default function QuestionSection() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [answer, setAnswer] = useState('');
@@ -73,25 +42,48 @@ export default function QuestionSection() {
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'timestamp' | 'upvotes'>('timestamp');
+
+  // Fetch questions when component mounts, category changes, or sort order changes
+  useEffect(() => {
+    fetchQuestions();
+  }, [activeCategory, sortBy]);
 
   // Filter questions based on active category
   const filteredQuestions = activeCategory === 'all' 
     ? questions 
-    : questions.filter(q => q.categoryId === activeCategory);
+    : questions.filter(q => q.category_id === activeCategory);
 
-  const handleUpvote = (questionId: string) => {
-    if (upvotedQuestions.includes(questionId)) {
-      // Remove upvote
-      setUpvotedQuestions(prev => prev.filter(id => id !== questionId));
+  const handleUpvote = async (questionId: string) => {
+    try {
+      // Call the upvote API
+      const response = await fetch(`http://localhost:9000/api/questionnaires/${questionId}/upvote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upvote question');
+      }
+
+      const updatedQuestion = await response.json();
+      
+      // Update the questions state with the updated question
       setQuestions(prev => prev.map(q => 
-        q.id === questionId ? { ...q, upvotes: q.upvotes - 1 } : q
+        q._id === questionId ? updatedQuestion : q
       ));
-    } else {
-      // Add upvote
-      setUpvotedQuestions(prev => [...prev, questionId]);
-      setQuestions(prev => prev.map(q => 
-        q.id === questionId ? { ...q, upvotes: q.upvotes + 1 } : q
-      ));
+
+      // Update the upvotedQuestions state
+      if (upvotedQuestions.includes(questionId)) {
+        setUpvotedQuestions(prev => prev.filter(id => id !== questionId));
+      } else {
+        setUpvotedQuestions(prev => [...prev, questionId]);
+      }
+    } catch (error) {
+      console.error('Error upvoting question:', error);
     }
   };
 
@@ -102,71 +94,99 @@ export default function QuestionSection() {
 
   const handleViewAnswers = (question: Question) => {
     // Save question data to localStorage before navigation
-    localStorage.setItem(`question_${question.id}`, JSON.stringify(question));
-    navigate(`/questions/${question.id}/answers`);
+    localStorage.setItem(`question_${question._id}`, JSON.stringify(question));
+    navigate(`/questions/${question._id}/answers`);
   };
 
-  const submitQuestion = () => {
+  const submitQuestion = async () => {
     if (!title.trim() || !content.trim()) return;
 
-    const newQuestion: Question = {
-      id: Date.now().toString(),
-      title,
-      content,
-      authors: [{
-        id: 'current-user',
-        name: 'Current User',
-        initials: 'CU'
-      }],
-      upvotes: 0,
-      answers: 0,
-      timestamp: 'Just now',
-      categoryId: activeCategory,
-    };
+    const response = await fetch('http://localhost:9000/api/questionnaires', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: title,
+        content: content,
+        category_id: activeCategory
+      })
+    });
+    const newQuestionnaire = await response.json();
 
-    setQuestions(prev => [newQuestion, ...prev]);
+    setQuestions(prev => [newQuestionnaire, ...prev]);
     setTitle('');
     setContent('');
     setIsAskModalOpen(false);
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (!currentQuestion || !answer.trim()) return;
 
-    const newAnswer = {
-      id: Date.now().toString(),
-      content: answer,
-      author: {
-        id: 'current-user',
-        name: 'Current User',
-        initials: 'CU'
-      },
-      upvotes: 0,
-      timestamp: 'Just now',
-      questionId: currentQuestion.id
-    };
+    try {
+      // Call the answer API to increment the answer count
+      const response = await fetch(`http://localhost:9000/api/questionnaires/${currentQuestion._id}/answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-    // Save the new answer to localStorage
-    const existingAnswers = JSON.parse(localStorage.getItem(`answers_${currentQuestion.id}`) || '[]');
-    const updatedAnswers = [newAnswer, ...existingAnswers];
-    localStorage.setItem(`answers_${currentQuestion.id}`, JSON.stringify(updatedAnswers));
+      if (!response.ok) {
+        throw new Error('Failed to submit answer');
+      }
 
-    // Update question's answer count
-    setQuestions(prev => prev.map(q => 
-      q.id === currentQuestion.id 
-        ? { ...q, answers: q.answers + 1 }
-        : q
-    ));
+      const updatedQuestion = await response.json();
 
-    // Update localStorage for the question
-    localStorage.setItem(`question_${currentQuestion.id}`, JSON.stringify({
-      ...currentQuestion,
-      answers: currentQuestion.answers + 1
-    }));
+      // Create a new answer object
+      const newAnswer = {
+        id: Date.now().toString(),
+        content: answer,
+        author: {
+          id: 'current-user',
+          name: 'Current User',
+          initials: 'CU'
+        },
+        upvotes: 0,
+        timestamp: new Date().toISOString(),
+        questionId: currentQuestion._id
+      };
 
-    setAnswer('');
-    setIsAnswerModalOpen(false);
-    setCurrentQuestion(null);
+      // Save the new answer to localStorage
+      const existingAnswers = JSON.parse(localStorage.getItem(`answers_${currentQuestion._id}`) || '[]');
+      const updatedAnswers = [newAnswer, ...existingAnswers];
+      localStorage.setItem(`answers_${currentQuestion._id}`, JSON.stringify(updatedAnswers));
+
+      // Update the questions state with the updated question
+      setQuestions(prev => prev.map(q => 
+        q._id === currentQuestion._id ? updatedQuestion : q
+      ));
+
+      // Update localStorage for the question
+      localStorage.setItem(`question_${currentQuestion._id}`, JSON.stringify(updatedQuestion));
+
+      setAnswer('');
+      setIsAnswerModalOpen(false);
+      setCurrentQuestion(null);
+    } catch (error) {
+      console.error('Error submitting answer:', error);
+    }
+  };
+
+  const fetchQuestions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`http://localhost:9000/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch questions');
+      }
+      const questionnaires = await response.json();
+      setQuestions(questionnaires);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -205,6 +225,33 @@ export default function QuestionSection() {
               ))}
             </div>
 
+            {/* Sort Options */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Sort by:</span>
+              <button
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                  sortBy === 'timestamp' 
+                    ? "bg-gray-900 text-white" 
+                    : "border border-gray-300 bg-white hover:bg-gray-50"
+                }`}
+                onClick={() => setSortBy('timestamp')}
+              >
+                <Clock size={14} />
+                <span>Latest</span>
+              </button>
+              <button
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                  sortBy === 'upvotes' 
+                    ? "bg-gray-900 text-white" 
+                    : "border border-gray-300 bg-white hover:bg-gray-50"
+                }`}
+                onClick={() => setSortBy('upvotes')}
+              >
+                <TrendingUp size={14} />
+                <span>Most Upvoted</span>
+              </button>
+            </div>
+
             {/* Ask Question Button - Separated and Prominent */}
             <button
               onClick={() => setIsAskModalOpen(true)}
@@ -221,66 +268,78 @@ export default function QuestionSection() {
 
       {/* Questions Grid - Updated with AllMentors styling */}
       <div className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {filteredQuestions.map(question => (
-            <div
-              key={question.id}
-              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
-            >
-              <h2 className="text-xl font-semibold mb-4">{question.title}</h2>
-              
-              <div className="flex items-center mb-4">
-                <div className="flex -space-x-2 mr-2">
-                  {question.authors.map((author, index) => (
-                    <div 
-                      key={index} 
-                      className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-sm font-medium"
-                    >
-                      {author.initials}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <p className="text-gray-600 mb-6">{question.content}</p>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-3">
-                  <button 
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
-                      upvotedQuestions.includes(question.id)
-                        ? "bg-black text-white border-black"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
-                    onClick={() => handleUpvote(question.id)}
-                  >
-                    <ArrowUp size={16} className={upvotedQuestions.includes(question.id) ? "text-white" : ""} />
-                    <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
-                  </button>
-                  
-                  <button 
-                    className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
-                    onClick={() => handleAnswer(question)}
-                  >
-                    <MessageSquare size={16} />
-                    <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
-                  </button>
-
-                  {question.answers > 0 && (
-                    <button 
-                      className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-gray-200 transition-colors"
-                      onClick={() => handleViewAnswers(question)}
-                    >
-                      <span>View {question.answers} Answers</span>
-                    </button>
-                  )}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+          </div>
+        ) : filteredQuestions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-600">No questions found. Be the first to ask a question!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {filteredQuestions.map(question => (
+              <div
+                key={question._id}
+                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
+              >
+                <h2 className="text-xl font-semibold mb-4">{question.title}</h2>
+                
+                <div className="flex items-center mb-4">
+                  <div className="flex -space-x-2 mr-2">
+                    {question.authors.map((author, index) => (
+                      <div 
+                        key={index} 
+                        className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-sm font-medium"
+                      >
+                        {author.initials}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
-                <span className="text-sm text-gray-500">{question.timestamp}</span>
+                <p className="text-gray-600 mb-6">{question.content}</p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex space-x-3">
+                    <button 
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
+                        upvotedQuestions.includes(question._id)
+                          ? "bg-black text-white border-black"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                      onClick={() => handleUpvote(question._id)}
+                    >
+                      <ArrowUp size={16} className={upvotedQuestions.includes(question._id) ? "text-white" : ""} />
+                      <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
+                    </button>
+                    
+                    <button 
+                      className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
+                      onClick={() => handleAnswer(question)}
+                    >
+                      <MessageSquare size={16} />
+                      <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
+                    </button>
+
+                    {question.answers > 0 && (
+                      <button 
+                        className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-gray-200 transition-colors"
+                        onClick={() => handleViewAnswers(question)}
+                      >
+                        <span>View {question.answers} Answers</span>
+                      </button>
+                    )}
+                  </div>
+                  
+                  <span className="text-sm text-gray-500">
+                    {new Date(question.timestamp).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Ask Question Modal */}
