@@ -58,7 +58,7 @@ export default function QuestionSection() {
   const handleUpvote = async (questionId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`http://localhost:8000/api/questionnaires/${questionId}/upvote`, {
+      const response = await fetch(`http://localhost:9000/api/questionnaires/${questionId}/upvote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export default function QuestionSection() {
   const submitQuestion = async () => {
     if (!title.trim() || !content.trim()) return;
 
-    const response = await fetch('http://localhost:8000/api/questionnaires', {
+    const response = await fetch('http://localhost:9000/api/questionnaires', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export default function QuestionSection() {
 
     try {
       // Call the answer API to increment the answer count
-      const response = await fetch(`http://localhost:8000/api/questionnaires/${currentQuestion._id}/answer`, {
+      const response = await fetch(`http://localhost:9000/api/questionnaires/${currentQuestion._id}/answer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export default function QuestionSection() {
   const fetchQuestions = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8000/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
+      const response = await fetch(`http://localhost:9000/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
       if (!response.ok) {
         throw new Error('Failed to fetch questions');
       }
