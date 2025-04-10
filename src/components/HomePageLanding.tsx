@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { getUserData } from '../utils/auth';
 import img from "../image.webp";
 import mentor1 from '../MentoImg/mentor1.jpg'
 import mentor2 from '../MentoImg/mentor2.jpg'
@@ -576,7 +576,16 @@ function App() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="px-8 py-4 bg-black text-white rounded-full text-lg font-medium hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
-                onClick={() => navigate("/become-mentor")}
+                onClick={() => {
+                  const userData = getUserData();
+                  if (userData?.role === 'mentor') {
+                    navigate('/dashboard');
+                  } else {
+                    navigate('/register', { 
+                      state: { defaultRole: 'mentor' } 
+                    });
+                  }
+                }}
               >
                 Become a Mentor
                 <ArrowRight size={20} />

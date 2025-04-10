@@ -12,6 +12,15 @@ const Header: React.FC = () => {
     navigate('/login');
   };
 
+  const handleDashboardClick = () => {
+    const userData = getUserData();
+    if (userData?.role === 'mentor') {
+      navigate('/dashboard');
+    } else if (userData?.role === 'user') {
+      navigate('/mentee-dashboard');
+    }
+  };
+
   return (
     <nav className="flex justify-between items-center px-8 py-4 bg-white/90 sticky top-0 z-50">
       <div className="flex items-center gap-12">
@@ -21,7 +30,9 @@ const Header: React.FC = () => {
         >
           Mentor<span className="text-black">Hood</span>
         </h1>
+        
       </div>
+
       <div className="flex items-center gap-4">
         {userData ? (
           <>
@@ -31,6 +42,12 @@ const Header: React.FC = () => {
                 {userData.username}
               </span>
             </div>
+            <button 
+              onClick={handleDashboardClick}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#4937e8] transition-all duration-300 rounded-lg hover:bg-gray-50"
+            >
+              <span className="font-medium">Dashboard</span>
+            </button>
             <button 
               onClick={handleLogout}
               className="nav-button bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all duration-300"

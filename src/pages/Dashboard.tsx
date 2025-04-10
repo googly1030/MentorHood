@@ -1,4 +1,4 @@
-import { Settings2, X, Plus, Share2, Copy, Megaphone } from 'lucide-react';
+import { Settings2,  Plus, Share2, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
@@ -30,19 +30,7 @@ const navigate = useNavigate();
         </button>
         </div>
 
-        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Megaphone className="text-[#4937e8]" />
-            <span className="text-gray-800 font-medium">Welcome to Mentor-Hood!</span>
-            <span className="text-gray-600">Complete your profile to start accepting mentee requests.</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="text-[#4937e8] hover:text-[#4338ca] font-medium">Setup Guide</button>
-            <button className="text-gray-400 hover:text-gray-500">
-              <X size={20} />
-            </button>
-          </div>
-        </div>
+      
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Technical Mentoring */}
