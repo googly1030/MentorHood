@@ -281,7 +281,7 @@ const MentorProfileForm = () => {
         targetMentees: [formData.relationshipType], // Convert relationshipType to array
       };
   
-      const response = await fetch('http://localhost:8000/api/users/mentors/profile', {
+      const response = await fetch('http://localhost:9000/api/users/mentors/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,7 +300,7 @@ const MentorProfileForm = () => {
   
       toast.success('Mentor profile created successfully!');
       localStorage.removeItem('mentorFormData');
-      navigate('/');
+      navigate('/Dashboard');
       
     } catch (error) {
       console.error('Submission error:', error);

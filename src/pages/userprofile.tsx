@@ -331,10 +331,10 @@ function App() {
                 className="w-40 h-40 rounded-full border-4 border-white shadow-lg"
               />
               <div className="ml-6 mb-4">
-                <h1 className={`text-3xl font-bold ${textColor}`}>
+                <h1 className={`text-3xl text-white font-bold `}>
                   ney batista
                 </h1>
-                <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`mt-1 text-white`}>
                   Product Manager, Program Manager, Project Manager at Stanford Graduate School of Business
                 </p>
                 <div className="mt-2">
