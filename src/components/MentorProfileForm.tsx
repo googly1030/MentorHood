@@ -300,7 +300,7 @@ const MentorProfileForm = () => {
   
       toast.success('Mentor profile created successfully!');
       localStorage.removeItem('mentorFormData');
-      navigate('/');
+      navigate('/Dashboard');
       
     } catch (error) {
       console.error('Submission error:', error);

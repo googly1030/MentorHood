@@ -13,6 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 import MentorProfileForm from './components/MentorProfileForm';
+import Dashboard from './pages/Dashboard';
+import CreateSession from './pages/CreateSession';
 
 function App() {
   return (
@@ -22,7 +24,7 @@ function App() {
         <Header />
         <main className="flex-grow">
           <Routes>
-            {/* Unauthenticated Routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route 
               path="/register" 
               element={
@@ -79,6 +81,11 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/create-session" element={
+              <ProtectedRoute>
+                <CreateSession />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
