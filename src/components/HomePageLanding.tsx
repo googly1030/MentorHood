@@ -586,7 +586,6 @@ function App() {
                 <div className="flex gap-3">
                   <a
                     href={mentor.calendlyLink}
-                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
                   >

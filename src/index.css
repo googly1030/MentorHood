@@ -511,3 +511,9 @@ footer a:hover::after {
   }
 }
 
+.nav-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}

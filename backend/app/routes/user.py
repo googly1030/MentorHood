@@ -1,63 +1,109 @@
 from fastapi import APIRouter, HTTPException, status
+from datetime import datetime
+from passlib.context import CryptContext
+from pydantic import BaseModel
 from app.models.user import User, UserModel
-from app.schemas.user import UserCreate, UserUpdate
 from app.database import get_user, create_user, update_user, delete_user, user_collection
-from passlib.hash import bcrypt
+
+# Create password context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Define models
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    username: str
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    username: str
+    role: str
+    created_at: datetime
 
 router = APIRouter(
     prefix="/users",
     tags=["users"]
 )
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register_user(user: UserModel):
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register(user: UserCreate):
     try:
         # Check if user exists
-        existing_user = await user_collection.find_one({"email": user.email})
-        if existing_user:
+        if await user_collection.find_one({"email": user.email}):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
             )
-
-        # Create new user
-        user_dict = user.dict()
+        
+        # Create user document
+        user_dict = {
+            "email": user.email,
+            "username": user.username,
+            "hashed_password": pwd_context.hash(user.password),
+            "role": "user",
+            "created_at": datetime.utcnow()
+        }
+        
+        # Insert into database
         result = await user_collection.insert_one(user_dict)
         
-        # Confirm user was created
-        if result.inserted_id:
-            return {"message": "User created successfully"}
-        
+        # Return user data without password
+        return {
+            "id": str(result.inserted_id),
+            "email": user.email,
+            "username": user.username,
+            "role": user_dict["role"],
+            "created_at": user_dict["created_at"]
+        }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail=f"Could not register user: {str(e)}"
         )
 
-@router.post("/", response_model=User)
-async def create_new_user(user: UserCreate):
-    db_user = await create_user(user)
-    if not db_user:
-        raise HTTPException(status_code=400, detail="User could not be created")
-    return db_user
-
-@router.get("/{user_id}", response_model=User)
-async def read_user(user_id: str):
-    db_user = await get_user(user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-@router.put("/{user_id}", response_model=User)
-async def update_existing_user(user_id: str, user: UserUpdate):
-    db_user = await update_user(user_id, user)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-@router.delete("/{user_id}", response_model=dict)
-async def delete_existing_user(user_id: str):
-    result = await delete_user(user_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"detail": "User deleted successfully"}
+# Update the login function to properly handle password fields
+@router.post("/login", response_model=UserResponse)
+async def login(user: UserLogin):
+    try:
+        # Find user by email
+        db_user = await user_collection.find_one({"email": user.email})
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+        
+        # Check if hashed_password exists
+        if "hashed_password" not in db_user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="User data is corrupted"
+            )
+        
+        # Verify password
+        if not pwd_context.verify(user.password, db_user["hashed_password"]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+        
+        # Return user data without password
+        return {
+            "id": str(db_user["_id"]),
+            "email": db_user["email"],
+            "username": db_user.get("username", ""),  # Add fallback
+            "role": db_user.get("role", "user"),     # Add fallback
+            "created_at": db_user.get("created_at", datetime.utcnow())
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
+        )

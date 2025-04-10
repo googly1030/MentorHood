@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock } from 'lucide-react';
+import { setUserData } from '../utils/auth';
+import toast from 'react-hot-toast';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,6 +15,15 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Password validation
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+
+    const loadingToast = toast.loading('Creating your account...');
+
     try {
       const response = await fetch('http://localhost:8000/api/users/register', {
         method: 'POST',
@@ -23,17 +34,36 @@ const Register = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Registration failed:', errorData);
+        if (data.message.includes('already exists')) {
+          toast.error('Email already registered. Please login instead.', {
+            id: loadingToast,
+          });
+        } else {
+          toast.error(data.message || 'Registration failed', {
+            id: loadingToast,
+          });
+        }
         return;
       }
 
-      const data = await response.json();
-      console.log('Registration successful:', data);
+      setUserData({
+        username: data.username,
+        email: data.email,
+        role: data.role,
+        token: data.token, 
+      });
+
+      toast.success('Account created successfully!', {
+        id: loadingToast,
+      });
       navigate('/');
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch {
+      toast.error('Network error. Please try again.', {
+        id: loadingToast,
+      });
     }
   };
 

@@ -9,6 +9,9 @@ import AllMentors from './pages/AllMentors';
 import QuestionSection from './components/QuestionSection';
 import QuestionAnswers from './components/QuestionAnswers';
 import Register from './pages/Register';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 
 function App() {
   return (
@@ -18,13 +21,55 @@ function App() {
         <Header />
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<HomePageLanding />} />
-            <Route path="/profile/:id" element={<UserProfile />} />
-            <Route path="/booking/:serviceId" element={<BookingDetails />} />
-            <Route path="/mentors" element={<AllMentors />} />
-            <Route path="/questions" element={<QuestionSection />} />
-            <Route path="/questions/:questionId/answers" element={<QuestionAnswers />} />
-            <Route path="/register" element={<Register />} />
+            {/* Unauthenticated Routes */}
+            <Route 
+              path="/register" 
+              element={
+                <UnauthenticatedRoute>
+                  <Register />
+                </UnauthenticatedRoute>
+              } 
+            />
+            <Route 
+              path="/login" 
+              element={
+                <UnauthenticatedRoute>
+                  <Login />
+                </UnauthenticatedRoute>
+              } 
+            />
+
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <HomePageLanding />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/:id" element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/booking/:serviceId" element={
+              <ProtectedRoute>
+                <BookingDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentors" element={
+              <ProtectedRoute>
+                <AllMentors />
+              </ProtectedRoute>
+            } />
+            <Route path="/questions" element={
+              <ProtectedRoute>
+                <QuestionSection />
+              </ProtectedRoute>
+            } />
+            <Route path="/questions/:questionId/answers" element={
+              <ProtectedRoute>
+                <QuestionAnswers />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
