@@ -40,6 +40,7 @@ class SessionBase(BaseModel):
     isPaid: Optional[bool] = None
     price: Optional[str] = None
     mentorId: Optional[str] = None
+    sessionId: Optional[str] = None
 
 class SessionCreate(SessionBase):
     timeSlots: Optional[List[TimeSlot]] = None

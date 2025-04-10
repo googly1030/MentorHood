@@ -40,7 +40,7 @@ const DAYS = [
   'THURSDAYS', 'FRIDAYS', 'SATURDAYS'
 ];
 
-function SessionForm({ formData, setFormData, onNext }: {
+export function SessionForm({ formData, setFormData, onNext }: {
     formData: FormData;
     setFormData: (data: FormData) => void;
     onNext: () => void;
@@ -291,7 +291,7 @@ function SessionForm({ formData, setFormData, onNext }: {
     );
   }
 
-function AvailabilityForm({ timeSlots, setTimeSlots, onBack, onNext }: {
+export function AvailabilityForm({ timeSlots, setTimeSlots, onBack, onNext }: {
   timeSlots: TimeSlot[];
   setTimeSlots: (slots: TimeSlot[]) => void;
   onBack: () => void;
@@ -463,7 +463,7 @@ function AvailabilityForm({ timeSlots, setTimeSlots, onBack, onNext }: {
   );
 }
 
-function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
+export function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
     formData: FormData;
     timeSlots: TimeSlot[];
     onBack: () => void;
@@ -670,9 +670,9 @@ function CreateSession() {
         throw new Error('Failed to create session');
       }
 
-      const createdSession = await response.json();
-      if (createdSession.status === 'success') {
-        console.log('Session created successfully');
+      const result = await response.json();
+      if (result.status === 'success') {
+        console.log('Session created successfully with ID:', result.sessionId);
         navigate('/dashboard/');
       } else {
         throw new Error('Failed to create session');

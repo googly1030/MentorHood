@@ -3,19 +3,20 @@ from datetime import datetime, UTC
 from typing import List
 from app.schemas.session import Session, SessionCreate
 from app.database import get_collection
-from bson import ObjectId
+import uuid
 
 router = APIRouter(
     prefix="/api/sessions",
     tags=["sessions"]
 )
 
-@router.post("/create", response_model=Session)
+@router.post("/create")
 async def create_session(session: SessionCreate):
     collection = get_collection("sessions")
     
     session_dict = session.model_dump()
     session_dict.update({
+        "sessionId": str(uuid.uuid4()),
         "created_at": datetime.now(UTC),
         "updated_at": datetime.now(UTC)
     })
@@ -23,34 +24,89 @@ async def create_session(session: SessionCreate):
     result = await collection.insert_one(session_dict)
     return {
         "status": "success",
+        "sessionId": session_dict["sessionId"]
     }
 
-@router.get("/{session_id}", response_model=Session)
+@router.post("/update/{session_id}")
+async def update_session(session_id: str, session: SessionCreate):
+    collection = get_collection("sessions")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+    
+    exist_session = await collection.find_one({"sessionId": session_id})
+    if exist_session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    session_dict = session.model_dump()
+    session_dict.update({
+        "updated_at": datetime.now(UTC),
+        "sessionId": session_id
+    })
+    
+    result = await collection.update_one(
+        {"sessionId": session_id},
+        {"$set": session_dict}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="No data updated")
+    
+    return {
+        "status": "success",
+    }
+
+@router.post("/delete/{session_id}")
+async def delete_session(session_id: str):
+    collection = get_collection("sessions")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+    
+    result = await collection.delete_one({"sessionId": session_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    return {
+        "status": "success",
+    }
+
+@router.get("/{session_id}")
 async def get_session(session_id: str):
     collection = get_collection("sessions")
     
-    if not ObjectId.is_valid(session_id):
-        raise HTTPException(status_code=400, detail="Invalid session ID")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Session ID required")
     
-    session = await collection.find_one({"_id": ObjectId(session_id)})
+    session = await collection.find_one({"sessionId": session_id})
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    session["_id"] = str(session["_id"])
+    # Convert ObjectId to string and remove _id field
+    session_dict = dict(session)
+    session_dict.pop('_id', None)
+    
     return {
         "status": "success",
-        "session": session
+        "session": session_dict
     }
 
-@router.get("/mentor/{mentor_id}", response_model=List[Session])
+@router.get("/mentor/{mentor_id}")
 async def get_mentor_sessions(mentor_id: str):
     collection = get_collection("sessions")
     
     sessions = await collection.find({"mentorId": mentor_id}).to_list(length=None)
+    
+    # Convert ObjectId to string and remove _id field for each session
+    sessions_list = []
     for session in sessions:
-        session["_id"] = str(session["_id"])
+        session_dict = dict(session)
+        session_dict.pop('_id', None)
+        sessions_list.append(session_dict)
+
     return {
         "status": "success",
         "mentorId": mentor_id,
-        "sessions": sessions
+        "sessions": sessions_list
     }
