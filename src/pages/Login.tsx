@@ -43,7 +43,8 @@ const Login = () => {
         username: data.username,
         email: data.email,
         role: data.role,
-        token: data.id, // Using the user ID as token
+        token: data.id,
+        userId: data.userId
       });
 
       toast.dismiss(loadingToastId);

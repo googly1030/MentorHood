@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from app.models.user import User, UserModel
 from app.database import get_user, create_user, update_user, delete_user, user_collection, user_profile_collection
 from bson import ObjectId  # Add this import at the top
+import uuid
 
 # Create password context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,6 +27,7 @@ class UserResponse(BaseModel):
     username: str
     role: str
     created_at: datetime
+    userId: str
 
 class Experience(BaseModel):
     years: int
@@ -65,11 +67,12 @@ async def register(user: UserCreate):
         
         # Create user document
         user_dict = {
+            "userId": str(uuid.uuid4()),
             "email": user.email,
             "username": user.username,
             "hashed_password": pwd_context.hash(user.password),
             "role": "user",
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(UTC)
         }
         
         # Insert into database
@@ -78,6 +81,7 @@ async def register(user: UserCreate):
         # Return user data without password
         return {
             "id": str(result.inserted_id),
+            "userId": user_dict["userId"],
             "email": user.email,
             "username": user.username,
             "role": user_dict["role"],
@@ -118,10 +122,11 @@ async def login(user: UserLogin):
         # Return user data without password
         return {
             "id": str(db_user["_id"]),
+            "userId": db_user["userId"],
             "email": db_user["email"],
             "username": db_user.get("username", ""),  
             "role": db_user.get("role", "user"),     
-            "created_at": db_user.get("created_at", datetime.utcnow())
+            "created_at": db_user.get("created_at", datetime.now(UTC))
         }
     except HTTPException:
         raise
