@@ -650,9 +650,37 @@ function CreateSession() {
     }))
   );
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', { formData, timeSlots });
-    navigate('/');
+  const handleSubmit = async () => {
+    try {
+      const sessionData = {
+        ...formData,
+        mentorId: "current-user-id", // You should replace this with actual mentor ID from your auth system
+        timeSlots: timeSlots
+      };
+
+      const response = await fetch('http://localhost:9000/api/sessions/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      const createdSession = await response.json();
+      if (createdSession.status === 'success') {
+        console.log('Session created successfully');
+        navigate('/dashboard/');
+      } else {
+        throw new Error('Failed to create session');
+      }
+    } catch (error) {
+      console.error('Error creating session:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (
