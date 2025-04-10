@@ -579,7 +579,7 @@ function App() {
                 onClick={() => {
                   const userData = getUserData();
                   if (userData?.role === 'mentor') {
-                    navigate('/dashboard');
+                    navigate('/mentor-dashboard');
                   } else {
                     navigate('/register', { 
                       state: { defaultRole: 'mentor' } 

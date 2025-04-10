@@ -673,7 +673,7 @@ function CreateSession() {
       const result = await response.json();
       if (result.status === 'success') {
         console.log('Session created successfully with ID:', result.sessionId);
-        navigate('/dashboard/');
+        navigate('/mentor-dashboard/');
       } else {
         throw new Error('Failed to create session');
       }

@@ -133,7 +133,7 @@ function EditSession() {
 
       const result = await response.json();
       if (result.status === 'success') {
-        navigate('/dashboard/');
+        navigate('/mentor-dashboard/');
       } else {
         throw new Error('Failed to update session');
       }
@@ -155,7 +155,7 @@ function EditSession() {
 
         const result = await response.json();
         if (result.status === 'success') {
-          navigate('/dashboard/');
+          navigate('/mentor-dashboard/');
         } else {
           throw new Error('Failed to delete session');
         }
@@ -170,7 +170,7 @@ function EditSession() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <button
-            onClick={() => navigate('/dashboard/')}
+            onClick={() => navigate('/mentor-dashboard/')}
             className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8] transition-colors duration-300"
           >
             <ArrowLeft size={20} />
