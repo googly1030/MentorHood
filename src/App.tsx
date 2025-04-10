@@ -15,6 +15,7 @@ import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 import MentorProfileForm from './components/MentorProfileForm';
 import Dashboard from './pages/Dashboard';
 import CreateSession from './pages/CreateSession';
+import EditSession from './pages/EditSession';
 
 function App() {
   return (
@@ -86,6 +87,7 @@ function App() {
                 <CreateSession />
               </ProtectedRoute>
             } />
+            <Route path="/sessions/:sessionId/edit" element={<EditSession />} />
           </Routes>
         </main>
         <Footer />
