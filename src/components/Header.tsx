@@ -15,7 +15,7 @@ const Header: React.FC = () => {
         </h1>
       </div>
       <div className="flex gap-4">
-        <button className="nav-button bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 transition-all duration-300">
+        <button  onClick={() => navigate('/register')} className="nav-button bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 transition-all duration-300">
           Sign up
         </button>
         <button className="nav-button bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white hover:from-[#4338ca] hover:to-[#4937e8] transition-all duration-300">

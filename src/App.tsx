@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop';
 import AllMentors from './pages/AllMentors';
 import QuestionSection from './components/QuestionSection';
 import QuestionAnswers from './components/QuestionAnswers';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/mentors" element={<AllMentors />} />
             <Route path="/questions" element={<QuestionSection />} />
             <Route path="/questions/:questionId/answers" element={<QuestionAnswers />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </main>
         <Footer />
