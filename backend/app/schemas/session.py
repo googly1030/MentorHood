@@ -44,6 +44,7 @@ class SessionBase(BaseModel):
 
 class SessionCreate(SessionBase):
     timeSlots: Optional[List[TimeSlot]] = None
+    userId: str
 
 class Session(SessionBase):
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")

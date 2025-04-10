@@ -52,10 +52,11 @@ const Register = () => {
       }
 
       setUserData({
+        userId: data.userId,
         username: data.username,
         email: data.email,
         role: data.role,
-        token: data.id, // Store user id as token
+        token: data.id,
       });
 
       toast.success('Account created successfully!', {

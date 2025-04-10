@@ -96,7 +96,7 @@ async def get_session(session_id: str):
 async def get_mentor_sessions(mentor_id: str):
     collection = get_collection("sessions")
     
-    sessions = await collection.find({"mentorId": mentor_id}).to_list(length=None)
+    sessions = await collection.find({"userId": mentor_id}).to_list(length=None)
     
     # Convert ObjectId to string and remove _id field for each session
     sessions_list = []
@@ -107,6 +107,6 @@ async def get_mentor_sessions(mentor_id: str):
 
     return {
         "status": "success",
-        "mentorId": mentor_id,
+        "userId": mentor_id,
         "sessions": sessions_list
     }
