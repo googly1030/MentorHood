@@ -26,10 +26,7 @@ interface Category {
 }
 
 const initialCategories: Category[] = [
-  { id: 'all', label: 'All Questions' },
-  { id: 'tech', label: 'Technical' },
-  { id: 'career', label: 'Career' },
-  { id: 'mentorship', label: 'Mentorship'},
+  { id: 'all', label: 'All Questions' }
 ];
 
 const initialQuestions: Question[] = [
@@ -178,9 +175,7 @@ export default function QuestionSection() {
       <div className="hero-section relative">
         <div className="mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
           <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
-            Get Expert Answers from
-            <br />
-            Industry Leaders
+          Questions for this AMA
           </h1>
           <p className="text-xl mb-8 text-gray-700 text-center max-w-2xl mx-auto">
             Ask questions, share knowledge, and connect with tech professionals 
