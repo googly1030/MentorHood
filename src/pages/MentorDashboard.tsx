@@ -108,47 +108,93 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {sessions.map((session) => (
-              <div key={session.sessionId} className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <div key={session.sessionId} className="border border-gray-100 rounded-xl p-6 bg-white shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-gray-800">{session.sessionName}</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#4937e8] flex items-center justify-center text-white font-semibold">
+                      {session.sessionName.charAt(0)}
+                    </div>
+                    <h3 className="font-semibold text-gray-800 text-lg">{session.sessionName}</h3>
                   </div>
-                  <button className="text-gray-400 hover:text-[#4937e8]">
+                  <button className="text-gray-400 hover:text-[#4937e8] transition-colors">
                     <Settings2 size={20} />
                   </button>
                 </div>
-                <p className="text-gray-600 mb-2">{session.description}</p>
-                <div className="text-gray-600 mb-2">
-                  {session.duration} mins • {session.sessionType} • {session.isPaid ? `$${session.price}` : 'Free'}
-                </div>
-                <div className="text-gray-600 mb-2">
-                  {session.occurrence} • {session.numberOfSessions} session(s)
-                </div>
+                
+                <p className="text-gray-600 mb-4 line-clamp-2">{session.description}</p>
+                
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {session.topics.map((topic, index) => (
-                    <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
-                      {topic}
-                    </span>
-                  ))}
+                  <span className="bg-blue-50 text-[#4937e8] px-3 py-1 rounded-full text-sm font-medium">
+                    {session.duration} mins
+                  </span>
+                  <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
+                    {session.sessionType}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${session.isPaid ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-600'}`}>
+                    {session.isPaid ? `$${session.price}` : 'Free'}
+                  </span>
                 </div>
-                <div className="text-gray-600 mb-4">
-                  <p className="font-medium mb-1">Available Time Slots:</p>
-                  {session.timeSlots.map((slot, index) => (
-                    slot.available && slot.timeRanges.length > 0 && (
-                      <div key={index} className="text-sm">
-                        {slot.day}: {slot.timeRanges.map(range => `${range.start} - ${range.end}`).join(', ')}
-                      </div>
-                    )
-                  ))}
+
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 text-gray-600 mb-2">
+                    <span className="text-sm font-medium">{session.occurrence}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-sm">{session.numberOfSessions} session(s)</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8]">
+
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Topics</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {session.topics.map((topic, index) => {
+                      const colors = [
+                        'bg-blue-50 text-blue-600',
+                        'bg-purple-50 text-purple-600',
+                        'bg-pink-50 text-pink-600',
+                        'bg-green-50 text-green-600',
+                        'bg-yellow-50 text-yellow-600',
+                        'bg-indigo-50 text-indigo-600',
+                        'bg-red-50 text-red-600',
+                        'bg-teal-50 text-teal-600'
+                      ];
+                      const colorIndex = index % colors.length;
+                      return (
+                        <span key={index} className={`px-3 py-1 rounded-full text-sm font-medium ${colors[colorIndex]}`}>
+                          {topic}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Available Time Slots</h4>
+                  <div className="space-y-1">
+                    {session.timeSlots.map((slot, index) => (
+                      slot.available && slot.timeRanges.length > 0 && (
+                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="w-20 font-medium">{slot.day}</span>
+                          <span className="flex-1">
+                            {slot.timeRanges.map((range, idx) => (
+                              <span key={idx} className="bg-gray-50 px-2 py-1 rounded">
+                                {range.start} - {range.end}
+                              </span>
+                            ))}
+                          </span>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                  <button className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8] transition-colors">
                     <Copy size={18} />
-                    Copy Link
+                    <span className="text-sm font-medium">Copy Link</span>
                   </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8]">
+                  <button className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8] transition-colors">
                     <Share2 size={18} />
-                    Share
+                    <span className="text-sm font-medium">Share</span>
                   </button>
                 </div>
               </div>
