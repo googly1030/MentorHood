@@ -245,6 +245,7 @@ function EditSession() {
               timeSlots={timeSlots}
               onBack={() => setStep(2)}
               onSubmit={handleSubmit}
+              finalText='Edit'
             />
           )}
         </div>

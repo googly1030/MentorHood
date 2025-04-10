@@ -465,11 +465,12 @@ export function AvailabilityForm({ timeSlots, setTimeSlots, onBack, onNext }: {
   );
 }
 
-export function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
+export function ReviewForm({ formData, timeSlots, onBack, onSubmit, finalText }: {
     formData: FormData;
     timeSlots: TimeSlot[];
     onBack: () => void;
     onSubmit: () => void;
+    finalText: string;
   }) {
     return (
       <div className="bg-white p-8">
@@ -612,7 +613,7 @@ export function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
             onClick={onSubmit}
             className="flex items-center gap-2 bg-[#4937e8] hover:bg-[#4338ca] text-white px-8 py-3 rounded-lg font-medium transition-all duration-300"
           >
-            Create Session
+            {finalText} Session
             <svg
               className="w-5 h-5"
               fill="none"
@@ -750,6 +751,7 @@ function CreateSession() {
               timeSlots={timeSlots}
               onBack={() => setStep(2)}
               onSubmit={handleSubmit}
+              finalText='Create'
             />
           )}
         </div>
