@@ -634,7 +634,10 @@ function App() {
                 accelerate your career growth
               </p>
             </div>
-            <button className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/mentors?tab=group-sessions')} 
+              className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
+            >
               View All Sessions
               <ArrowRight size={20} />
             </button>

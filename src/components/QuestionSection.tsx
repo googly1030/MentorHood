@@ -23,14 +23,13 @@ interface Question {
 interface Category {
   id: string;
   label: string;
-  icon: string;
 }
 
 const initialCategories: Category[] = [
-  { id: 'all', label: 'All Questions', icon: '🌟' },
-  { id: 'tech', label: 'Technical', icon: '💻' },
-  { id: 'career', label: 'Career', icon: '💼' },
-  { id: 'mentorship', label: 'Mentorship', icon: '🤝' },
+  { id: 'all', label: 'All Questions' },
+  { id: 'tech', label: 'Technical' },
+  { id: 'career', label: 'Career' },
+  { id: 'mentorship', label: 'Mentorship'},
 ];
 
 const initialQuestions: Question[] = [
@@ -174,138 +173,119 @@ export default function QuestionSection() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-screen-xl pt-[5rem] pb-[10rem]">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Neighborhood</h1>
-        <button
-          onClick={() => setIsAskModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors"
-        >
-          Ask a question
-        </button>
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - Reused from AllMentors */}
+      <div className="hero-section relative">
+        <div className="mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
+          <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
+            Get Expert Answers from
+            <br />
+            Industry Leaders
+          </h1>
+          <p className="text-xl mb-8 text-gray-700 text-center max-w-2xl mx-auto">
+            Ask questions, share knowledge, and connect with tech professionals 
+            from top companies worldwide.
+          </p>
+        </div>
+
+        {/* Category Filter and Ask Question Button */}
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-12 mt-8">
+            {/* Category Filters */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {initialCategories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                    activeCategory === category.id 
+                    ? "bg-gray-900 text-white" 
+                    : "border border-gray-300 bg-white hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveCategory(category.id)}
+                >
+                  <span className="flex items-center gap-2">
+                     {category.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Ask Question Button - Separated and Prominent */}
+            <button
+              onClick={() => setIsAskModalOpen(true)}
+              className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                transition-all duration-300 transform hover:scale-105 shadow-lg 
+                flex items-center gap-2 font-medium min-w-[160px] justify-center"
+            >
+              <MessageSquare size={18} />
+              Ask a Question
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Category filter */}
-      <div className="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-2">
-        {initialCategories.map((category) => (
-          <button
-            key={category.id}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              activeCategory === category.id
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveCategory(category.id)}
-          >
-            <span>{category.icon}</span>
-            <span>{category.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Questions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Featured Question - Full Width */}
-        {filteredQuestions.slice(0, 1).map((question) => (
-          <div key={question.id} className="md:col-span-2 p-6 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4">{question.title}</h2>
-            
-            <div className="flex items-center mb-4">
-              <div className="flex -space-x-2 mr-2">
-                {question.authors.map((author, index) => (
-                  <div key={index} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-sm font-medium">
-                    {author.image ? (
-                      <img src={author.image} alt="Author" className="w-full h-full rounded-full" />
-                    ) : (
-                      author.initials
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button className="text-blue-600 font-medium hover:text-blue-700">View Playbook</button>
-            </div>
-            
-            <p className="text-gray-600 mb-6 text-lg">{question.content}</p>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-4">
-                <button 
-                  className={`flex items-center space-x-2 px-4 py-2 text-sm border rounded-full transition-colors
-                    ${upvotedQuestions.includes(question.id) ? "text-blue-600 border-blue-200 bg-blue-50" : "text-gray-700 border-gray-200 hover:bg-gray-50"}`}
-                  onClick={() => handleUpvote(question.id)}
-                >
-                  <ArrowUp size={18} className={upvotedQuestions.includes(question.id) ? "text-blue-600" : ""} />
-                  <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
-                </button>
-                
-                <button 
-                  className="flex items-center space-x-2 px-4 py-2 text-sm border rounded-full text-gray-700 border-gray-200 hover:bg-gray-50 transition-colors"
-                  onClick={() => handleAnswer(question)}
-                >
-                  <MessageSquare size={18} />
-                  <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
-                </button>
+      {/* Questions Grid - Updated with AllMentors styling */}
+      <div className="max-w-6xl mx-auto px-4 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {filteredQuestions.map(question => (
+            <div
+              key={question.id}
+              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
+            >
+              <h2 className="text-xl font-semibold mb-4">{question.title}</h2>
+              
+              <div className="flex items-center mb-4">
+                <div className="flex -space-x-2 mr-2">
+                  {question.authors.map((author, index) => (
+                    <div 
+                      key={index} 
+                      className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-sm font-medium"
+                    >
+                      {author.initials}
+                    </div>
+                  ))}
+                </div>
               </div>
               
-              <div className="text-sm text-gray-500">{question.timestamp}</div>
-            </div>
-          </div>
-        ))}
-
-        {/* Regular Questions - Two Columns */}
-        {filteredQuestions.slice(1, 3).map((question) => (
-          <div key={question.id} className="p-6 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-            <h2 className="text-xl font-semibold mb-4">{question.title}</h2>
-            
-            <div className="flex items-center mb-4">
-              <div className="flex -space-x-2 mr-2">
-                {question.authors.map((author, index) => (
-                  <div key={index} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium">
-                    {author.image ? (
-                      <img src={author.image} alt="Author" className="w-full h-full rounded-full" />
-                    ) : (
-                      author.initials
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button className="text-blue-600 font-medium hover:text-blue-700">View Playbook</button>
-            </div>
-            
-            <p className="text-gray-600 mb-4">{question.content}</p>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-3">
-                <button 
-                  className={`flex items-center space-x-1 px-3 py-1 text-sm border rounded-md 
-                    ${upvotedQuestions.includes(question.id) ? "text-blue-600 border-blue-200 bg-blue-50" : "text-gray-700 border-gray-200 hover:bg-gray-50"}`}
-                  onClick={() => handleUpvote(question.id)}
-                >
-                  <ArrowUp size={16} className={upvotedQuestions.includes(question.id) ? "text-blue-600" : ""} />
-                  <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
-                </button>
-                
-                <button 
-                  className="flex items-center space-x-1 px-3 py-1 text-sm border rounded-md text-gray-700 border-gray-200 hover:bg-gray-50"
-                  onClick={() => handleAnswer(question)}
-                >
-                  <MessageSquare size={16} />
-                  <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
-                </button>
-
-                <button 
-                  className="flex items-center space-x-1 px-3 py-1 text-sm border rounded-md text-gray-700 border-gray-200 hover:bg-gray-50"
-                  onClick={() => handleViewAnswers(question)}
-                >
-                  <span>View All Answers</span>
-                </button>
-              </div>
+              <p className="text-gray-600 mb-6">{question.content}</p>
               
-              <div className="text-sm text-gray-500">{question.timestamp}</div>
+              <div className="flex items-center justify-between">
+                <div className="flex space-x-3">
+                  <button 
+                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
+                      upvotedQuestions.includes(question.id)
+                        ? "bg-black text-white border-black"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                    onClick={() => handleUpvote(question.id)}
+                  >
+                    <ArrowUp size={16} className={upvotedQuestions.includes(question.id) ? "text-white" : ""} />
+                    <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
+                  </button>
+                  
+                  <button 
+                    className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
+                    onClick={() => handleAnswer(question)}
+                  >
+                    <MessageSquare size={16} />
+                    <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
+                  </button>
+
+                  {question.answers > 0 && (
+                    <button 
+                      className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-gray-200 transition-colors"
+                      onClick={() => handleViewAnswers(question)}
+                    >
+                      <span>View {question.answers} Answers</span>
+                    </button>
+                  )}
+                </div>
+                
+                <span className="text-sm text-gray-500">{question.timestamp}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Ask Question Modal */}

@@ -40,7 +40,6 @@ interface GroupSession {
 
 
 const mentors: Mentor[] = [
-  // Most Visited Category
   {
     id: 1,
     name: "Sarah Johnson",
@@ -121,8 +120,6 @@ const mentors: Mentor[] = [
     category: "most-visited",
     companyLogo: "/company-logos/microsoft.png"
   },
-
-  // Service Based Category
   {
     id: 6,
     name: "Alex Rodriguez",
@@ -139,9 +136,6 @@ const mentors: Mentor[] = [
     category: "service-based",
     companyLogo: "/company-logos/salesforce.png"
   },
-  // Add 4 more service-based mentors...
-
-  // Company Experts Category
   {
     id: 11,
     name: "Jennifer Lee",
@@ -158,9 +152,6 @@ const mentors: Mentor[] = [
     category: "company-experts",
     companyLogo: "/company-logos/apple.png"
   },
-  // Add 4 more company experts...
-
-  // Venture Capital Category
   {
     id: 16,
     name: "Mark Thompson",
@@ -176,11 +167,8 @@ const mentors: Mentor[] = [
     price: "₹2000/session",
     category: "venture-capital",
     companyLogo: "/company-logos/sequoia.png"
-  },
-  // Add 4 more venture capital mentors...
+  }
 ];
-
-// Add this array of group sessions
 const groupSessions: GroupSession[] = [
   {
     id: 1,
@@ -197,15 +185,24 @@ const groupSessions: GroupSession[] = [
     participants: 25,
     maxParticipants: 50,
     price: "₹500/session"
-  },
-  // Add more group sessions...
+  }
 ];
 
 const AllMentors = () => {
   const navigate = useNavigate();
   const [activeCategory] = useState<string>('most-visited');
-  const [activeTab, setActiveTab] = useState<'all-mentors' | 'group-sessions'>('all-mentors');
+  
+  // Get the tab from URL parameters
+  const searchParams = new URLSearchParams(window.location.search);
+  const defaultTab = searchParams.get('tab') === 'group-sessions' ? 'group-sessions' : 'all-mentors';
+  
+  const [activeTab, setActiveTab] = useState<'all-mentors' | 'group-sessions'>(defaultTab);
 
+  // Modify the setActiveTab function to update the URL
+  const handleTabChange = (tab: 'all-mentors' | 'group-sessions') => {
+    setActiveTab(tab);
+    navigate(`/mentors?tab=${tab}`, { replace: true });
+  };
 
   const categories = [
     { id: 'most-visited', name: 'Most Visited', icon: TrendingUp },
@@ -274,7 +271,7 @@ const AllMentors = () => {
               className={`text-xl font-medium px-4 py-2 relative ${
                 activeTab === "all-mentors" ? "text-gray-800" : "text-gray-500"
               }`}
-              onClick={() => setActiveTab("all-mentors")}
+              onClick={() => handleTabChange("all-mentors")}
             >
               All Mentors
               {activeTab === "all-mentors" && (
@@ -285,7 +282,7 @@ const AllMentors = () => {
               className={`text-xl font-medium px-4 py-2 relative ${
                 activeTab === "group-sessions" ? "text-[#4937e8]" : "text-gray-500"
               }`}
-              onClick={() => setActiveTab("group-sessions")}
+              onClick={() => handleTabChange("group-sessions")}
             >
               Group Sessions
               {activeTab === "group-sessions" && (
