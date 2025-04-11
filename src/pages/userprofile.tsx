@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users, Sun, Moon, Star } from 'lucide-react';
+import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users, Sun, Moon, Star, Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface Service {
@@ -26,7 +26,8 @@ enum TabType {
   OVERVIEW = 'overview',
   REVIEWS = 'reviews',
   ACHIEVEMENTS = 'achievements',
-  GROUP_SESSIONS = 'groupSessions'
+  GROUP_SESSIONS = 'groupSessions',
+  SERVICES = 'services'
 }
 
 interface Review {
@@ -51,6 +52,27 @@ function App() {
   const [groupDiscussions, setGroupDiscussions] = useState<GroupDiscussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUser = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const { role, userId } = JSON.parse(userData);
+          setUserRole(role);
+          if (role === 'mentor' && userId === mentorId) {
+            setIsCurrentUser(true);
+          }
+        } catch (err) {
+          console.error('Error parsing token:', err);
+        }
+      }
+    };
+
+    checkUser();
+  }, [mentorId]);
 
   useEffect(() => {
     const fetchMentorProfile = async () => {
@@ -135,6 +157,43 @@ function App() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case TabType.SERVICES:
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Available Sessions</h2>
+              <button 
+                onClick={() => navigate('/mentor-dashboard')}
+                className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
+              >
+                <Settings2 size={16} />
+                Manage Sessions
+              </button>
+            </div>
+            {services.map((service, index) => (
+              <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className={`font-medium ${textColor}`}>{service.sessionName}</h3>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                      Duration: {service.duration} minutes
+                    </p>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                      {service.description}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => handleBooking(service._id)}
+                    className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    {service.isPaid ? `Book • Rs ${service.price}` : 'Book • Free'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
       case TabType.REVIEWS:
         return (
           <div className="space-y-6">
@@ -181,8 +240,18 @@ function App() {
       case TabType.GROUP_SESSIONS:
         return (
           <div className="space-y-6">
-            {groupDiscussions.map((session) => (
-              <div key={session._id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Group Sessions</h2>
+              <button 
+                onClick={() => navigate('/mentor-dashboard')}
+                className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
+              >
+                <Settings2 size={16} />
+                Manage Sessions
+              </button>
+            </div>
+            {groupDiscussions.map((session, index) => (
+              <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className={`font-medium ${textColor}`}>{session.sessionName}</h3>
@@ -282,7 +351,15 @@ function App() {
         />
         
         <div className="absolute top-4 right-4 flex gap-3">
-          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
+          {isCurrentUser && userRole === 'mentor' && (
+            <button 
+              onClick={() => navigate(`/profile/${mentorId}/edit`)}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all"
+            >
+              <Edit className="w-6 h-6 text-white" />
+            </button>
+          )}
+          {/* <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
             <MessageCircle className="w-6 h-6 text-white" />
           </button>
           <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
@@ -290,7 +367,7 @@ function App() {
           </button>
           <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-all">
             <MoreHorizontal className="w-6 h-6 text-white" />
-          </button>
+          </button> */}
         </div>
 
         <div className="absolute top-4 left-4 flex gap-3">
@@ -407,12 +484,21 @@ function App() {
                 </div>
 
                 <div className="mt-6">
-                  <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Available sessions</h2>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className={`text-xl font-bold ${textColor}`}>Available sessions</h2>
+                    <button 
+                      onClick={() => navigate('/mentor-dashboard')}
+                      className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
+                    >
+                      <Settings2 size={16} />
+                      Manage
+                    </button>
+                  </div>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Book 1:1 sessions from the options based on your needs</p>
                   
                   <div className="space-y-4">
-                    {services.map((service) => (
-                      <div key={service._id} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
+                    {services.map((service, index) => (
+                      <div key={`service-${index}`} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
                         <div className="flex justify-between items-start">
                           <div>
                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">One-on-One</span>
