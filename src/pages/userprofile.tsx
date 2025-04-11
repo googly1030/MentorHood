@@ -89,7 +89,7 @@ function App() {
 
     const fetchGroupDiscussions = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=group-sessions`);
+        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=group-session`);
         if (!response.ok) {
           throw new Error('Failed to fetch group discussions');
         }
@@ -213,35 +213,7 @@ function App() {
               <p className={textColor}>
                 {mentorProfile.headline}
               </p>
-              <button className="text-teal-600 mt-2">Show more</button>
-            </div>
-
-            {/* Services Section */}
-            <div>
-              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Services</h2>
-              <div className="space-y-4">
-                {services.map((service) => (
-                  <div key={service._id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className={`font-medium ${textColor}`}>{service.sessionName}</h3>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                          Duration: {service.duration} minutes
-                        </p>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                          {service.description}
-                        </p>
-                      </div>
-                      <button 
-                        onClick={() => handleBooking(service._id)}
-                        className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
-                      >
-                        {service.isPaid ? `Book • Rs ${service.price}` : 'Book • Free'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* <button className="text-teal-600 mt-2">Show more</button> */}
             </div>
 
             {/* Experience Section */}
@@ -439,24 +411,29 @@ function App() {
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Book 1:1 sessions from the options based on your needs</p>
                   
                   <div className="space-y-4">
-                    {mentorProfile.services.map((session: any) => (
-                      <div key={session.id} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
+                    {services.map((service) => (
+                      <div key={service._id} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
                         <div className="flex justify-between items-start">
                           <div>
-                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Advance</span>
-                            <h3 className={`font-medium mt-2 ${textColor}`}>{session.title}</h3>
+                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">One-on-One</span>
+                            <h3 className={`font-medium mt-2 ${textColor}`}>{service.sessionName}</h3>
                             <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                              {session.duration}, {session.frequency}, {session.sessions} sessions
+                              Duration: {service.duration} minutes
+                            </p>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                              {service.description}
                             </p>
                           </div>
                           <button 
-                            onClick={() => handleBooking(session.id)}
+                            onClick={() => handleBooking(service._id)}
                             className="bg-black text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-800 transition-colors"
                           >
                             Book
                           </button>
                         </div>
-                        <p className={`text-lg font-medium mt-2 ${textColor}`}>${session.price}.00</p>
+                        <p className={`text-lg font-medium mt-2 ${textColor}`}>
+                          {service.isPaid ? `Rs ${service.price}` : 'Free'}
+                        </p>
                       </div>
                     ))}
                   </div>

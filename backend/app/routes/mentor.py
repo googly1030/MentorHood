@@ -61,7 +61,7 @@ async def get_mentor_sessions(
     # Build query based on session type
     query = {"userId": mentor_id}
     if type:
-        if type not in ["one-on-one", "group-sessions"]:
+        if type not in ["one-on-one", "group-session"]:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid session type. Must be either 'one-on-one' or 'group-session'"
