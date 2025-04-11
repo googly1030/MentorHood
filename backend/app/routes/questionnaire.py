@@ -55,13 +55,17 @@ async def list_questionnaires(
 async def create_questionnaire(questionnaire: QuestionnaireCreate):
     collection = get_collection("questionnaires")
     
-    questionnaire_dict = questionnaire.dict()
+    questionnaire_dict = questionnaire.dict(exclude={"author"})
+    
+    # Use provided author details or default values
+    author = questionnaire.author.dict() if questionnaire.author else {
+        "id": "current-user",
+        "name": "Current User",
+        "initials": "CU"
+    }
+    
     questionnaire_dict.update({
-        "authors": [{
-            "id": "current-user",  # This should be replaced with actual user ID
-            "name": "Current User",  # This should be replaced with actual user name
-            "initials": "CU"  # This should be replaced with actual user initials
-        }],
+        "authors": [author],
         "upvotes": 0,
         "answers": 0,
         "timestamp": datetime.utcnow(),
