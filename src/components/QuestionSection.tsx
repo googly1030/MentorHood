@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, MessageSquare, Clock, TrendingUp } from 'lucide-react';
+import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon  } from 'lucide-react';
 
 interface Author {
   id: string;
@@ -22,14 +22,24 @@ interface Question {
   updated_at: string;
 }
 
-interface Category {
-  id: string;
-  label: string;
+
+
+// New interface for session details
+interface SessionDetails {
+  title: string;
+  date: string;
+  time: string;
+  duration: string;
+  host: {
+    name: string;
+    role: string;
+    company: string;
+    image: string;
+  };
+  description: string;
 }
 
-const initialCategories: Category[] = [
-  { id: 'all', label: 'All Questions' }
-];
+
 
 export default function QuestionSection() {
   const navigate = useNavigate();
@@ -37,13 +47,34 @@ export default function QuestionSection() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [answer, setAnswer] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory] = useState('all');
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'timestamp' | 'upvotes'>('timestamp');
+  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState('');
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  // Sample session details (would come from API in a real app)
+  const sessionDetails: SessionDetails = {
+    title: "Building Scalable Microservices Architecture",
+    date: "April 15, 2025",
+    time: "10:00 AM PST",
+    duration: "60 minutes",
+    host: {
+      name: "Michael Chen",
+      role: "Engineering Manager",
+      company: "Meta",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+    },
+    description: "Join us for an insightful Ask Me Anything session where Michael will share his expertise on building scalable microservices architecture. Learn about design patterns, common pitfalls, and best practices from his experience leading engineering teams at Meta."
+  };
 
   // Fetch questions when component mounts, category changes, or sort order changes
   useEffect(() => {
@@ -189,6 +220,47 @@ export default function QuestionSection() {
     }
   };
 
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:9000/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setIsEmailSent(true);
+        setTimeout(() => {
+          setIsWaitlistModalOpen(false);
+          setIsEmailSent(false);
+          setEmail('');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error joining waitlist:', error);
+    }
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsRegistered(true);
+      setTimeout(() => {
+        setIsRegisterModalOpen(false);
+        setIsRegistered(false);
+        setRegistrationEmail('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error registering for session:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Reused from AllMentors */}
@@ -201,33 +273,81 @@ export default function QuestionSection() {
             Ask questions, share knowledge, and connect with tech professionals 
             from top companies worldwide.
           </p>
+          
+          {/* Session Details Card */}
+          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 overflow-hidden">
+            {/* Session Header */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <img 
+                  src={sessionDetails.host.image}
+                  alt={sessionDetails.host.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+                />
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{sessionDetails.title}</h2>
+                  <p className="text-gray-700 mt-1">
+                    Hosted by <span className="font-semibold">{sessionDetails.host.name}</span>, {sessionDetails.host.role} at {sessionDetails.host.company}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Session Details */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-50 p-2 rounded-full">
+                    <CalendarIcon size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="font-medium">{sessionDetails.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-50 p-2 rounded-full">
+                    <Clock size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Time</p>
+                    <p className="font-medium">{sessionDetails.time}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-50 p-2 rounded-full">
+                    <Video size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{sessionDetails.duration}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-6">{sessionDetails.description}</p>
+              
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => setIsRegisterModalOpen(true)}
+                  className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                    transition-all duration-300 transform hover:scale-105 shadow-lg 
+                    flex items-center gap-2 font-medium"
+                >
+                  <CalendarIcon size={18} />
+                  Register Now
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Category Filter and Ask Question Button */}
+        {/* UPDATED: Sort By and Ask Question Button */}
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-12 mt-8">
-            {/* Category Filters */}
-            <div className="flex flex-wrap justify-center gap-3">
-              {initialCategories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`px-4 py-2 rounded-full transition-all duration-300 ${
-                    activeCategory === category.id 
-                    ? "bg-gray-900 text-white" 
-                    : "border border-gray-300 bg-white hover:bg-gray-50"
-                  }`}
-                  onClick={() => setActiveCategory(category.id)}
-                >
-                  <span className="flex items-center gap-2">
-                     {category.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* Sort Options */}
+            {/* Sort Options - Moved to replace All Questions filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Sort by:</span>
+              <span className="text-sm text-gray-600 font-medium">Sort by:</span>
               <button
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
                   sortBy === 'timestamp' 
@@ -252,21 +372,20 @@ export default function QuestionSection() {
               </button>
             </div>
 
-            {/* Ask Question Button - Separated and Prominent */}
+            {/* Add Ask Question Button at right end */}
             <button
               onClick={() => setIsAskModalOpen(true)}
-              className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
-                transition-all duration-300 transform hover:scale-105 shadow-lg 
-                flex items-center gap-2 font-medium min-w-[160px] justify-center"
+              className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 
+                transition-all duration-200 flex items-center gap-2 font-medium"
             >
-              <MessageSquare size={18} />
+              <MessageSquare size={16} />
               Ask a Question
             </button>
           </div>
         </div>
       </div>
 
-      {/* Questions Grid - Updated with AllMentors styling */}
+      {/* Questions Grid - No changes needed */}
       <div className="max-w-6xl mx-auto px-4 pb-16">
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
@@ -416,6 +535,118 @@ export default function QuestionSection() {
                 Post Answer
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Waitlist Modal */}
+      {isWaitlistModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
+            <button
+              onClick={() => setIsWaitlistModalOpen(false)}
+              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+            
+            {isEmailSent ? (
+              <div className="text-center py-8">
+                <div className="mb-4 text-green-500">
+                  <Check size={48} className="mx-auto" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  You're on the list!
+                </h3>
+                <p className="text-gray-600">
+                  We'll notify you when the AMA session begins.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-2">Join the Waitlist</h2>
+                <p className="text-gray-600 mb-6">
+                  Be the first to know when this AMA session goes live.
+                </p>
+                
+                <form onSubmit={handleWaitlistSubmit}>
+                  <div className="mb-6">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 
+                        focus:outline-none focus:ring-2 focus:ring-[#4937e8]"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 rounded-xl bg-[#4937e8] text-white 
+                      hover:bg-[#4338ca] transition-all duration-300"
+                  >
+                    Join Waitlist
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Registration Modal */}
+      {isRegisterModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
+            <button
+              onClick={() => setIsRegisterModalOpen(false)}
+              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+            
+            {isRegistered ? (
+              <div className="text-center py-8">
+                <div className="mb-4 text-green-500">
+                  <Check size={48} className="mx-auto" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  You're registered!
+                </h3>
+                <p className="text-gray-600">
+                  We'll send you a reminder before the session starts.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-2">Register for the Session</h2>
+                <p className="text-gray-600 mb-6">
+                  Enter your email to register for the AMA session.
+                </p>
+                
+                <form onSubmit={handleRegisterSubmit}>
+                  <div className="mb-6">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email"
+                      value={registrationEmail}
+                      onChange={(e) => setRegistrationEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 
+                        focus:outline-none focus:ring-2 focus:ring-[#4937e8]"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 rounded-xl bg-[#4937e8] text-white 
+                      hover:bg-[#4338ca] transition-all duration-300"
+                  >
+                    Register Now
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
