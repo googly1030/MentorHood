@@ -775,7 +775,7 @@ function App() {
                         <h4 className="font-medium text-gray-800">
                           {mentor?.name}
                         </h4>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 text-sm line-clamp-2 max-w-[200px]">
                           {mentor?.headline}
                         </p>
                       </div>
