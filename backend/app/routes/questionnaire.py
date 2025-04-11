@@ -180,12 +180,127 @@ async def register_user(registration: RegistrationRequest):
         subject = "Registration Confirmation - MentorHood"
         body = f"""
         <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: 'Arial', sans-serif;
+                        line-height: 1.6;
+                        color: #333333;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    .email-container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }}
+                    .email-header {{
+                        background-color: #000000;
+                        padding: 20px;
+                        text-align: center;
+                    }}
+                    .logo {{
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #ffffff;
+                        text-decoration: none;
+                    }}
+                    .email-body {{
+                        background-color: #ffffff;
+                        padding: 30px;
+                        border: 1px solid #e0e0e0;
+                        border-top: none;
+                    }}
+                    h2 {{
+                        color: #000000;
+                        font-size: 22px;
+                        margin-top: 0;
+                        margin-bottom: 20px;
+                    }}
+                    p {{
+                        margin-bottom: 16px;
+                        font-size: 16px;
+                    }}
+                    .cta-button {{
+                        display: inline-block;
+                        background-color: #000000;
+                        color: #ffffff !important;
+                        text-decoration: none;
+                        padding: 12px 24px;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        margin: 20px 0;
+                    }}
+                    .meet-link {{
+                        background-color: #f5f5f5;
+                        border: 1px solid #e0e0e0;
+                        padding: 15px;
+                        border-radius: 4px;
+                        margin: 20px 0;
+                    }}
+                    .meet-link a {{
+                        color: #1a73e8;
+                        text-decoration: none;
+                        font-weight: 500;
+                    }}
+                    .email-footer {{
+                        background-color: #f5f5f5;
+                        padding: 20px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #666666;
+                    }}
+                    .social-links {{
+                        margin-top: 15px;
+                    }}
+                    .social-links a {{
+                        display: inline-block;
+                        margin: 0 10px;
+                        color: #666666;
+                        text-decoration: none;
+                    }}
+                </style>
+            </head>
             <body>
-                <h2>Thank you for registering with MentorHood!</h2>
-                <p>We're excited to have you join our community of mentors and mentees.</p>
-                <p>You can now access all our features and start connecting with others.</p>
-                <p>If you have any questions, feel free to reach out to our support team.</p>
-                <p>Best regards,<br>The MentorHood Team</p>
+                <div class="email-container">
+                    <div class="email-header">
+                        <span class="logo">MentorHood</span>
+                    </div>
+                    
+                    <div class="email-body">
+                        <h2>Thank you for registering with MentorHood!</h2>
+                        
+                        <p>We're excited to have you join our community of mentors and mentees. At MentorHood, we believe in the power of knowledge sharing and professional growth.</p>
+                        
+                        <p>You can now access all our features and start connecting with others. Explore our platform to find the perfect mentor match for your career goals.</p>
+                        
+                        <div class="meet-link">
+                            <p><strong>Join our new member orientation:</strong></p>
+                            <p>We'd love to welcome you personally to our community. Join our upcoming orientation meeting to learn how to make the most of your MentorHood experience.</p>
+                            <a href="https://meet.google.com/abc-defg-hij" target="_blank">https://meet.google.com/abc-defg-hij</a>
+                            <p><small>Date: Next Friday at 3:00 PM EST</small></p>
+                        </div>
+                        
+                        <p>Get started by completing your profile and browsing available mentors in your field of interest.</p>
+                        
+                        <a href="" class="cta-button">Complete Your Profile</a>
+                        
+                        <p>If you have any questions, feel free to reach out to our support team at <a href="mailto:support@mentorhood.com">support@mentorhood.com</a>.</p>
+                        
+                        <p>Best regards,<br>The MentorHood Team</p>
+                    </div>
+                    
+                    <div class="email-footer">
+                        <p>© 2025 MentorHood. All rights reserved.</p>
+                        <p>123 Mentorship Avenue, Knowledge City, CA 94103</p>
+                        <div class="social-links">
+                            <a href="#">Twitter</a> | 
+                            <a href="#">LinkedIn</a> | 
+                            <a href="#">Instagram</a>
+                        </div>
+                        <p><small>You're receiving this email because you signed up for MentorHood.</small></p>
+                    </div>
+                </div>
             </body>
         </html>
         """
