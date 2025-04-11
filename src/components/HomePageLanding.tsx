@@ -1115,7 +1115,7 @@ function App() {
                 {centerCardContent.description}
               </p>
               <div className="flex justify-center">
-                <button className="px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-full text-base font-medium transition-all transform hover:scale-105">
+                <button onClick={() => navigate('/mentors')} className="px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-full text-base font-medium transition-all transform hover:scale-105">
                   {centerCardContent.buttonText}
                 </button>
               </div>
