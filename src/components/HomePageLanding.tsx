@@ -35,6 +35,20 @@ interface Suggestion {
   icon: string;
 }
 
+interface Mentor {
+  userId: string;
+  name: string;
+  headline: string;
+  profilePhoto: string;
+  rating: number;
+  experience: {
+    years: number;
+    months: number;
+  };
+  primaryExpertise: string;
+  bookings: number;
+}
+
 const suggestions: Suggestion[] = [
   {
     id: 1,
@@ -107,44 +121,9 @@ function App() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("mentee");
 
-  const mentors = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      rating: 4.8,
-      role: "Senior Product Manager at Google",
-      experience: "8+ years",
-      specialization: "Product Management, Career Transitions",
-      bookings: 1228,
-      image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-      calendlyLink: "/booking/1",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      rating: 4.9,
-      role: "Engineering Manager at Meta",
-      experience: "10+ years",
-      specialization: "Software Architecture, Leadership",
-      bookings: 956,
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
-      calendlyLink: "/booking/2",
-    },
-    {
-      id: 3,
-      name: "Emily Rodriguez",
-      rating: 4.7,
-      role: "Tech Lead at Amazon",
-      experience: "7+ years",
-      specialization: "Frontend Development, System Design",
-      bookings: 843,
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
-      calendlyLink: "/booking/3",
-    },
-  ];
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const upcomingSessions = [
     {
@@ -424,6 +403,28 @@ function App() {
     mentors.length,
   ]);
 
+  useEffect(() => {
+    const fetchMentors = async () => {
+      try {
+        const response = await fetch('http://localhost:9000/api/mentors/all');
+        if (!response.ok) {
+          throw new Error('Failed to fetch mentors');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setMentors(data.mentors);
+          setVisibleCards(new Array(data.mentors.length).fill(false));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load mentors');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMentors();
+  }, []);
+
   return (
     <div className="min-h-screen">
       {emojis.map(({ id, emoji, left, top }) => (
@@ -600,59 +601,64 @@ function App() {
           <h2 className="text-4xl font-bold mb-12 text-center">
             Your Knowledge Buddies
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {mentors.map((mentor, index) => (
-              <div
-                key={index}
-                ref={(el) => (cardsRef.current[index] = el)}
-                className={`mentor-card bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow ${
-                  visibleCards[index] ? "visible" : ""
-                }`}
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <img
-                    src={mentor.image}
-                    alt={mentor.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-lg">{mentor.name}</h3>
-                    <div className="flex items-center gap-1 text-yellow-500">
-                      <Star size={16} fill="currentColor" />
-                      <span>{mentor.rating}/5</span>
+          {loading ? (
+            <div className="text-center">Loading mentors...</div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {mentors.map((mentor, index) => (
+                <div
+                  key={mentor.userId}
+                  ref={(el) => (cardsRef.current[index] = el)}
+                  className={`mentor-card bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow ${
+                    visibleCards[index] ? "visible" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <img
+                      src={mentor.profilePhoto || `https://ui-avatars.com/api/?name=${mentor.name}&background=random`}
+                      alt={mentor.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-lg">{mentor.name}</h3>
+                      <div className="flex items-center gap-1 text-yellow-500">
+                        <Star size={16} fill="currentColor" />
+                        <span>{mentor.rating || 4.5}/5</span>
+                      </div>
                     </div>
                   </div>
+                  <p className="text-gray-700 mb-2">{mentor.headline}</p>
+                  <p className="text-gray-700 mb-2">
+                    Experience: {mentor.experience.years}+ years
+                  </p>
+                  <p className="text-gray-700 mb-2">
+                    Specialization: {mentor.primaryExpertise}
+                  </p>
+                  <p className="text-gray-700 font-medium mb-6">
+                    {mentor.bookings || 0}+ sessions conducted
+                  </p>
+                  <div className="flex gap-3">
+                    <a
+                      href={`/profile/${mentor.userId}`}
+                      className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
+                    >
+                      <Phone size={16} />
+                      Schedule Call
+                    </a>
+                    <button
+                      onClick={() => navigate(`/profile/${mentor.userId}`)}
+                      className="flex-1 bg-gray-100 text-black py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-200"
+                    >
+                      <Users size={16} />
+                      View Profile
+                    </button>
+                  </div>
                 </div>
-                <p className="text-gray-700 mb-2">{mentor.role}</p>
-                <p className="text-gray-700 mb-2">
-                  Experience: {mentor.experience}
-                </p>
-                <p className="text-gray-700 mb-2">
-                  Specialization: {mentor.specialization}
-                </p>
-                <p className="text-gray-700 font-medium mb-6">
-                  {mentor.bookings}+ sessions conducted
-                </p>
-                <div className="flex gap-3">
-                  <a
-                    href={mentor.calendlyLink}
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
-                  >
-                    <Phone size={16} />
-                    Schedule Call
-                  </a>
-                  <button
-                    onClick={() => navigate(`/profile/${index}`)}
-                    className="flex-1 bg-gray-100 text-black py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-200"
-                  >
-                    <Users size={16} />
-                    View Profile
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <button

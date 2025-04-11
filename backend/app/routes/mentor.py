@@ -10,6 +10,24 @@ router = APIRouter(
     tags=["mentors"]
 )
 
+@router.get("/all")
+async def get_all_mentors():
+    collection = get_collection("mentorProfile")
+    
+    mentors = await collection.find({}).to_list(length=None)
+    
+    # Convert ObjectId to string and remove _id field for each mentor
+    mentors_list = []
+    for mentor in mentors:
+        mentor_dict = dict(mentor)
+        mentor_dict.pop('_id', None)
+        mentors_list.append(mentor_dict)
+
+    return {
+        "status": "success",
+        "mentors": mentors_list
+    }
+
 @router.get("/{mentor_id}")
 async def get_mentor_profile(mentor_id: str):
     collection = get_collection("mentorProfile")
