@@ -829,7 +829,7 @@ function App() {
 
                   <button 
                     className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={() => navigate('/questions')}
+                    onClick={() => navigate(`/questions/${session._id}`)}
                   >
                     Register Now
                     <ArrowRight size={18} />
@@ -939,7 +939,7 @@ function App() {
 
                   <button 
                     className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={() => navigate('/questions')}
+                    onClick={() => navigate(`/questions/${session._id}`)}
                   >
                     Register Now
                     <ArrowRight size={18} />

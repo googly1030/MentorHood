@@ -1,25 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X, Mail } from 'lucide-react';
 import { Question } from '../types/question';
 
 // New interface for session details
 interface SessionDetails {
+  _id: string;
   title: string;
   date: string;
   time: string;
   duration: string;
-  host: {
+  mentor: {
     name: string;
     role: string;
     company: string;
     image: string;
   };
   description: string;
+  registrants: number;
+  maxRegistrants: number;
+  isWomanTech: boolean;
+  tag: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function QuestionSection() {
   const navigate = useNavigate();
+  const params = useParams();
+  const sessionId = params.sessionId;
   const [questions, setQuestions] = useState<Question[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -39,21 +48,48 @@ export default function QuestionSection() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [sessionError, setSessionError] = useState<string | null>(null);
 
-  // Sample session details (would come from API in a real app)
-  const sessionDetails: SessionDetails = {
-    title: "Building Scalable Microservices Architecture",
-    date: "April 15, 2025",
-    time: "10:00 AM PST",
-    duration: "60 minutes",
-    host: {
-      name: "Michael Chen",
-      role: "Engineering Manager",
-      company: "Meta",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-    },
-    description: "Join us for an insightful Ask Me Anything session where Michael will share his expertise on building scalable microservices architecture. Learn about design patterns, common pitfalls, and best practices from his experience leading engineering teams at Meta."
-  };
+  // Fetch session details when component mounts
+  useEffect(() => {
+    const fetchSessionDetails = async () => {
+      console.log(params);
+      const sessionId = params.sessionId;
+      console.log(sessionId);
+      if (!sessionId) {
+        setSessionError("No session ID provided");
+        setSessionLoading(false);
+        return;
+      }
+
+      try {
+        setSessionLoading(true);
+        const response = await fetch(`http://localhost:9000/ama-sessions/${sessionId}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setSessionError("Session not found");
+          } else {
+            setSessionError("Failed to load session details");
+          }
+          setSessionLoading(false);
+          return;
+        }
+        
+        const data = await response.json();
+        setSessionDetails(data);
+        setSessionLoading(false);
+      } catch (error) {
+        console.error('Error fetching session details:', error);
+        setSessionError("An error occurred while loading session details");
+        setSessionLoading(false);
+      }
+    };
+
+    fetchSessionDetails();
+  }, [sessionId]);
 
   // Fetch questions when component mounts, category changes, or sort order changes
   useEffect(() => {
@@ -257,81 +293,91 @@ export default function QuestionSection() {
           </p>
           
           {/* Session Details Card */}
-          <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 overflow-hidden">
-            {/* Session Header */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-4">
-                <img 
-                  src={sessionDetails.host.image}
-                  alt={sessionDetails.host.name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
-                />
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{sessionDetails.title}</h2>
-                  <p className="text-gray-700 mt-1">
-                    Hosted by <span className="font-semibold">{sessionDetails.host.name}</span>, {sessionDetails.host.role} at {sessionDetails.host.company}
-                  </p>
-                </div>
-              </div>
+          {sessionLoading ? (
+            <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 p-8 flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
             </div>
-            
-            {/* Session Details */}
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 p-2 rounded-full">
-                    <CalendarIcon size={20} className="text-blue-600" />
-                  </div>
+          ) : sessionError ? (
+            <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 p-8 text-center">
+              <p className="text-red-500 text-xl">{sessionError}</p>
+            </div>
+          ) : sessionDetails ? (
+            <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 overflow-hidden">
+              {/* Session Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={sessionDetails.mentor.image}
+                    alt={sessionDetails.mentor.name}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+                  />
                   <div>
-                    <p className="text-sm text-gray-500">Date</p>
-                    <p className="font-medium">{sessionDetails.date}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 p-2 rounded-full">
-                    <Clock size={20} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Time</p>
-                    <p className="font-medium">{sessionDetails.time}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 p-2 rounded-full">
-                    <Video size={20} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Duration</p>
-                    <p className="font-medium">{sessionDetails.duration}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">{sessionDetails.title}</h2>
+                    <p className="text-gray-700 mt-1">
+                      Hosted by <span className="font-semibold">{sessionDetails.mentor.name}</span>, {sessionDetails.mentor.role} at {sessionDetails.mentor.company}
+                    </p>
                   </div>
                 </div>
               </div>
               
-              <p className="text-gray-700 mb-6">{sessionDetails.description}</p>
-              
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={(e) => handleWaitlistSubmit(e)}
-                  disabled={isSubmitting}
-                  className={`px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
-                    transition-all duration-300 transform hover:scale-105 shadow-lg 
-                    flex items-center gap-2 font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Registering...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CalendarIcon size={18} />
-                      Register Now
-                    </>
-                  )}
-                </button>
+              {/* Session Details */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 p-2 rounded-full">
+                      <CalendarIcon size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Date</p>
+                      <p className="font-medium">{sessionDetails.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 p-2 rounded-full">
+                      <Clock size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Time</p>
+                      <p className="font-medium">{sessionDetails.time}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 p-2 rounded-full">
+                      <Video size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Duration</p>
+                      <p className="font-medium">{sessionDetails.duration}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-gray-700 mb-6">{sessionDetails.description}</p>
+                
+                <div className="flex flex-wrap gap-4">
+                  <button
+                    onClick={(e) => handleWaitlistSubmit(e)}
+                    disabled={isSubmitting}
+                    className={`px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                      transition-all duration-300 transform hover:scale-105 shadow-lg 
+                      flex items-center gap-2 font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Registering...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CalendarIcon size={18} />
+                        Register Now
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
         </div>
 
         {/* UPDATED: Sort By and Ask Question Button */}

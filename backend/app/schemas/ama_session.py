@@ -34,12 +34,13 @@ class AMASessionBase(BaseModel):
     questions: List[str]
     isWomanTech: bool = False
     tag: Optional[str] = None
+    description: Optional[str] = None
 
 class AMASessionCreate(AMASessionBase):
     pass
 
 class AMASession(AMASessionBase):
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
