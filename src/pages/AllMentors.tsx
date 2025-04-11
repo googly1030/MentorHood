@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, TrendingUp, Building2, Rocket , Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+
 interface Mentor {
   id: number;
   name: string;
@@ -19,25 +20,75 @@ interface Mentor {
   companyLogo?: string;
 }
 
-// Add this interface for group sessions
-interface GroupSession {
-  id: number;
-  title: string;
-  topic: string;
-  mentor: {
-    name: string;
-    role: string;
-    image: string;
-  };
-  date: string;
-  time: string;
-  duration: string;
-  participants: number;
-  maxParticipants: number;
-  price: string;
+interface TimeRange {
+  start: string;
+  end: string;
 }
 
+interface TimeSlot {
+  day: string;
+  available: boolean;
+  timeRanges: TimeRange[];
+}
 
+interface Session {
+  sessionId: string;
+  sessionName: string;
+  description: string;
+  duration: string;
+  sessionType: string;
+  numberOfSessions: string;
+  occurrence: string;
+  topics: string[];
+  allowMenteeTopics: boolean;
+  showOnProfile: boolean;
+  isPaid: boolean;
+  price: string;
+  mentorId: string | null;
+  userId: string;
+  timeSlots: TimeSlot[];
+  created_at: string;
+  updated_at: string;
+}
+
+interface MentorProfile {
+  userId: string;
+  name: string;
+  headline: string;
+  membership: string;
+  role: string;
+  rating: number;
+  bookings: number;
+  location: string;
+  availability: string;
+  experience: Array<{
+    title: string;
+    company: string;
+    description: string;
+    duration: string;
+  }>;
+  totalExperience: {
+    years: number;
+    months: number;
+  };
+  primaryExpertise: string;
+  disciplines: string[];
+  skills: string[];
+  mentoringTopics: string[];
+  reviews: Array<{
+    id: number;
+    user: {
+      name: string;
+      image: string;
+      role: string;
+    };
+    rating: number;
+    comment: string;
+    date: string;
+  }>;
+  image?: string;
+  companyLogo?: string;
+}
 
 const mentors: Mentor[] = [
   {
@@ -169,24 +220,6 @@ const mentors: Mentor[] = [
     companyLogo: "/company-logos/sequoia.png"
   }
 ];
-const groupSessions: GroupSession[] = [
-  {
-    id: 1,
-    title: "5 Things You Didn't Know About Getting into UX",
-    topic: "UX Design",
-    mentor: {
-      name: "Sarah Johnson",
-      role: "Senior UX Designer at Google",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-    },
-    date: "May 15, 2023",
-    time: "10:00 AM",
-    duration: "60 min",
-    participants: 25,
-    maxParticipants: 50,
-    price: "₹500/session"
-  }
-];
 
 const AllMentors = () => {
   const navigate = useNavigate();
@@ -204,14 +237,19 @@ const AllMentors = () => {
   // Add sorting state
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
 
+  // Add state for API data
+  const [oneOnOneSessions, setOneOnOneSessions] = useState<Session[]>([]);
+  const [groupSessions, setGroupSessions] = useState<Session[]>([]);
+  const [mentorProfiles, setMentorProfiles] = useState<MentorProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // Get the tab from URL parameters
   const searchParams = new URLSearchParams(window.location.search);
-  const defaultTab = searchParams.get('tab') === 'group-session' ? 'group-session' : 'all-mentors';
-  
-  const [activeTab, setActiveTab] = useState<'all-mentors' | 'group-session'>(defaultTab);
+  const defaultTab = searchParams.get('tab') || 'all-mentors';
+  const [activeTab, setActiveTab] = useState<'all-mentors' | 'one-on-one' | 'group-session'>(defaultTab as any);
 
   // Modify the setActiveTab function to update the URL
-  const handleTabChange = (tab: 'all-mentors' | 'group-session') => {
+  const handleTabChange = (tab: 'all-mentors' | 'one-on-one' | 'group-session') => {
     setActiveTab(tab);
     navigate(`/mentors?tab=${tab}`, { replace: true });
   };
@@ -279,6 +317,45 @@ const AllMentors = () => {
       [filterName]: !prev[filterName]
     }));
   };
+
+  // Add useEffect for fetching data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch one-on-one sessions
+        const oneOnOneResponse = await fetch('http://localhost:9000/api/sessions/one-on-one/all');
+        const oneOnOneData = await oneOnOneResponse.json();
+        if (oneOnOneData.status === 'success') {
+          setOneOnOneSessions(oneOnOneData.sessions);
+          // Create a Set of unique mentor IDs to avoid duplicates
+          const uniqueMentors = new Map();
+          oneOnOneData.mentors.forEach((mentor: MentorProfile) => {
+            uniqueMentors.set(mentor.userId, mentor);
+          });
+          setMentorProfiles(Array.from(uniqueMentors.values()));
+        }
+
+        // Fetch group sessions
+        const groupResponse = await fetch('http://localhost:9000/api/sessions/group-session/all');
+        const groupData = await groupResponse.json();
+        if (groupData.status === 'success') {
+          setGroupSessions(groupData.sessions);
+          // Add new mentors without duplicates
+          const uniqueMentors = new Map(mentorProfiles.map(m => [m.userId, m]));
+          groupData.mentors.forEach((mentor: MentorProfile) => {
+            uniqueMentors.set(mentor.userId, mentor);
+          });
+          setMentorProfiles(Array.from(uniqueMentors.values()));
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -425,6 +502,17 @@ const AllMentors = () => {
             </button>
             <button
               className={`text-xl font-medium px-4 py-2 relative ${
+                activeTab === "one-on-one" ? "text-[#4937e8]" : "text-gray-500"
+              }`}
+              onClick={() => handleTabChange("one-on-one")}
+            >
+              One on One
+              {activeTab === "one-on-one" && (
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#4937e8]"></div>
+              )}
+            </button>
+            <button
+              className={`text-xl font-medium px-4 py-2 relative ${
                 activeTab === "group-session" ? "text-[#4937e8]" : "text-gray-500"
               }`}
               onClick={() => handleTabChange("group-session")}
@@ -438,7 +526,11 @@ const AllMentors = () => {
       </div>
 
       {/* Content Section */}
-      {activeTab === 'all-mentors' ? (
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4937e8]"></div>
+        </div>
+      ) : activeTab === 'all-mentors' ? (
         // Mentors Grid
         <>
           <div className="max-w-6xl mx-auto px-4 pb-16">
@@ -458,7 +550,7 @@ const AllMentors = () => {
                       >
                         <div className="flex items-start gap-4 mb-4">
                           <img
-                            src={mentor.image}
+                            src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
                             alt={mentor.name}
                             className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                           />
@@ -511,75 +603,144 @@ const AllMentors = () => {
             })}
           </div>
         </>
+      ) : activeTab === 'one-on-one' ? (
+        // One on One Sessions Grid
+        <div className="max-w-6xl mx-auto px-4 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {oneOnOneSessions.map(session => {
+              const mentor = mentorProfiles.find(m => m.userId === session.userId);
+              if (!mentor) return null;
+
+              return (
+                <div
+                  key={session.sessionId}
+                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <img
+                      src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      alt={mentor.name}
+                      className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
+                    />
+                    {mentor.companyLogo && (
+                      <img
+                        src={mentor.companyLogo}
+                        alt="Company"
+                        className="w-6 h-6 rounded-full absolute top-4 right-4"
+                      />
+                    )}
+                  </div>
+
+                  <h3 className="font-semibold text-lg mb-1">{session.sessionName}</h3>
+                  <p className="text-gray-600 text-sm mb-2">{mentor.headline}</p>
+
+                  <div className="flex items-center gap-2 mb-4">
+                    <Star size={16} className="text-gray-700 fill-current" />
+                    <span className="font-medium">{mentor.rating}</span>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-gray-600">{mentor.reviews?.length || 0} reviews</span>
+                  </div>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Duration</span>
+                      <span className="font-medium text-gray-900">{session.duration} mins</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Topics</span>
+                      <span className="font-medium text-gray-900">{session.topics.join(", ")}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Session Type</span>
+                      <span className="font-medium text-gray-900">
+                        {session.numberOfSessions} {session.numberOfSessions === "1" ? "Session" : "Sessions"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-600 mb-4">
+                    <p className="line-clamp-2">{session.description}</p>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-lg font-bold text-gray-700">
+                      {session.isPaid ? `₹${session.price}` : 'Free'}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {`${mentor.totalExperience.years}+ years experience`}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/book-session/${session.sessionId}`)}
+                    className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 transition-colors"
+                  >
+                    Book Session
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       ) : (
         // Group Sessions Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groupSessions.map(session => (
-              <div
-                key={session.id}
-                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
-              >
-                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium mb-4">
-                  {session.topic}
-                </span>
-                
-                <h3 className="text-xl font-bold mb-4 text-gray-900">
-                  {session.title}
-                </h3>
+            {groupSessions.map(session => {
+              const mentor = mentorProfiles.find(m => m.userId === session.userId);
+              if (!mentor) return null;
 
-                <div className="flex items-center gap-4 mb-6">
-                  <img
-                    src={session.mentor.image}
-                    alt={session.mentor.name}
-                    className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
-                  />
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {session.mentor.name}
-                    </h4>
-                    <p className="text-gray-500 text-sm">
-                      {session.mentor.role}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>Date & Time</span>
-                    <span className="font-medium text-gray-900">
-                      {session.date}, {session.time}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>Duration</span>
-                    <span className="font-medium text-gray-900">{session.duration}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>Participants</span>
-                    <span className="font-medium text-gray-900">
-                      {session.participants}/{session.maxParticipants}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-lg font-bold text-gray-700">
-                    {session.price}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {((session.participants / session.maxParticipants) * 100).toFixed(0)}% filled
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => navigate(`/book-session/${session.id}`)}
-                  className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors"
+              return (
+                <div
+                  key={session.sessionId}
+                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
                 >
-                  Join Session
-                </button>
-              </div>
-            ))}
+                  <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium mb-4">
+                    {session.topics?.[0] || 'No topic specified'}
+                  </span>
+                  
+                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                    {session.sessionName}
+                  </h3>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <img
+                      src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      alt={mentor.name}
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
+                    />
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {mentor.name}
+                      </h4>
+                      <p className="text-gray-500 text-sm">
+                        {mentor.role}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Duration</span>
+                      <span className="font-medium text-gray-900">{session.duration}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-lg font-bold text-gray-700">
+                      {session.isPaid ? `₹${session.price}` : 'Free'}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/book-session/${session.sessionId}`)}
+                    className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors"
+                  >
+                    Join Session
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -686,13 +686,19 @@ function App() {
                     {mentor.bookings || 0}+ sessions conducted
                   </p>
                   <div className="flex gap-3">
-                    <a
+                    {/* <a
+                      href={`/booking/${oneOnOneSessions.find(s => s.userId === mentor.userId)?.sessionId || ''}`}
+                      className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
+                    >
+                      <Phone size={16} />
+                      Schedule Call<a
                       href={`/booking/${oneOnOneSessions.find(s => s.userId === mentor.userId)?.sessionId || ''}`}
                       className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
                     >
                       <Phone size={16} />
                       Schedule Call
                     </a>
+                    </a> */}
                     <button
                       onClick={() => navigate(`/profile/${mentor.userId}`)}
                       className="flex-1 bg-gray-100 text-black py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-200"
@@ -718,6 +724,84 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* One-on-One Sessions Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">One-on-One Sessions</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Get personalized guidance from experienced mentors in focused one-on-one sessions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {oneOnOneSessions.map((session) => {
+              const mentor = mentors.find(m => m.userId === session.userId);
+              
+              return (
+                <div key={session.sessionId} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-600">
+                        {mentor?.name?.charAt(0) || 'M'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{session.sessionName}</h3>
+                      <p className="text-gray-600">{mentor?.headline}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Clock className="w-5 h-5" />
+                      <span>{session.duration} minutes session</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Video className="w-5 h-5" />
+                      <span>Google Meet</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="w-5 h-5" />
+                      <span>{session.occurrence}</span>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-6">
+                    <h4 className="text-lg font-semibold mb-3">Topics Covered</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {session.topics.map((topic, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-5 h-5 fill-current text-yellow-400" />
+                      <span className="font-medium">4.9 (1.2k+ sessions)</span>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/booking/${session.sessionId}`)}
+                      className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
+                        hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
+                    >
+                      Book Now
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* Upcoming Sessions Section */}
       <section className="bg-white py-24 relative overflow-hidden">
@@ -1245,84 +1329,6 @@ function App() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* One-on-One Sessions Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">One-on-One Sessions</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Get personalized guidance from experienced mentors in focused one-on-one sessions
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {oneOnOneSessions.map((session) => {
-              const mentor = mentors.find(m => m.userId === session.userId);
-              
-              return (
-                <div key={session.sessionId} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-600">
-                        {mentor?.name?.charAt(0) || 'M'}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{session.sessionName}</h3>
-                      <p className="text-gray-600">{mentor?.headline}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 mb-6">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock className="w-5 h-5" />
-                      <span>{session.duration} minutes session</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Video className="w-5 h-5" />
-                      <span>Google Meet</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="w-5 h-5" />
-                      <span>{session.occurrence}</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-6">
-                    <h4 className="text-lg font-semibold mb-3">Topics Covered</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {session.topics.map((topic, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 fill-current text-yellow-400" />
-                      <span className="font-medium">4.9 (1.2k+ sessions)</span>
-                    </div>
-                    <button
-                      onClick={() => navigate(`/booking/${session.sessionId}`)}
-                      className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
-                        hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
-                    >
-                      Book Now
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>
