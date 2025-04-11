@@ -6,21 +6,24 @@ export interface Author {
 }
 
 export interface Question {
-  id: string;
+  _id: string;
   title: string;
   content: string;
   authors: Author[];
   upvotes: number;
   answers: number;
   timestamp: string;
-  categoryId: string;
+  category_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Answer {
-  id: string;
+  _id: string;
   content: string;
   author: Author;
   upvotes: number;
-  timestamp: string;
-  questionId: string;
+  created_at: string;
+  updated_at: string;
+  question_id: string;
 }

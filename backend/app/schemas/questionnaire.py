@@ -44,4 +44,21 @@ class Questionnaire(QuestionnaireBase):
     class Config:
         json_encoders = {ObjectId: str}
         populate_by_name = True
+        arbitrary_types_allowed = True
+
+class AnswerCreate(BaseModel):
+    content: str
+    author: AuthorBase
+    question_id: str
+
+class Answer(AnswerCreate):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    upvotes: int = 0
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Config:
+        json_encoders = {ObjectId: str}
+        populate_by_name = True
         arbitrary_types_allowed = True 

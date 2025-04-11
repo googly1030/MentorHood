@@ -1,28 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon  } from 'lucide-react';
-
-interface Author {
-  id: string;
-  name: string;
-  image?: string;
-  initials: string;
-}
-
-interface Question {
-  _id: string;
-  title: string;
-  content: string;
-  authors: Author[];
-  upvotes: number;
-  answers: number;
-  timestamp: string;
-  category_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-
+import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X } from 'lucide-react';
+import { Question } from '../types/question';
 
 // New interface for session details
 interface SessionDetails {
@@ -38,8 +17,6 @@ interface SessionDetails {
   };
   description: string;
 }
-
-
 
 export default function QuestionSection() {
   const navigate = useNavigate();
@@ -118,14 +95,23 @@ export default function QuestionSection() {
     }
   };
 
-  const handleAnswer = (question: Question) => {
+  const handleQuestionClick = (question: Question) => {
     setCurrentQuestion(question);
     setIsAnswerModalOpen(true);
   };
 
+  useEffect(() => {
+    const userKey = localStorage.getItem('user');
+    if (userKey) {
+      // You can use the userKey here for authentication or other purposes
+      const userObj = JSON.parse(userKey);
+      setEmail(userObj.email);
+
+    }
+  }, []);
+
   const handleViewAnswers = (question: Question) => {
-    // Save question data to localStorage before navigation
-    localStorage.setItem(`question_${question._id}`, JSON.stringify(question));
+    // Navigate to the answers page
     navigate(`/questions/${question._id}/answers`);
   };
 
@@ -155,46 +141,34 @@ export default function QuestionSection() {
     if (!currentQuestion || !answer.trim()) return;
 
     try {
-      // Call the answer API to increment the answer count
-      const response = await fetch(`http://localhost:9000/api/questionnaires/${currentQuestion._id}/answer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit answer');
-      }
-
-      const updatedQuestion = await response.json();
-
-      // Create a new answer object
-      const newAnswer = {
-        id: Date.now().toString(),
+      // Create the answer object
+      const answerData = {
         content: answer,
         author: {
           id: 'current-user',
           name: 'Current User',
           initials: 'CU'
         },
-        upvotes: 0,
-        timestamp: new Date().toISOString(),
-        questionId: currentQuestion._id
+        question_id: currentQuestion._id
       };
 
-      // Save the new answer to localStorage
-      const existingAnswers = JSON.parse(localStorage.getItem(`answers_${currentQuestion._id}`) || '[]');
-      const updatedAnswers = [newAnswer, ...existingAnswers];
-      localStorage.setItem(`answers_${currentQuestion._id}`, JSON.stringify(updatedAnswers));
+      // Call the answer API to store the answer in the database
+      const response = await fetch(`http://localhost:9000/api/questionnaires/${currentQuestion._id}/answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(answerData)
+      });
 
-      // Update the questions state with the updated question
+      if (!response.ok) {
+        throw new Error('Failed to submit answer');
+      }
+
+      // Update the questions state to reflect the new answer count
       setQuestions(prev => prev.map(q => 
-        q._id === currentQuestion._id ? updatedQuestion : q
+        q._id === currentQuestion._id ? {...q, answers: q.answers + 1} : q
       ));
-
-      // Update localStorage for the question
-      localStorage.setItem(`question_${currentQuestion._id}`, JSON.stringify(updatedQuestion));
 
       setAnswer('');
       setIsAnswerModalOpen(false);
@@ -223,7 +197,7 @@ export default function QuestionSection() {
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/api/waitlist', {
+      const response = await fetch('http://localhost:9000/api/questionnaires/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +226,7 @@ export default function QuestionSection() {
       
       setIsRegistered(true);
       setTimeout(() => {
-        setIsRegisterModalOpen(false);
+        setIsRegisterModalOpen(true);
         setIsRegistered(false);
         setRegistrationEmail('');
       }, 2000);
@@ -329,7 +303,7 @@ export default function QuestionSection() {
               
               <div className="flex flex-wrap gap-4">
                 <button
-                  onClick={() => setIsRegisterModalOpen(true)}
+                  onClick={(e) => handleWaitlistSubmit(e)}
                   className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
                     transition-all duration-300 transform hover:scale-105 shadow-lg 
                     flex items-center gap-2 font-medium"
@@ -435,7 +409,7 @@ export default function QuestionSection() {
                     
                     <button 
                       className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
-                      onClick={() => handleAnswer(question)}
+                      onClick={() => handleQuestionClick(question)}
                     >
                       <MessageSquare size={16} />
                       <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
@@ -507,32 +481,52 @@ export default function QuestionSection() {
 
       {/* Answer Modal */}
       {isAnswerModalOpen && currentQuestion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-2">Answer Question</h2>
-            <h3 className="font-medium text-gray-700 mb-4">{currentQuestion.title}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-xl font-semibold">{currentQuestion.title}</h3>
+              <button 
+                onClick={() => {
+                  setIsAnswerModalOpen(false);
+                  setCurrentQuestion(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-700">{currentQuestion.content}</p>
+            </div>
             
             <div className="mb-4">
+              <h4 className="font-medium mb-2">Your Answer</h4>
               <textarea
-                placeholder="Share your knowledge and experience..."
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full p-2 border rounded-md min-h-[150px]"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+                placeholder="Type your answer here..."
               />
             </div>
             
-            <div className="flex justify-end space-x-2">
-              <button 
-                onClick={() => setIsAnswerModalOpen(false)}
-                className="px-4 py-2 border rounded-md text-gray-700"
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setIsAnswerModalOpen(false);
+                  setCurrentQuestion(null);
+                }}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={submitAnswer}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={!answer.trim()}
               >
-                Post Answer
+                Submit Answer
               </button>
             </div>
           </div>
