@@ -49,6 +49,24 @@ interface Mentor {
   bookings: number;
 }
 
+interface AMASession {
+  _id: string;
+  title: string;
+  mentor: {
+    name: string;
+    role: string;
+    image: string;
+  };
+  date: string;
+  time: string;
+  duration: string;
+  registrants: number;
+  maxRegistrants: number;
+  questions: string[];
+  isWomanTech: boolean;
+  tag?: string;
+}
+
 const suggestions: Suggestion[] = [
   {
     id: 1,
@@ -125,6 +143,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [amaSessions, setAmaSessions] = useState<AMASession[]>([]);
+  const [womenTechSessions, setWomenTechSessions] = useState<AMASession[]>([]);
+
   const upcomingSessions = [
     {
       tag: "Career Mentorship",
@@ -168,88 +189,6 @@ function App() {
       duration: "45 min",
       price: 1500,
     },
-  ];
-
-  const amaSessions = [
-    {
-      title: "Building Scalable Systems",
-      mentor: {
-        name: "Alex Chen",
-        role: "Principal Engineer, Netflix",
-        image:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
-      },
-      date: "May 20, 2023",
-      time: "7:00 PM",
-      duration: "60 min",
-      registrants: 42,
-      maxRegistrants: 100,
-      questions: [
-        "How do you handle database scaling?",
-        "Best practices for microservices architecture?",
-        "Strategies for handling high traffic loads",
-      ],
-    },
-    {
-      title: "Product Management Insights",
-      mentor: {
-        name: "Sarah Wilson",
-        role: "Director of Product, Spotify",
-        image:
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
-      },
-      date: "May 22, 2023",
-      time: "6:30 PM",
-      duration: "60 min",
-      registrants: 35,
-      maxRegistrants: 75,
-      questions: [
-        "How to prioritize feature requests?",
-        "Techniques for user research",
-        "Managing stakeholder expectations",
-      ],
-    },
-  ];
-
-  const womenInTechSessions = [
-    {
-      title: "Women in Tech Leadership",
-      mentor: {
-        name: "Dr. Sarah Mitchell",
-        role: "Engineering Director, Google",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
-      },
-      date: "May 25, 2024",
-      time: "7:00 PM",
-      duration: "60 min",
-      registrants: 85,
-      maxRegistrants: 100,
-      questions: [
-        "Building high-performing diverse engineering teams",
-        "Navigating career growth in tech leadership",
-        "Balancing technical and managerial responsibilities"
-      ],
-      tag: "Women in Tech"
-    },
-    {
-      title: "Tech Innovation & AI",
-      mentor: {
-        name: "Emily Zhang",
-        role: "AI Research Lead, Microsoft",
-        image: "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=150"
-      },
-      date: "May 27, 2024",
-      time: "6:30 PM",
-      duration: "90 min",
-      registrants: 72,
-      maxRegistrants: 100,
-      questions: [
-        "Latest trends in AI and Machine Learning",
-        "Building innovative tech products",
-        "Research to product transition strategies"
-      ],
-      tag: "Women in Tech"
-    }
   ];
 
   const sessionCardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -423,6 +362,33 @@ function App() {
     };
 
     fetchMentors();
+  }, []);
+
+  useEffect(() => {
+    const fetchAMASessions = async () => {
+      try {
+        const [amaResponse, womenTechResponse] = await Promise.all([
+          fetch('http://localhost:9000/ama-sessions?is_woman_tech=false'),
+          fetch('http://localhost:9000/ama-sessions?is_woman_tech=true')
+        ]);
+
+        if (!amaResponse.ok || !womenTechResponse.ok) {
+          throw new Error('Failed to fetch sessions');
+        }
+
+        const amaData = await amaResponse.json();
+        const womenTechData = await womenTechResponse.json();
+
+        setAmaSessions(amaData);
+        setWomenTechSessions(womenTechData);
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAMASessions();
   }, []);
 
   return (
@@ -785,94 +751,97 @@ function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {amaSessions.map((session, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-              >
-                <div className="flex items-start gap-6 mb-8">
-                  <img
-                    src={session.mentor.image}
-                    alt={session.mentor.name}
-                    className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
-                  />
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2 text-gray-800">
-                      {session.title}
-                    </h3>
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <p className="text-gray-800 font-medium">
-                      {session.mentor.name}
-                    </p>
-                    <p className="text-gray-500">{session.mentor.role}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  <div className="bg-gray-100 rounded-xl p-4">
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <div className="flex items-center gap-2 text-gray-800 mb-1">
-                      <Calendar size={18} className="text-gray-800" />
-                      <span className="font-medium">Date & Time</span>
-                    </div>
-                    <p className="text-gray-500">{session.date}</p>
-                    <p className="text-gray-500">
-                      {session.time} • {session.duration}
-                    </p>
-                  </div>
-                  <div className="bg-gray-100 rounded-xl p-4">
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <div className="flex items-center gap-2 text-gray-800 mb-1">
-                      <Users2 size={18} className="text-gray-800" />
-                      <span className="font-medium">Registrants</span>
-                    </div>
-                    <p className="text-gray-500">
-                      {session.registrants}/{session.maxRegistrants}
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            (session.registrants / session.maxRegistrants) * 100
-                          }%`,
-                        }}
-                      ></div>
+          {loading ? (
+            <div className="text-center">Loading sessions...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {amaSessions.map((session) => (
+                <div
+                  key={session._id}
+                  className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
+                >
+                  <div className="flex items-start gap-6 mb-8">
+                    <img
+                      src={session.mentor.image}
+                      alt={session.mentor.name}
+                      className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
+                    />
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2 text-gray-800">
+                        {session.title}
+                      </h3>
+                      <p className="text-gray-800 font-medium">
+                        {session.mentor.name}
+                      </p>
+                      <p className="text-gray-500">{session.mentor.role}</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                  {/* Changed from text-[#3730A3] to text-gray-800 */}
-                  <div className="flex items-center gap-2 text-gray-800 mb-4">
-                    <MessageCircle size={18} className="text-gray-800" />
-                    <span className="font-medium">Sample Questions</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div className="bg-gray-100 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-gray-800 mb-1">
+                        <Calendar size={18} className="text-gray-800" />
+                        <span className="font-medium">Date & Time</span>
+                      </div>
+                      <p className="text-gray-500">{session.date}</p>
+                      <p className="text-gray-500">
+                        {session.time} • {session.duration}
+                      </p>
+                    </div>
+                    <div className="bg-gray-100 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-gray-800 mb-1">
+                        <Users2 size={18} className="text-gray-800" />
+                        <span className="font-medium">Registrants</span>
+                      </div>
+                      <p className="text-gray-500">
+                        {session.registrants}/{session.maxRegistrants}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (session.registrants / session.maxRegistrants) * 100
+                            }%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
-                  <ul className="space-y-3">
-                    {session.questions.map((question, qIndex) => (
-                      <li
-                        key={qIndex}
-                        className="flex items-start gap-3 text-gray-500"
-                      >
-                        {/* Changed from bg-[#3730A3] to bg-gray-800 */}
-                        <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
-                        {question}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
-                <button className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"  onClick={() => navigate('/questions')}>
-                  Register Now
-                  <ArrowRight size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="bg-gray-100 rounded-xl p-6 mb-8">
+                    <div className="flex items-center gap-2 text-gray-800 mb-4">
+                      <MessageCircle size={18} className="text-gray-800" />
+                      <span className="font-medium">Sample Questions</span>
+                    </div>
+                    <ul className="space-y-3">
+                      {session.questions.map((question, qIndex) => (
+                        <li
+                          key={qIndex}
+                          className="flex items-start gap-3 text-gray-500"
+                        >
+                          <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
+                          {question}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button 
+                    className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
+                    onClick={() => navigate('/questions')}
+                  >
+                    Register Now
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
+      {/* Women in Tech Section */}
       <section className="bg-white py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
@@ -880,103 +849,105 @@ function App() {
 
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 bg-blue-100 text-[#4937e8] rounded-full text-sm font-medium mb-4">
-            Featured: Women in Tech Series
-          </span>
-          <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-            Empowering Women in Technology
-          </h2>
-          <p className="text-gray-700 text-lg max-w-2xl mx-auto">
+            <span className="inline-block px-4 py-2 bg-blue-100 text-[#4937e8] rounded-full text-sm font-medium mb-4">
+              Featured: Women in Tech Series
+            </span>
+            <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
+              Empowering Women in Technology
+            </h2>
+            <p className="text-gray-700 text-lg max-w-2xl mx-auto">
               Join exclusive sessions with accomplished women leaders in technology sharing their journey, 
               insights, and strategies for success in the tech industry
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {womenInTechSessions.map((session, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-              >
-                <div className="flex items-start gap-6 mb-8">
-                  <img
-                    src={session.mentor.image}
-                    alt={session.mentor.name}
-                    className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
-                  />
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2 text-gray-800">
-                      {session.title}
-                    </h3>
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <p className="text-gray-800 font-medium">
-                      {session.mentor.name}
-                    </p>
-                    <p className="text-gray-500">{session.mentor.role}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  <div className="bg-gray-100 rounded-xl p-4">
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <div className="flex items-center gap-2 text-gray-800 mb-1">
-                      <Calendar size={18} className="text-gray-800" />
-                      <span className="font-medium">Date & Time</span>
-                    </div>
-                    <p className="text-gray-500">{session.date}</p>
-                    <p className="text-gray-500">
-                      {session.time} • {session.duration}
-                    </p>
-                  </div>
-                  <div className="bg-gray-100 rounded-xl p-4">
-                    {/* Changed from text-[#3730A3] to text-gray-800 */}
-                    <div className="flex items-center gap-2 text-gray-800 mb-1">
-                      <Users2 size={18} className="text-gray-800" />
-                      <span className="font-medium">Registrants</span>
-                    </div>
-                    <p className="text-gray-500">
-                      {session.registrants}/{session.maxRegistrants}
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            (session.registrants / session.maxRegistrants) * 100
-                          }%`,
-                        }}
-                      ></div>
+          {loading ? (
+            <div className="text-center">Loading sessions...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {womenTechSessions.map((session) => (
+                <div
+                  key={session._id}
+                  className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
+                >
+                  <div className="flex items-start gap-6 mb-8">
+                    <img
+                      src={session.mentor.image}
+                      alt={session.mentor.name}
+                      className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
+                    />
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2 text-gray-800">
+                        {session.title}
+                      </h3>
+                      <p className="text-gray-800 font-medium">
+                        {session.mentor.name}
+                      </p>
+                      <p className="text-gray-500">{session.mentor.role}</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                  {/* Changed from text-[#3730A3] to text-gray-800 */}
-                  <div className="flex items-center gap-2 text-gray-800 mb-4">
-                    <MessageCircle size={18} className="text-gray-800" />
-                    <span className="font-medium">Sample Questions</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div className="bg-gray-100 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-gray-800 mb-1">
+                        <Calendar size={18} className="text-gray-800" />
+                        <span className="font-medium">Date & Time</span>
+                      </div>
+                      <p className="text-gray-500">{session.date}</p>
+                      <p className="text-gray-500">
+                        {session.time} • {session.duration}
+                      </p>
+                    </div>
+                    <div className="bg-gray-100 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-gray-800 mb-1">
+                        <Users2 size={18} className="text-gray-800" />
+                        <span className="font-medium">Registrants</span>
+                      </div>
+                      <p className="text-gray-500">
+                        {session.registrants}/{session.maxRegistrants}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (session.registrants / session.maxRegistrants) * 100
+                            }%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
-                  <ul className="space-y-3">
-                    {session.questions.map((question, qIndex) => (
-                      <li
-                        key={qIndex}
-                        className="flex items-start gap-3 text-gray-500"
-                      >
-                        {/* Changed from bg-[#3730A3] to bg-gray-800 */}
-                        <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
-                        {question}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
-                <button className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"  onClick={() => navigate('/questions')}>
-                  Register Now
-                  <ArrowRight size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="bg-gray-100 rounded-xl p-6 mb-8">
+                    <div className="flex items-center gap-2 text-gray-800 mb-4">
+                      <MessageCircle size={18} className="text-gray-800" />
+                      <span className="font-medium">Sample Questions</span>
+                    </div>
+                    <ul className="space-y-3">
+                      {session.questions.map((question, qIndex) => (
+                        <li
+                          key={qIndex}
+                          className="flex items-start gap-3 text-gray-500"
+                        >
+                          <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
+                          {question}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button 
+                    className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
+                    onClick={() => navigate('/questions')}
+                  >
+                    Register Now
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
