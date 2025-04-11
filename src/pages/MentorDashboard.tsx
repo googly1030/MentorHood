@@ -83,7 +83,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top header section with gradient background */}
-      <div className="bg-gradient-to-r from-[#4937e8]/90 to-[#4338ca]/90 text-white py-8">
+      <div className="bg-gradient-to-r from-gray-700/90 to-gray-600/90 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6">
             <div>
@@ -93,9 +93,16 @@ function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+            <button 
+                onClick={() => navigate('/create-ama-session')}
+                className="bg-white hover:bg-gray-100 text-gray-700 px-5 py-2 rounded-lg flex items-center gap-2 transition-all font-medium"
+              >
+                <Plus size={18} />
+                CreateAMASession
+              </button>
               <button 
                 onClick={() => navigate('/create-session')}
-                className="bg-white hover:bg-gray-100 text-[#4937e8] px-5 py-2 rounded-lg flex items-center gap-2 transition-all font-medium"
+                className="bg-white hover:bg-gray-100 text-gray-700 px-5 py-2 rounded-lg flex items-center gap-2 transition-all font-medium"
               >
                 <Plus size={18} />
                 Create Session
@@ -190,7 +197,7 @@ function Dashboard() {
                     onClick={() => setActiveTab('active')}
                     className={`px-4 py-2 text-sm font-medium ${
                       activeTab === 'active' 
-                        ? 'bg-[#4937e8] text-white' 
+                        ? 'bg-gray-700 text-white' 
                         : 'bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                   >
@@ -204,7 +211,7 @@ function Dashboard() {
           {/* Sessions list */}
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4937e8]"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-700"></div>
             </div>
           ) : filteredSessions.length === 0 ? (
             <div className="text-center py-16">
@@ -219,7 +226,7 @@ function Dashboard() {
               </p>
               <button
                 onClick={() => navigate('/create-session')}
-                className="bg-[#4937e8] hover:bg-[#4338ca] text-white px-5 py-2 rounded-lg inline-flex items-center gap-2 transition-all"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg inline-flex items-center gap-2 transition-all"
               >
                 <Plus size={18} />
                 Create New Session
@@ -233,12 +240,12 @@ function Dashboard() {
                   className="group flex flex-col h-full bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-default"
                 >
                   {/* Session header with colored accent based on session type */}
-                  <div className={`h-2 ${session.sessionType === 'One-on-One' ? 'bg-[#4937e8]' : 'bg-[#4338ca]'}`}></div>
+                  <div className={`h-2 ${session.sessionType === 'One-on-One' ? 'bg-gray-700' : 'bg-gray-600'}`}></div>
                   
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#4937e8] flex items-center justify-center text-white font-bold">
+                        <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
                           {session.sessionName.charAt(0)}
                         </div>
                         <h3 className="font-bold text-gray-800 text-lg">
@@ -250,7 +257,7 @@ function Dashboard() {
                           e.stopPropagation();
                           navigate(`/sessions/${session.sessionId}/edit`);
                         }}
-                        className="text-gray-400 hover:text-[#4937e8] transition-colors"
+                        className="text-gray-400 hover:text-gray-700 transition-colors"
                         aria-label="Edit session settings"
                       >
                         <Settings2 size={18} />
@@ -263,7 +270,7 @@ function Dashboard() {
                       <span className="bg-blue-100 text-[#4937e8] px-3 py-1 rounded-full text-sm font-medium">
                         {session.duration} mins
                       </span>
-                      <span className="bg-purple-100 text-[#4338ca] px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                         {session.sessionType}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${session.isPaid ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
@@ -284,12 +291,10 @@ function Dashboard() {
                       <div className="flex flex-wrap gap-2">
                         {session.topics.slice(0, 3).map((topic, index) => {
                           const colors = [
-                            'bg-blue-100 text-[#4937e8]',
-                            'bg-purple-100 text-[#4338ca]',
                             'bg-gray-100 text-gray-700',
-                            'bg-blue-100 text-[#4937e8]',
-                            'bg-purple-100 text-[#4338ca]',
-                            'bg-gray-100 text-gray-700'
+                            'bg-gray-50 text-gray-600',
+                            'bg-gray-100 text-gray-700',
+                            'bg-gray-50 text-gray-600'
                           ];
                           const colorIndex = index % colors.length;
                           return (
@@ -332,7 +337,7 @@ function Dashboard() {
                           ))}
                         
                         {session.timeSlots.filter(slot => slot.available && slot.timeRanges.length > 0).length > 2 && (
-                          <span className="text-xs text-[#4937e8] font-medium flex items-center mt-1">
+                          <span className="text-xs text-gray-700 font-medium flex items-center mt-1">
                             +{session.timeSlots.filter(slot => slot.available && slot.timeRanges.length > 0).length - 2} more days available
                           </span>
                         )}
@@ -342,7 +347,7 @@ function Dashboard() {
                     {/* View details button */}
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <button 
-                        className="w-full flex items-center justify-center gap-1 text-sm font-medium text-[#4937e8] hover:text-[#4338ca] transition-colors"
+                        className="w-full flex items-center justify-center gap-1 text-sm font-medium text-gray-700 hover:text-gray-600 transition-colors"
                         onClick={() => navigate(`/sessions/${session.sessionId}/edit`)}
                       >
                         View Session Details
