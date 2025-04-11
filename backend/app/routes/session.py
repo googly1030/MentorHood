@@ -110,3 +110,50 @@ async def get_mentor_sessions(mentor_id: str):
         "userId": mentor_id,
         "sessions": sessions_list
     }
+
+@router.get("/one-on-one/all")
+async def get_all_one_on_one_sessions():
+    sessions_collection = get_collection("sessions")
+    mentor_collection = get_collection("mentorProfile")
+    
+    try:
+        # Get all one-on-one sessions
+        sessions = await sessions_collection.find({"sessionType": "one-on-one"}).to_list(length=None)
+        
+        if not sessions:
+            return {
+                "status": "success",
+                "sessions": [],
+                "mentors": []
+            }
+        
+        # Get unique mentor IDs from sessions
+        mentor_ids = list(set(session["userId"] for session in sessions))
+        
+        # Get mentor profiles
+        mentors = await mentor_collection.find({"userId": {"$in": mentor_ids}}).to_list(length=None)
+        
+        # Convert ObjectId to string and remove _id field for each session and mentor
+        sessions_list = []
+        for session in sessions:
+            session_dict = dict(session)
+            session_dict.pop('_id', None)
+            sessions_list.append(session_dict)
+        
+        mentors_list = []
+        for mentor in mentors:
+            mentor_dict = dict(mentor)
+            mentor_dict.pop('_id', None)
+            mentors_list.append(mentor_dict)
+        
+        return {
+            "status": "success",
+            "sessions": sessions_list,
+            "mentors": mentors_list
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch sessions and mentors: {str(e)}"
+        )
