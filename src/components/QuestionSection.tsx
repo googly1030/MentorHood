@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X } from 'lucide-react';
+import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X, Mail } from 'lucide-react';
 import { Question } from '../types/question';
 
 // New interface for session details
@@ -33,10 +33,12 @@ export default function QuestionSection() {
   const [sortBy, setSortBy] = useState<'timestamp' | 'upvotes'>('timestamp');
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isEmailSent ] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Sample session details (would come from API in a real app)
   const sessionDetails: SessionDetails = {
@@ -196,6 +198,8 @@ export default function QuestionSection() {
 
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+  
     try {
       const response = await fetch('http://localhost:9000/api/questionnaires/register', {
         method: 'POST',
@@ -204,17 +208,21 @@ export default function QuestionSection() {
         },
         body: JSON.stringify({ email }),
       });
-
+  
       if (response.ok) {
-        setIsEmailSent(true);
+        setShowSuccessMessage(true);
         setTimeout(() => {
+          setShowSuccessMessage(false);
+          setIsSubmitting(false);
           setIsWaitlistModalOpen(false);
-          setIsEmailSent(false);
           setEmail('');
         }, 2000);
+      } else {
+        throw new Error('Registration failed');
       }
     } catch (error) {
       console.error('Error joining waitlist:', error);
+      setIsSubmitting(false);
     }
   };
 
@@ -249,7 +257,7 @@ export default function QuestionSection() {
           </p>
           
           {/* Session Details Card */}
-          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 overflow-hidden">
+          <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 overflow-hidden">
             {/* Session Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center gap-4">
@@ -304,12 +312,22 @@ export default function QuestionSection() {
               <div className="flex flex-wrap gap-4">
                 <button
                   onClick={(e) => handleWaitlistSubmit(e)}
-                  className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                  disabled={isSubmitting}
+                  className={`px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
                     transition-all duration-300 transform hover:scale-105 shadow-lg 
-                    flex items-center gap-2 font-medium"
+                    flex items-center gap-2 font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
-                  <CalendarIcon size={18} />
-                  Register Now
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Registering...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CalendarIcon size={18} />
+                      Register Now
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -585,6 +603,29 @@ export default function QuestionSection() {
                 </form>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mb-4">
+                <Check size={48} className="mx-auto text-green-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                Registration Successful!
+              </h3>
+              <p className="text-gray-600">
+                We've sent a confirmation email with all the details. Check your inbox!
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <Mail size={14} />
+                <span>{email}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
