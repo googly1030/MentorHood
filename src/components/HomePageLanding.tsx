@@ -41,9 +41,9 @@ interface Mentor {
   headline: string;
   profilePhoto: string;
   rating: number;
-  experience: {
-    years: number;
-    months: number;
+  totalExperience: {
+    years: any;
+    months: any;
   };
   primaryExpertise: string;
   bookings: number;
@@ -597,7 +597,7 @@ function App() {
                   </div>
                   <p className="text-gray-700 mb-2">{mentor.headline}</p>
                   <p className="text-gray-700 mb-2">
-                    Experience: {mentor.experience.years}+ years
+                    Experience: {mentor.totalExperience?.years || 0}+ years
                   </p>
                   <p className="text-gray-700 mb-2">
                     Specialization: {mentor.primaryExpertise}
