@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users , Sun, Moon, Star } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users, Sun, Moon, Star } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export interface Service {
   id: number;
@@ -67,8 +67,37 @@ interface Review {
 
 function App() {
   const navigate = useNavigate();
+  const { mentorId } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(TabType.OVERVIEW);
+  const [mentorProfile, setMentorProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMentorProfile = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch mentor profile');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setMentorProfile(data.mentor);
+        } else {
+          throw new Error('Failed to fetch mentor profile');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (mentorId) {
+      fetchMentorProfile();
+    }
+  }, [mentorId]);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -82,59 +111,24 @@ function App() {
   const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const cardBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
 
-  const reviews: Review[] = [
-    {
-      id: 1,
-      user: {
-        name: "John Doe",
-        image: "https://randomuser.me/api/portraits/men/1.jpg",
-        role: "Product Manager"
-      },
-      rating: 5,
-      comment: "Exceptional mentorship session! Ney provided invaluable insights...",
-      date: "2025-03-15"
-    },
-    {
-      id: 2,
-      user: {
-        name: "Sarah Smith",
-        image: "https://randomuser.me/api/portraits/women/1.jpg",
-        role: "UX Designer"
-      },
-      rating: 4.8,
-      comment: "Great session focused on product strategy and execution...",
-      date: "2025-03-10"
-    }
-  ];
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
-  const achievements = [
-    {
-      id: 1,
-      title: "Top 50 in Program Management",
-      description: "Recognized among the top 50 program managers globally",
-      icon: <Trophy className="w-12 h-12 text-yellow-500" />,
-      date: "Jan 2025 - Mar 2025"
-    },
-  ];
+  if (error) {
+    return <div className="flex items-center justify-center min-h-screen text-red-500">{error}</div>;
+  }
 
-  const groupSessions = [
-    {
-      id: 1,
-      title: "Product Strategy Workshop",
-      date: "2025-04-15",
-      time: "10:00 AM - 11:30 AM",
-      participants: 8,
-      maxParticipants: 12,
-      price: 99
-    },
-  ];
+  if (!mentorProfile) {
+    return <div className="flex items-center justify-center min-h-screen">Mentor profile not found</div>;
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
       case TabType.REVIEWS:
         return (
           <div className="space-y-6">
-            {reviews.map(review => (
+            {mentorProfile.reviews.map((review: any) => (
               <div key={review.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex items-start gap-4">
                   <img src={review.user.image} alt={review.user.name} className="w-12 h-12 rounded-full" />
@@ -159,10 +153,10 @@ function App() {
       case TabType.ACHIEVEMENTS:
         return (
           <div className="space-y-6">
-            {achievements.map(achievement => (
+            {mentorProfile.achievements.map((achievement: any) => (
               <div key={achievement.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex items-center gap-4">
-                  {achievement.icon}
+                  <Trophy className="w-12 h-12 text-yellow-500" />
                   <div>
                     <h3 className={`font-medium ${textColor}`}>{achievement.title}</h3>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{achievement.description}</p>
@@ -177,7 +171,7 @@ function App() {
       case TabType.GROUP_SESSIONS:
         return (
           <div className="space-y-6">
-            {groupSessions.map(session => (
+            {mentorProfile.groupSessions.map((session: any) => (
               <div key={session.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex justify-between items-start">
                   <div>
@@ -204,11 +198,7 @@ function App() {
             {/* About Section */}
             <div>
               <p className={textColor}>
-                Worked in organizations such as Circles.Life, Alibaba Group, Lazada Group and Dafiti Group.
-              </p>
-              <p className={`${textColor} mt-4`}>
-                I'm a seasoned executive in the e-commerce and telecom industries, bringing and building high-performance organizations with process solutions
-                within commercial constraints - local, cross-boundary, and remote teams; complemented by an MBA in Strategic and Economic Project Management...
+                {mentorProfile.headline}
               </p>
               <button className="text-teal-600 mt-2">Show more</button>
             </div>
@@ -217,18 +207,20 @@ function App() {
             <div>
               <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Experience</h2>
               <div className="space-y-4">
-                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                  <div className="flex justify-between">
-                    <div>
-                      <h3 className={`font-medium ${textColor}`}>Senior Product Manager</h3>
-                      <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Stanford Graduate School of Business</p>
+                {mentorProfile.experience.map((exp: any, index: number) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <div className="flex justify-between">
+                      <div>
+                        <h3 className={`font-medium ${textColor}`}>{exp.title}</h3>
+                        <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{exp.company}</p>
+                      </div>
+                      <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{exp.duration}</span>
                     </div>
-                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>2020 - Present</span>
+                    <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                      {exp.description}
+                    </p>
                   </div>
-                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                    Led cross-functional teams in developing and launching educational products...
-                  </p>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -236,12 +228,14 @@ function App() {
             <div>
               <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Projects</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                  <h3 className={`font-medium ${textColor}`}>Digital Transformation Initiative</h3>
-                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Led the digital transformation of legacy systems...
-                  </p>
-                </div>
+                {mentorProfile.projects.map((project: any, index: number) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <h3 className={`font-medium ${textColor}`}>{project.title}</h3>
+                    <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {project.description}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -249,13 +243,15 @@ function App() {
             <div>
               <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Resources</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                  <h3 className={`font-medium ${textColor}`}>Product Management Toolkit</h3>
-                  <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    A comprehensive guide for product managers...
-                  </p>
-                  <button className="text-teal-600 mt-2">Download →</button>
-                </div>
+                {mentorProfile.resources.map((resource: any, index: number) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <h3 className={`font-medium ${textColor}`}>{resource.title}</h3>
+                    <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {resource.description}
+                    </p>
+                    <button className="text-teal-600 mt-2">{resource.linkText}</button>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -263,21 +259,23 @@ function App() {
             <div>
               <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Testimonials</h2>
               <div className="space-y-4">
-                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                  <div className="flex items-start gap-4">
-                    <img 
-                      src="https://randomuser.me/api/portraits/men/1.jpg"
-                      alt="Testimonial"
-                      className="w-12 h-12 rounded-full"
-                    />
-                    <div>
-                      <h3 className={`font-medium ${textColor}`}>John Doe</h3>
-                      <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        "Ney's mentorship was instrumental in helping me transition into product management..."
-                      </p>
+                {mentorProfile.testimonials.map((testimonial: any, index: number) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <div className="flex items-start gap-4">
+                      <img 
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full"
+                      />
+                      <div>
+                        <h3 className={`font-medium ${textColor}`}>{testimonial.name}</h3>
+                        <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          "{testimonial.comment}"
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -332,14 +330,14 @@ function App() {
               />
               <div className="ml-6 mb-4">
                 <h1 className={`text-3xl text-white font-bold `}>
-                  ney batista
+                  {mentorProfile.name}
                 </h1>
                 <p className={`mt-1 text-white`}>
-                  Product Manager, Program Manager, Project Manager at Stanford Graduate School of Business
+                  {mentorProfile.headline}
                 </p>
                 <div className="mt-2">
                   <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>
-                    Member of uxfolio
+                    {mentorProfile.membership}
                   </span>
                 </div>
               </div>
@@ -366,7 +364,7 @@ function App() {
                   : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
               }`}
             >
-              Reviews (2)
+              Reviews ({mentorProfile.reviews.length})
             </button>
             <button 
               onClick={() => setActiveTab(TabType.ACHIEVEMENTS)}
@@ -425,7 +423,7 @@ function App() {
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Book 1:1 sessions from the options based on your needs</p>
                   
                   <div className="space-y-4">
-                    {services.map((session) => (
+                    {mentorProfile.services.map((session: any) => (
                       <div key={session.id} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
                         <div className="flex justify-between items-start">
                           <div>
