@@ -18,6 +18,8 @@ import CreateSession from './pages/CreateSession';
 import MenteeDashboard from './pages/MenteeDashboard';
 import EditSession from './pages/EditSession';
 import EditProfile from './pages/editprofile';
+import AMASessionform from './pages/AMASessionform';
+import CreateAMASession from './pages/AMASessionform';
 
 function App() {
   return (
@@ -96,6 +98,12 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/sessions/:sessionId/edit" element={<EditSession />} />
+            <Route path="/create-ama-session" element={
+              <ProtectedRoute>
+                <AMASessionform />
+              </ProtectedRoute>
+            } />
+            <Route path="/create-ama-session" element={<CreateAMASession />} />
           </Routes>
         </main>
         <Footer />
