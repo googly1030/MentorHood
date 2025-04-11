@@ -36,6 +36,10 @@ interface Session {
   price: string;
   timeSlots: TimeSlot[];
   userId: string;
+  mentorName?: string;
+  mentorRole?: string;
+  mentorCompany?: string;
+  mentorImage?: string;
 }
 
 const timezones: Timezone[] = [
@@ -74,7 +78,7 @@ const timezones: Timezone[] = [
 interface BookingState {
   isLoading: boolean;
   isSuccess: boolean;
-  meetingLink: string;
+  meeting_link: string;
 }
 
 const BookingDetails: React.FC = () => {
@@ -89,7 +93,7 @@ const BookingDetails: React.FC = () => {
   const [bookingState, setBookingState] = useState<BookingState>({
     isLoading: false,
     isSuccess: false,
-    meetingLink: ''
+    meeting_link: ''
   });
 
   // Generate dates for next 14 days starting from tomorrow
@@ -162,36 +166,56 @@ const BookingDetails: React.FC = () => {
     setBookingState({ ...bookingState, isLoading: true });
     
     try {
+      // Get user details from localStorage
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userEmail = user.email || '';
+      
+      // Prepare session data to send with the request
+      const sessionData = {
+        title: session.sessionName,
+        description: session.description,
+        duration: session.duration,
+        mentor: {
+          name: session.mentorName || 'Mentor',
+          role: session.mentorRole || '',
+          company: session.mentorCompany || '',
+          image: session.mentorImage || 'https://via.placeholder.com/50'
+        },
+        tag: session.sessionType || '',
+        _id: sessionId
+      };
+      
       const response = await fetch('http://localhost:9000/api/bookings/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sessionId: sessionId,
+          session_id: sessionId,
           date: selectedDate.toISOString(),
           time: selectedTime,
-          timezone: selectedTimezone.value
+          timezone: selectedTimezone.value,
+          email: userEmail,
+          session_data: sessionData
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to book session');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to book session');
       }
 
       const data = await response.json();
-      if (data.status === 'success') {
-        setBookingState({
-          isLoading: false,
-          isSuccess: true,
-          meetingLink: data.meetingLink
-        });
-      } else {
-        throw new Error('Failed to book session');
-      }
+      setBookingState({
+        isLoading: false,
+        isSuccess: true,
+        meeting_link: data.meeting_link || ''
+      });
+      
+      toast.success('Booking confirmed! Check your email for details.');
     } catch (error) {
       console.error('Error booking session:', error);
-      toast.error('Failed to book session. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to book session. Please try again.');
       setBookingState({ ...bookingState, isLoading: false });
     }
   };
@@ -413,12 +437,12 @@ const BookingDetails: React.FC = () => {
                           <span className="font-medium">Meeting Link</span>
                         </div>
                         <a 
-                          href={bookingState.meetingLink}
+                          href={bookingState.meeting_link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-700 text-sm break-all"
                         >
-                          {bookingState.meetingLink}
+                          {bookingState.meeting_link}
                         </a>
                       </div>
 
