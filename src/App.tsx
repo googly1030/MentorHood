@@ -72,7 +72,7 @@ function App() {
                 <AllMentors />
               </ProtectedRoute>
             } />
-            <Route path="/questions" element={
+            <Route path="/questions/:sessionId" element={
               <ProtectedRoute>
                 <QuestionSection />
               </ProtectedRoute>

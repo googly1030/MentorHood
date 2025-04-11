@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Any
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, Any
 from datetime import datetime
 from bson import ObjectId
 
@@ -18,28 +18,17 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, field_schema: dict, field: Any) -> None:
         field_schema.update(type="string")
 
-class Mentor(BaseModel):
-    name: str
-    role: str
-    image: str
+class RegistrationBase(BaseModel):
+    email: EmailStr
+    session_id: str
+    name: Optional[str] = None
+    company: Optional[str] = None
+    role: Optional[str] = None
 
-class AMASessionBase(BaseModel):
-    title: str
-    mentor: Mentor
-    date: str
-    time: str
-    duration: str
-    registrants: int
-    maxRegistrants: int
-    questions: List[str]
-    isWomanTech: bool = False
-    tag: Optional[str] = None
-    description: Optional[str] = None
-
-class AMASessionCreate(AMASessionBase):
+class RegistrationCreate(RegistrationBase):
     pass
 
-class AMASession(AMASessionBase):
+class Registration(RegistrationBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

@@ -212,7 +212,7 @@ const BookingDetails: React.FC = () => {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-gray-700 hover:text-black mb-8"
         >
           <ArrowLeft className="w-5 h-5" />
