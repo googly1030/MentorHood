@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Plus, Trash2, Save, X } from 'lucide-react';
 
 interface MentorProfile {
   userId: string;
@@ -131,6 +132,57 @@ export default function EditProfile() {
     }
   };
 
+  const handleAddExperience = () => {
+    setProfile(prev => ({
+      ...prev!,
+      experience: [
+        ...prev!.experience,
+        { title: '', company: '', duration: '', description: '' }
+      ]
+    }));
+  };
+
+  const handleRemoveExperience = (index: number) => {
+    setProfile(prev => ({
+      ...prev!,
+      experience: prev!.experience.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAddProject = () => {
+    setProfile(prev => ({
+      ...prev!,
+      projects: [
+        ...prev!.projects,
+        { title: '', description: '' }
+      ]
+    }));
+  };
+
+  const handleRemoveProject = (index: number) => {
+    setProfile(prev => ({
+      ...prev!,
+      projects: prev!.projects.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAddResource = () => {
+    setProfile(prev => ({
+      ...prev!,
+      resources: [
+        ...prev!.resources,
+        { title: '', description: '', linkText: '' }
+      ]
+    }));
+  };
+
+  const handleRemoveResource = (index: number) => {
+    setProfile(prev => ({
+      ...prev!,
+      resources: prev!.resources.filter((_, i) => i !== index)
+    }));
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -145,12 +197,14 @@ export default function EditProfile() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Edit Profile</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Edit Profile</h1>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Basic Information</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -158,7 +212,7 @@ export default function EditProfile() {
                 type="text"
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -167,7 +221,7 @@ export default function EditProfile() {
                 type="text"
                 value={profile.headline}
                 onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -176,17 +230,37 @@ export default function EditProfile() {
                 type="text"
                 value={profile.membership}
                 onChange={(e) => setProfile({ ...profile, membership: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
           </div>
         </div>
 
         {/* Experience */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Experience</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">Experience</h2>
+            <button
+              type="button"
+              onClick={handleAddExperience}
+              className="text-teal-600 hover:text-teal-700 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Experience
+            </button>
+          </div>
           {profile.experience.map((exp, index) => (
-            <div key={index} className="space-y-4 mb-4">
+            <div key={index} className="space-y-4 mb-4 p-4 border border-gray-100 rounded-lg">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-800">Experience #{index + 1}</h3>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExperience(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Title</label>
                 <input
@@ -197,7 +271,7 @@ export default function EditProfile() {
                     newExperience[index] = { ...exp, title: e.target.value };
                     setProfile({ ...profile, experience: newExperience });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -210,7 +284,7 @@ export default function EditProfile() {
                     newExperience[index] = { ...exp, company: e.target.value };
                     setProfile({ ...profile, experience: newExperience });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -223,7 +297,7 @@ export default function EditProfile() {
                     newExperience[index] = { ...exp, duration: e.target.value };
                     setProfile({ ...profile, experience: newExperience });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -236,7 +310,7 @@ export default function EditProfile() {
                     setProfile({ ...profile, experience: newExperience });
                   }}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
             </div>
@@ -244,10 +318,30 @@ export default function EditProfile() {
         </div>
 
         {/* Projects */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Projects</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">Projects</h2>
+            <button
+              type="button"
+              onClick={handleAddProject}
+              className="text-teal-600 hover:text-teal-700 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Project
+            </button>
+          </div>
           {profile.projects.map((project, index) => (
-            <div key={index} className="space-y-4 mb-4">
+            <div key={index} className="space-y-4 mb-4 p-4 border border-gray-100 rounded-lg">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-800">Project #{index + 1}</h3>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveProject(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Title</label>
                 <input
@@ -258,7 +352,7 @@ export default function EditProfile() {
                     newProjects[index] = { ...project, title: e.target.value };
                     setProfile({ ...profile, projects: newProjects });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -271,7 +365,7 @@ export default function EditProfile() {
                     setProfile({ ...profile, projects: newProjects });
                   }}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
             </div>
@@ -279,10 +373,30 @@ export default function EditProfile() {
         </div>
 
         {/* Resources */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Resources</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">Resources</h2>
+            <button
+              type="button"
+              onClick={handleAddResource}
+              className="text-teal-600 hover:text-teal-700 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Resource
+            </button>
+          </div>
           {profile.resources.map((resource, index) => (
-            <div key={index} className="space-y-4 mb-4">
+            <div key={index} className="space-y-4 mb-4 p-4 border border-gray-100 rounded-lg">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-800">Resource #{index + 1}</h3>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveResource(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Title</label>
                 <input
@@ -293,7 +407,7 @@ export default function EditProfile() {
                     newResources[index] = { ...resource, title: e.target.value };
                     setProfile({ ...profile, resources: newResources });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -306,7 +420,7 @@ export default function EditProfile() {
                     setProfile({ ...profile, resources: newResources });
                   }}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
               <div>
@@ -319,25 +433,27 @@ export default function EditProfile() {
                     newResources[index] = { ...resource, linkText: e.target.value };
                     setProfile({ ...profile, resources: newResources });
                   }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                 />
               </div>
             </div>
           ))}
         </div>
 
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end gap-4 mt-8">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
+            <X size={16} />
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700"
+            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2"
           >
+            <Save size={16} />
             Save Changes
           </button>
         </div>
