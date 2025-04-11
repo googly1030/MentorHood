@@ -14,6 +14,8 @@ import {
   Users2,
   Search,
   Trophy,
+  Loader2,
+  Video,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,18 +37,51 @@ interface Suggestion {
   icon: string;
 }
 
+interface Session {
+  sessionId: string;
+  sessionName: string;
+  description: string;
+  duration: string;
+  sessionType: string;
+  numberOfSessions: string;
+  occurrence: string;
+  topics: string[];
+  allowMenteeTopics: boolean;
+  showOnProfile: boolean;
+  isPaid: boolean;
+  price: string;
+  timeSlots: {
+    day: string;
+    available: boolean;
+    timeRanges: {
+      start: string;
+      end: string;
+    }[];
+  }[];
+  userId: string;
+}
+
 interface Mentor {
   userId: string;
   name: string;
   headline: string;
-  profilePhoto: string;
-  rating: number;
-  totalExperience: {
-    years: any;
-    months: any;
-  };
   primaryExpertise: string;
-  bookings: number;
+  disciplines: string[];
+  skills: string[];
+  mentoringTopics: string[];
+  totalExperience: {
+    years: number;
+    months: number;
+  };
+  experience: {
+    title: string;
+    company: string;
+    description: string;
+    duration: string;
+  }[];
+  profilePhoto?: string;
+  rating?: number;
+  bookings?: number;
 }
 
 interface AMASession {
@@ -194,6 +229,8 @@ function App() {
   const sessionCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleSessionCards, setVisibleSessionCards] = useState<boolean[]>([]);
 
+  const [oneOnOneSessions, setOneOnOneSessions] = useState<Session[]>([]);
+  const [groupSessions, setGroupSessions] = useState<Session[]>([]);
 
   const addEmoji = () => {
     const section = document.querySelector(".knowledge-buddies-section");
@@ -361,7 +398,42 @@ function App() {
       }
     };
 
+    const fetchOneOnOneSessions = async () => {
+      try {
+        const response = await fetch('http://localhost:9000/api/sessions/one-on-one/all');
+        if (!response.ok) {
+          throw new Error('Failed to fetch sessions');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setOneOnOneSessions(data.sessions);
+          setMentors(data.mentors);
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchGroupSessions = async () => {
+      try {
+        const response = await fetch('http://localhost:9000/api/sessions/group-session/all');
+        if (!response.ok) {
+          throw new Error('Failed to fetch group sessions');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setGroupSessions(data.sessions);
+        }
+      } catch (error) {
+        console.error('Error fetching group sessions:', error);
+      }
+    };
+
     fetchMentors();
+    fetchOneOnOneSessions();
+    fetchGroupSessions();
   }, []);
 
   useEffect(() => {
@@ -390,6 +462,14 @@ function App() {
 
     fetchAMASessions();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -607,7 +687,7 @@ function App() {
                   </p>
                   <div className="flex gap-3">
                     <a
-                      href={`/profile/${mentor.userId}`}
+                      href={`/booking/${oneOnOneSessions.find(s => s.userId === mentor.userId)?.sessionId || ''}`}
                       className="flex-1 bg-black text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-800"
                     >
                       <Phone size={16} />
@@ -665,71 +745,74 @@ function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sessions-grid">
-            {upcomingSessions.map((session, index) => (
-              <div
-                key={index}
-                ref={(el) => (sessionCardsRef.current[index] = el)}
-                className={`session-card bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl 
-                  transition-all duration-700 group border border-gray-200 ${
-                    visibleSessionCards[index] ? "visible" : ""
-                  }`}
-                style={{ "--card-index": index } as React.CSSProperties}
-              >
-                <div className="transform transition-transform duration-700 group-hover:scale-[1.02]">
-                  <span className="inline-block px-3 py-1 bg-gray-100 text-black rounded-full text-sm font-medium mb-4">
-                    {session.tag}
-                  </span>
-                  <h3 className="text-2xl font-bold mb-6 text-gray-800">
-                    {session.title}
-                  </h3>
-
-                  <div className="flex items-center gap-4 mb-6">
-                    <img
-                      src={session.mentor.image}
-                      alt={session.mentor.name}
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
-                    />
-                    <div>
-                      <h4 className="font-medium text-gray-800">
-                        {session.mentor.name}
-                      </h4>
-                      <p className="text-gray-500 text-sm">
-                        {session.mentor.role}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center gap-3 text-gray-500">
-                      <Calendar size={18} className="text-[#3730A3]" />
-                      <span>{session.date}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-gray-500">
-                      <Clock size={18} className="text-[#3730A3]" />
-                      <span>
-                        {session.time} • {session.duration}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center text-xl font-bold text-gray-800">
-                      <DollarSign size={18} className="text-[#3730A3]" />
-                      {session.price}
+            {groupSessions.map((session, index) => {
+              const mentor = mentors.find(m => m.userId === session.userId);
+              return (
+                <div
+                  key={session.sessionId}
+                  ref={(el) => (sessionCardsRef.current[index] = el)}
+                  className={`session-card bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl 
+                    transition-all duration-700 group border border-gray-200 ${
+                      visibleSessionCards[index] ? "visible" : ""
+                    }`}
+                  style={{ "--card-index": index } as React.CSSProperties}
+                >
+                  <div className="transform transition-transform duration-700 group-hover:scale-[1.02]">
+                    <span className="inline-block px-3 py-1 bg-gray-100 text-black rounded-full text-sm font-medium mb-4">
+                      {session.sessionType}
                     </span>
+                    <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                      {session.sessionName}
+                    </h3>
 
-                    <button
-                      onClick={() => navigate("/booking/1")}
-                      className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
-                      hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
-                    >
-                      Book Now
-                      <ArrowRight size={18} />
-                    </button>
+                    <div className="flex items-center gap-4 mb-6">
+                      <img
+                        src={mentor?.profilePhoto || `https://ui-avatars.com/api/?name=${mentor?.name}&background=random`}
+                        alt={mentor?.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-800">
+                          {mentor?.name}
+                        </h4>
+                        <p className="text-gray-500 text-sm">
+                          {mentor?.headline}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mb-8">
+                      <div className="flex items-center gap-3 text-gray-500">
+                        <Calendar size={18} className="text-[#3730A3]" />
+                        <span>{session.timeSlots?.[0]?.day || 'Flexible'}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-gray-500">
+                        <Clock size={18} className="text-[#3730A3]" />
+                        <span>
+                          {session.duration} minutes
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center text-xl font-bold text-gray-800">
+                        <DollarSign size={18} className="text-[#3730A3]" />
+                        {session.price || 'Free'}
+                      </span>
+
+                      <button
+                        onClick={() => navigate(`/booking/${session.sessionId}`)}
+                        className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
+                        hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
+                      >
+                        Book Now
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1162,6 +1245,84 @@ function App() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* One-on-One Sessions Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">One-on-One Sessions</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Get personalized guidance from experienced mentors in focused one-on-one sessions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {oneOnOneSessions.map((session) => {
+              const mentor = mentors.find(m => m.userId === session.userId);
+              
+              return (
+                <div key={session.sessionId} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-600">
+                        {mentor?.name?.charAt(0) || 'M'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{session.sessionName}</h3>
+                      <p className="text-gray-600">{mentor?.headline}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Clock className="w-5 h-5" />
+                      <span>{session.duration} minutes session</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Video className="w-5 h-5" />
+                      <span>Google Meet</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="w-5 h-5" />
+                      <span>{session.occurrence}</span>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-6">
+                    <h4 className="text-lg font-semibold mb-3">Topics Covered</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {session.topics.map((topic, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-5 h-5 fill-current text-yellow-400" />
+                      <span className="font-medium">4.9 (1.2k+ sessions)</span>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/booking/${session.sessionId}`)}
+                      className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 
+                        hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
+                    >
+                      Book Now
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
