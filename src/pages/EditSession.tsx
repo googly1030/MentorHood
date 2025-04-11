@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { SessionForm, AvailabilityForm, ReviewForm } from './CreateSession';
 import { getUserData } from '../utils/auth';
 import { toast } from 'sonner';
@@ -30,11 +30,11 @@ interface TimeSlot {
   timeRanges: TimeRange[];
 }
 
-const TOPICS = [
-  'UX Design', 'Product Management', 'Web Development',
-  'Mobile Development', 'Data Science', 'Marketing',
-  'Leadership', 'Career Development', 'Entrepreneurship'
-];
+// const TOPICS = [
+//   'UX Design', 'Product Management', 'Web Development',
+//   'Mobile Development', 'Data Science', 'Marketing',
+//   'Leadership', 'Career Development', 'Entrepreneurship'
+// ];
 
 const OCCURRENCE_OPTIONS = [
   'Repeats every week',
@@ -85,7 +85,7 @@ function EditSession() {
         if (data.status === 'success') {
           const session = data.session;
           setFormData({
-            sessionName: session.title,
+            sessionName: session.sessionName,
             description: session.description || '',
             duration: session.duration.toString(),
             sessionType: session.type,
