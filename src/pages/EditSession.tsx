@@ -56,7 +56,7 @@ function EditSession() {
     sessionName: '',
     description: '',
     duration: '30',
-    sessionType: 'recurring',
+    sessionType: 'one-on-one',
     numberOfSessions: '1',
     occurrence: OCCURRENCE_OPTIONS[0],
     topics: [],

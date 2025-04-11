@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 from datetime import datetime, UTC
 from typing import List
 from app.schemas.mentor import MentorProfile
@@ -46,4 +46,38 @@ async def get_all_mentors():
     return {
         "status": "success",
         "mentors": mentors_list
+    }
+
+@router.get("/{mentor_id}/sessions")
+async def get_mentor_sessions(
+    mentor_id: str,
+    type: str = Query(None, description="Type of session: one-on-one or group-session")
+):
+    sessions_collection = get_collection("sessions")
+    
+    if not mentor_id:
+        raise HTTPException(status_code=400, detail="Mentor ID required")
+    
+    # Build query based on session type
+    query = {"userId": mentor_id}
+    if type:
+        if type not in ["one-on-one", "group-sessions"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid session type. Must be either 'one-on-one' or 'group-session'"
+            )
+        query["sessionType"] = type
+    
+    sessions = await sessions_collection.find(query).to_list(length=None)
+    
+    # Convert ObjectId to string and remove _id field for each session
+    sessions_list = []
+    for session in sessions:
+        session_dict = dict(session)
+        session_dict.pop('_id', None)
+        sessions_list.append(session_dict)
+
+    return {
+        "status": "success",
+        "sessions": sessions_list
     } 

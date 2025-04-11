@@ -2,49 +2,25 @@ import { useState, useEffect } from 'react';
 import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users, Sun, Moon, Star } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-export interface Service {
-  id: number;
-  title: string;
+interface Service {
+  _id: string;
+  sessionName: string;
+  description: string;
   duration: string;
-  type: string;
-  frequency: string;
-  sessions: number;
-  price: number;
-  rating?: number;
+  sessionType: string;
+  price: string;
+  isPaid: boolean;
 }
 
-export const services: Service[] = [
-  {
-    id: 1,
-    title: 'Performance Boost',
-    duration: '20 minutes',
-    type: 'Video Call',
-    frequency: 'Weekly',
-    sessions: 6,
-    price: 360,
-    rating: 4.9
-  },
-  {
-    id: 2,
-    title: 'Mentorship session',
-    duration: '20 minutes',
-    type: 'Video Call',
-    frequency: 'Weekly',
-    sessions: 2,
-    price: 50,
-    rating: 4.8
-  },
-  {
-    id: 3,
-    title: 'Momentum Overview',
-    duration: '20 minutes',
-    type: 'Video Call',
-    frequency: 'Fortnightly',
-    sessions: 2,
-    price: 56,
-    rating: 4.7
-  }
-];
+interface GroupDiscussion {
+  _id: string;
+  sessionName: string;
+  description: string;
+  duration: string;
+  sessionType: string;
+  price: string;
+  isPaid: boolean;
+}
 
 enum TabType {
   OVERVIEW = 'overview',
@@ -71,6 +47,8 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(TabType.OVERVIEW);
   const [mentorProfile, setMentorProfile] = useState<any>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [groupDiscussions, setGroupDiscussions] = useState<GroupDiscussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,8 +72,40 @@ function App() {
       }
     };
 
+    const fetchServices = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=one-on-one`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setServices(data.sessions);
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      }
+    };
+
+    const fetchGroupDiscussions = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=group-sessions`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch group discussions');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setGroupDiscussions(data.sessions);
+        }
+      } catch (err) {
+        console.error('Error fetching group discussions:', err);
+      }
+    };
+
     if (mentorId) {
       fetchMentorProfile();
+      fetchServices();
+      fetchGroupDiscussions();
     }
   }, [mentorId]);
 
@@ -103,7 +113,7 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
-  const handleBooking = (sessionId: number) => {
+  const handleBooking = (sessionId: string) => {
     navigate(`/booking/${sessionId}`);
   };
 
@@ -171,20 +181,23 @@ function App() {
       case TabType.GROUP_SESSIONS:
         return (
           <div className="space-y-6">
-            {mentorProfile.groupSessions.map((session: any) => (
-              <div key={session.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+            {groupDiscussions.map((session) => (
+              <div key={session._id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className={`font-medium ${textColor}`}>{session.title}</h3>
+                    <h3 className={`font-medium ${textColor}`}>{session.sessionName}</h3>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      {session.date} • {session.time}
+                      Duration: {session.duration} minutes
                     </p>
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      {session.participants}/{session.maxParticipants} participants
+                      {session.description}
                     </p>
                   </div>
-                  <button className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm">
-                    Join • ${session.price}
+                  <button 
+                    onClick={() => handleBooking(session._id)}
+                    className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    {session.isPaid ? `Join • Rs ${session.price}` : 'Join • Free'}
                   </button>
                 </div>
               </div>
@@ -201,6 +214,34 @@ function App() {
                 {mentorProfile.headline}
               </p>
               <button className="text-teal-600 mt-2">Show more</button>
+            </div>
+
+            {/* Services Section */}
+            <div>
+              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Services</h2>
+              <div className="space-y-4">
+                {services.map((service) => (
+                  <div key={service._id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className={`font-medium ${textColor}`}>{service.sessionName}</h3>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          Duration: {service.duration} minutes
+                        </p>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          {service.description}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => handleBooking(service._id)}
+                        className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
+                      >
+                        {service.isPaid ? `Book • Rs ${service.price}` : 'Book • Free'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Experience Section */}
@@ -249,31 +290,6 @@ function App() {
                     <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                       {resource.description}
                     </p>
-                    <button className="text-teal-600 mt-2">{resource.linkText}</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Testimonials Section */}
-            <div>
-              <h2 className={`text-xl font-bold mb-4 ${textColor}`}>Testimonials</h2>
-              <div className="space-y-4">
-                {mentorProfile.testimonials.map((testimonial: any, index: number) => (
-                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                    <div className="flex items-start gap-4">
-                      <img 
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div>
-                        <h3 className={`font-medium ${textColor}`}>{testimonial.name}</h3>
-                        <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          "{testimonial.comment}"
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
