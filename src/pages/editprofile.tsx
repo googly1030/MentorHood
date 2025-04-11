@@ -7,6 +7,16 @@ interface MentorProfile {
   name: string;
   headline: string;
   membership: string;
+  totalExperience: {
+    years: number;
+    months: number;
+  };
+  linkedinUrl: string;
+  githubUrl: string;
+  primaryExpertise: string;
+  disciplines: string[];
+  skills: string[];
+  mentoringTopics: string[];
   experience: {
     title: string;
     company: string;
@@ -109,8 +119,9 @@ export default function EditProfile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
+    if (!profile) return;
 
+    try {
       const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/update`, {
         method: 'POST',
         headers: {
@@ -125,7 +136,7 @@ export default function EditProfile() {
 
       const data = await response.json();
       if (data.status === 'success') {
-        navigate(`/profile/${profile?.userId}`);
+        navigate(`/profile/${profile.userId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -230,6 +241,115 @@ export default function EditProfile() {
                 type="text"
                 value={profile.membership}
                 onChange={(e) => setProfile({ ...profile, membership: e.target.value })}
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Experience (Years)</label>
+                <input
+                  type="number"
+                  value={profile.totalExperience?.years || 0}
+                  onChange={(e) => setProfile({
+                    ...profile,
+                    totalExperience: {
+                      ...profile.totalExperience,
+                      years: parseInt(e.target.value)
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Experience (Months)</label>
+                <input
+                  type="number"
+                  value={profile.totalExperience?.months || 0}
+                  onChange={(e) => setProfile({
+                    ...profile,
+                    totalExperience: {
+                      ...profile.totalExperience,
+                      months: parseInt(e.target.value)
+                    }
+                  })}
+                  min="0"
+                  max="11"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">LinkedIn URL</label>
+              <input
+                type="text"
+                value={profile.linkedinUrl}
+                onChange={(e) => {
+                  let url = e.target.value;
+                  // Remove any existing protocol
+                  url = url.replace(/^https?:\/\//, '');
+                  setProfile({ ...profile, linkedinUrl: url });
+                }}
+                placeholder="www.linkedin.com/in/username"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">GitHub URL</label>
+              <input
+                type="text"
+                value={profile.githubUrl}
+                onChange={(e) => {
+                  let url = e.target.value;
+                  // Remove any existing protocol
+                  url = url.replace(/^https?:\/\//, '');
+                  setProfile({ ...profile, githubUrl: url });
+                }}
+                placeholder="github.com/username"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Primary Expertise</label>
+              <input
+                type="text"
+                value={profile.primaryExpertise}
+                onChange={(e) => setProfile({ ...profile, primaryExpertise: e.target.value })}
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Disciplines (comma-separated)</label>
+              <input
+                type="text"
+                value={profile.disciplines?.join(', ')}
+                onChange={(e) => setProfile({
+                  ...profile,
+                  disciplines: e.target.value.split(',').map(item => item.trim())
+                })}
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Skills (comma-separated)</label>
+              <input
+                type="text"
+                value={profile.skills?.join(', ')}
+                onChange={(e) => setProfile({
+                  ...profile,
+                  skills: e.target.value.split(',').map(item => item.trim())
+                })}
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Mentoring Topics (comma-separated)</label>
+              <input
+                type="text"
+                value={profile.mentoringTopics?.join(', ')}
+                onChange={(e) => setProfile({
+                  ...profile,
+                  mentoringTopics: e.target.value.split(',').map(item => item.trim())
+                })}
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
               />
             </div>

@@ -55,6 +55,14 @@ function App() {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  const ensureHttps = (url: string) => {
+    if (!url) return '#';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
   useEffect(() => {
     const checkUser = () => {
       const userData = localStorage.getItem('user');
@@ -282,7 +290,83 @@ function App() {
               <p className={textColor}>
                 {mentorProfile.headline}
               </p>
-              {/* <button className="text-teal-600 mt-2">Show more</button> */}
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div className={`${cardBg} p-4 rounded-lg`}>
+                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Experience</h3>
+                  <p className={`text-lg font-medium ${textColor}`}>
+                    {mentorProfile.totalExperience?.years} years {mentorProfile.totalExperience?.months} months
+                  </p>
+                </div>
+                <div className={`${cardBg} p-4 rounded-lg`}>
+                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Primary Expertise</h3>
+                  <p className={`text-lg font-medium ${textColor}`}>{mentorProfile.primaryExpertise}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div className={`${cardBg} p-4 rounded-lg`}>
+                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Connect</h3>
+                  <div className="mt-2 space-y-2">
+                    <a
+                      href={ensureHttps(mentorProfile.linkedinUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-700 block"
+                    >
+                      LinkedIn Profile
+                    </a>
+                    <a
+                      href={ensureHttps(mentorProfile.githubUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-gray-700 block"
+                    >
+                      GitHub Profile
+                    </a>
+                  </div>
+                </div>
+                <div className={`${cardBg} p-4 rounded-lg`}>
+                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Disciplines</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {mentorProfile.disciplines?.map((discipline: string, index: number) => (
+                      <span
+                        key={index}
+                        className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
+                      >
+                        {discipline}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`mt-4 ${cardBg} p-4 rounded-lg`}>
+                <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Skills</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mentorProfile.skills?.map((skill: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`mt-4 ${cardBg} p-4 rounded-lg`}>
+                <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Mentoring Topics</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mentorProfile.mentoringTopics?.map((topic: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Experience Section */}
