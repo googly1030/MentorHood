@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Clock, Video, Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
+import { ArrowLeft, Clock, Video, Mail,  Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
 import { format, addDays, isSameDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -430,8 +430,25 @@ const BookingDetails: React.FC = () => {
                       <p className="text-gray-600 mb-6">
                         Your session has been scheduled for {selectedDate && format(selectedDate, 'MMMM d, yyyy')} at {selectedTime}
                       </p>
-
                       <div className="w-full p-4 bg-gray-50 rounded-xl mb-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Mail className="w-5 h-5 text-gray-700" />
+                          <span className="font-medium">Booking Details Sent</span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3">
+                          We've sent all the meeting details to your email. Please check your inbox for the meeting link and further instructions.
+                        </p>
+                        <a 
+                          href="https://mail.google.com/mail/u/0/#inbox" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Mail className="w-4 h-4" />
+                          Check Email
+                        </a>
+                      </div>
+                      {/* <div className="w-full p-4 bg-gray-50 rounded-xl mb-6">
                         <div className="flex items-center gap-3 mb-2">
                           <Video className="w-5 h-5 text-gray-700" />
                           <span className="font-medium">Meeting Link</span>
@@ -444,7 +461,7 @@ const BookingDetails: React.FC = () => {
                         >
                           {bookingState.meeting_link}
                         </a>
-                      </div>
+                      </div> */}
 
                       <button
                         onClick={() => navigate('/')}

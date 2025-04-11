@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
   Star,
-  Phone,
   Users,
   Coffee,
   BookOpen,
@@ -12,14 +11,14 @@ import {
   DollarSign,
   MessageCircle,
   Users2,
-  Search,
+  // Search,
   Trophy,
   Loader2,
   Video,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { getUserData } from '../utils/auth';
+// import { motion, AnimatePresence } from "framer-motion";
+// import { getUserData } from '../utils/auth';
 import img from "../image.webp";
 import mentor1 from '../MentoImg/mentor1.jpg'
 import mentor2 from '../MentoImg/mentor2.jpg'
@@ -30,12 +29,6 @@ import mentor6 from '../MentoImg/mentor6.jpg'
 import mentor7 from '../MentoImg/mentor7.jpg'
 import mentor8 from '../MentoImg/mentor8.jpg'
 
-interface Suggestion {
-  id: number;
-  category: string;
-  title: string;
-  icon: string;
-}
 
 interface Session {
   sessionId: string;
@@ -102,44 +95,7 @@ interface AMASession {
   tag?: string;
 }
 
-const suggestions: Suggestion[] = [
-  {
-    id: 1,
-    category: "LinkedIn-based",
-    title: "Data scientists at FAANG who transitioned from CS backgrounds.",
-    icon: "🔍",
-  },
-  {
-    id: 2,
-    category: "Career development",
-    title: "Top mentors for negotiating higher salaries in tech.",
-    icon: "📈",
-  },
-  {
-    id: 3,
-    category: "Job search",
-    title: "Hiring managers who give resume feedback for job switchers.",
-    icon: "💼",
-  },
-  {
-    id: 4,
-    category: "Networking",
-    title: "Best LinkedIn influencers for growing a strong tech network.",
-    icon: "🤝",
-  },
-  {
-    id: 5,
-    category: "Unconventional careers",
-    title: "Non-traditional career paths for professionals with Python skills.",
-    icon: "🚀",
-  },
-  {
-    id: 6,
-    category: "Leadership",
-    title: "Executives mentoring first-time managers in tech.",
-    icon: "👥",
-  },
-];
+
 
 function App() {
   const [scrollOpacity, setScrollOpacity] = useState(1);
@@ -148,9 +104,7 @@ function App() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const journeySectionRef = useRef<HTMLDivElement>(null);
   const [isJourneySectionInView, setIsJourneySectionInView] = useState(false);
-  const [emojis, setEmojis] = useState<
-    { id: number; emoji: string; left: number; top: number }[]
-  >([]);
+  // Removed unused emojis state
   const [centerCardContent] = useState({
     icon: (
       <img
@@ -165,14 +119,10 @@ function App() {
     buttonText: "Start Your Journey",
     bgColor: "from-gray-800 to-blue-500",
   });
-  const [searchQuery, setSearchQuery] = useState("");
-  const sliderRef = useRef<HTMLDivElement>(null);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("mentee");
+  // const [activeTab, setActiveTab] = useState("mentee");
 
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,107 +131,13 @@ function App() {
   const [amaSessions, setAmaSessions] = useState<AMASession[]>([]);
   const [womenTechSessions, setWomenTechSessions] = useState<AMASession[]>([]);
 
-  const upcomingSessions = [
-    {
-      tag: "Career Mentorship",
-      title: "Career Transition to Product Management",
-      mentor: {
-        name: "Priya Sharma",
-        role: "Senior PM, Amazon",
-        image:
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
-      },
-      date: "May 15, 2023",
-      time: "6:00 PM",
-      duration: "45 min",
-      price: 1200,
-    },
-    {
-      tag: "Tech Guidance",
-      title: "React Performance Optimization",
-      mentor: {
-        name: "Rahul Mehta",
-        role: "Full Stack Developer, Microsoft",
-        image:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
-      },
-      date: "May 16, 2023",
-      time: "5:30 PM",
-      duration: "30 min",
-      price: 800,
-    },
-    {
-      tag: "Design Mentorship",
-      title: "Design System Architecture",
-      mentor: {
-        name: "Ananya Patel",
-        role: "Lead Designer, Flipkart",
-        image:
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
-      },
-      date: "May 17, 2023",
-      time: "4:30 PM",
-      duration: "45 min",
-      price: 1500,
-    },
-  ];
+
 
   const sessionCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleSessionCards, setVisibleSessionCards] = useState<boolean[]>([]);
 
   const [oneOnOneSessions, setOneOnOneSessions] = useState<Session[]>([]);
   const [groupSessions, setGroupSessions] = useState<Session[]>([]);
-
-  const addEmoji = () => {
-    const section = document.querySelector(".knowledge-buddies-section");
-    if (!section) return;
-
-    const rect = section.getBoundingClientRect();
-    const emojiList = ["❤️", "😊", "🌟", "✨", "🎉", "👏", "🚀", "💫"];
-    const emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-
-    const offsetX = Math.random() * rect.width;
-    const offsetY = Math.random() * rect.height;
-
-    const uniqueId = Date.now() + Math.random();
-
-    setEmojis((prev) => [
-      ...prev,
-      {
-        id: uniqueId,
-        emoji,
-        left: rect.left + offsetX,
-        top: rect.top + offsetY,
-      },
-    ]);
-
-    setTimeout(() => {
-      setEmojis((prev) => prev.filter((e) => e.id !== uniqueId));
-    }, 1500);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!sliderRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - sliderRef.current.offsetLeft);
-    setScrollLeft(sliderRef.current.scrollLeft);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !sliderRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    sliderRef.current.scrollLeft = scrollLeft - walk;
-  };
 
   useEffect(() => {
     let rafId: number;
@@ -333,9 +189,7 @@ function App() {
             setVisibleCards((prev) => {
               const newState = [...prev];
               newState[index] = isVisible;
-              if (!prev[index] && isVisible) {
-                addEmoji();
-              }
+
               return newState;
             });
           }
@@ -473,22 +327,6 @@ function App() {
 
   return (
     <div className="min-h-screen">
-      {emojis.map(({ id, emoji, left, top }) => (
-        <div
-          key={id}
-          className="emoji-container"
-          style={{
-            position: "absolute",
-            left: `${left}px`,
-            top: `${top}px`,
-            zIndex: 5,
-            fontSize: "24px",
-          }}
-        >
-          {emoji}
-        </div>
-      ))}
-
       <img
         src={img}
         alt="Background"
@@ -557,9 +395,9 @@ function App() {
         </div>
 
         {/* Content */}
-        <div className="max-w-6xl mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
+        <div className="max-w-7xl mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
           <div className="flex justify-center space-x-8 mb-12 relative">
-            <button
+            {/* <button
               className={`text-xl font-medium px-4 py-2 relative ${
                 activeTab === "mentee" ? "text-black" : "text-gray-500"
               }`}
@@ -580,7 +418,7 @@ function App() {
               {activeTab === "mentor" && (
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500"></div>
               )}
-            </button>
+            </button> */}
           </div>
 
           <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
@@ -593,7 +431,7 @@ function App() {
             experts. Get career guidance, technical advice, and actionable
             insights.
           </p>
-          <AnimatePresence mode="wait">
+          {/* <AnimatePresence mode="wait">
             {activeTab === "mentee" ? (
               <motion.div
                 key="search"
@@ -638,12 +476,12 @@ function App() {
                 <ArrowRight size={20} />
               </motion.button>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </div>
 
       <div className="knowledge-buddies-section py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-8">
           <h2 className="text-4xl font-bold mb-12 text-center">
             Your Knowledge Buddies
           </h2>
@@ -652,7 +490,7 @@ function App() {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
               {mentors.map((mentor, index) => (
                 <div
                   key={mentor.userId}
@@ -730,7 +568,7 @@ function App() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <div>
               <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
@@ -750,7 +588,7 @@ function App() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             {oneOnOneSessions.map((session) => {
               const mentor = mentors.find(m => m.userId === session.userId);
               
@@ -824,7 +662,7 @@ function App() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <div>
               <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
@@ -844,7 +682,7 @@ function App() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sessions-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 sessions-grid">
             {groupSessions.map((session, index) => {
               const mentor = mentors.find(m => m.userId === session.userId);
               return (
@@ -923,7 +761,7 @@ function App() {
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
               Ask Me Anything Sessions
@@ -1030,7 +868,7 @@ function App() {
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 bg-blue-100 text-[#4937e8] rounded-full text-sm font-medium mb-4">
               Featured: Women in Tech Series

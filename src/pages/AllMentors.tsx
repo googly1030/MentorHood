@@ -1,24 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, TrendingUp, Building2, Rocket , Search, ChevronDown } from 'lucide-react';
+import { Star , Clock, Briefcase, TrendingUp, Building2, Rocket , Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
-interface Mentor {
-  id: number;
-  name: string;
-  rating: number;
-  role: string;
-  experience: string;
-  specialization: string;
-  bookings: number;
-  location: string;
-  languages: string[];
-  image: string;
-  availability: string;
-  price: string;
-  category: 'most-visited' | 'service-based' | 'company-experts' | 'venture-capital';
-  companyLogo?: string;
-}
+
 
 interface TimeRange {
   start: string;
@@ -94,140 +79,10 @@ interface MentorProfile {
   }>;
 }
 
-const mentors: Mentor[] = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    rating: 4.9,
-    role: "Senior Product Manager at Google",
-    experience: "8+ years",
-    specialization: "Product Management",
-    bookings: 1228,
-    location: "San Francisco, CA",
-    languages: ["English", "Spanish"],
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-    availability: "Next available: Today",
-    price: "₹800/session",
-    category: "most-visited",
-    companyLogo: "/company-logos/google.png"
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    rating: 4.8,
-    role: "Engineering Manager at Meta",
-    experience: "10+ years",
-    specialization: "Software Architecture",
-    bookings: 956,
-    location: "Seattle, WA",
-    languages: ["English", "Mandarin"],
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-    availability: "Next available: Tomorrow",
-    price: "₹1000/session",
-    category: "most-visited",
-    companyLogo: "/company-logos/meta.png"
-  },
-  {
-    id: 3,
-    name: "Emma Wilson",
-    rating: 4.9,
-    role: "Tech Lead at Amazon",
-    experience: "12+ years",
-    specialization: "System Design",
-    bookings: 1432,
-    location: "New York, NY",
-    languages: ["English", "French"],
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-    availability: "Next available: Today",
-    price: "₹900/session",
-    category: "most-visited",
-    companyLogo: "/company-logos/amazon.png"
-  },
-  {
-    id: 4,
-    name: "David Park",
-    rating: 4.7,
-    role: "Staff Engineer at Netflix",
-    experience: "9+ years",
-    specialization: "Frontend Architecture",
-    bookings: 876,
-    location: "Los Angeles, CA",
-    languages: ["English", "Korean"],
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-    availability: "Next available: Tomorrow",
-    price: "₹850/session",
-    category: "most-visited",
-    companyLogo: "/company-logos/netflix.png"
-  },
-  {
-    id: 5,
-    name: "Priya Sharma",
-    rating: 4.9,
-    role: "Tech Lead at Microsoft",
-    experience: "7+ years",
-    specialization: "Cloud Architecture",
-    bookings: 785,
-    location: "Bangalore, India",
-    languages: ["English", "Hindi"],
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
-    availability: "Next available: Today",
-    price: "₹600/session",
-    category: "most-visited",
-    companyLogo: "/company-logos/microsoft.png"
-  },
-  {
-    id: 6,
-    name: "Alex Rodriguez",
-    rating: 4.8,
-    role: "Lead Developer at Salesforce",
-    experience: "8+ years",
-    specialization: "CRM Development",
-    bookings: 645,
-    location: "Austin, TX",
-    languages: ["English", "Spanish"],
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
-    availability: "Next available: Today",
-    price: "₹750/session",
-    category: "service-based",
-    companyLogo: "/company-logos/salesforce.png"
-  },
-  {
-    id: 11,
-    name: "Jennifer Lee",
-    rating: 4.9,
-    role: "Principal Engineer at Apple",
-    experience: "15+ years",
-    specialization: "iOS Development",
-    bookings: 1567,
-    location: "Cupertino, CA",
-    languages: ["English", "Mandarin"],
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
-    availability: "Next available: Today",
-    price: "₹1200/session",
-    category: "company-experts",
-    companyLogo: "/company-logos/apple.png"
-  },
-  {
-    id: 16,
-    name: "Mark Thompson",
-    rating: 4.9,
-    role: "Partner at Sequoia Capital",
-    experience: "12+ years",
-    specialization: "Startup Funding",
-    bookings: 423,
-    location: "San Francisco, CA",
-    languages: ["English"],
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7",
-    availability: "Next available: Tomorrow",
-    price: "₹2000/session",
-    category: "venture-capital",
-    companyLogo: "/company-logos/sequoia.png"
-  }
-];
+
 
 const AllMentors = () => {
   const navigate = useNavigate();
-  const [activeCategory] = useState<string>('most-visited');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     isPremium: false,

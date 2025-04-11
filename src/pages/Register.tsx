@@ -11,7 +11,7 @@ const Register = () => {
     username: '',
     email: '',
     password: '',
-    role: 'mentee',
+    role: '',
   });
   const [showMentorForm, setShowMentorForm] = useState(false);
   const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
@@ -55,7 +55,7 @@ const Register = () => {
         userId: data.userId,
         username: data.username,
         email: data.email,
-        role: data.role,
+        role: formData.role,
         token: data.id,
       });
 

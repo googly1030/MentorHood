@@ -5,6 +5,7 @@ import { getUserData } from '../utils/auth';
 import { MentorProfile } from '../types/mentor';
 import toast from 'react-hot-toast';
 import CustomSelect from './CustomSelect';
+import { setUserData } from '../utils/auth';
 
 const DISCIPLINES = [
   "Frontend Development",
@@ -296,6 +297,14 @@ const MentorProfileForm = () => {
   
       if (!response.ok) {
         throw new Error(data.detail || 'Failed to create profile');
+      }
+
+      const currentUserData = getUserData();
+      if (currentUserData) {
+        setUserData({
+          ...currentUserData,
+          role: 'mentor'
+        });
       }
   
       toast.success('Mentor profile created successfully!');
