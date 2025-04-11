@@ -1,13 +1,41 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Video, Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, ChevronDown, Loader2, Check } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Clock, Video, Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
+import { format, addDays, isSameDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface Timezone {
   value: string;
   label: string;
   offset: string;
+}
+
+interface TimeRange {
+  start: string;
+  end: string;
+}
+
+interface TimeSlot {
+  day: string;
+  available: boolean;
+  timeRanges: TimeRange[];
+}
+
+interface Session {
+  sessionName: string;
+  description: string;
+  duration: string;
+  sessionType: string;
+  numberOfSessions: string;
+  occurrence: string;
+  topics: string[];
+  allowMenteeTopics: boolean;
+  showOnProfile: boolean;
+  isPaid: boolean;
+  price: string;
+  timeSlots: TimeSlot[];
+  userId: string;
 }
 
 const timezones: Timezone[] = [
@@ -51,24 +79,48 @@ interface BookingState {
 
 const BookingDetails: React.FC = () => {
   const navigate = useNavigate();
+  const { sessionId } = useParams<{ sessionId: string }>();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const dateSliderRef = useRef<HTMLDivElement>(null);
   const [selectedTimezone, setSelectedTimezone] = useState(timezones[0]);
-  const [isTimezoneOpen, setIsTimezoneOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [bookingState, setBookingState] = useState<BookingState>({
     isLoading: false,
     isSuccess: false,
     meetingLink: ''
   });
 
-  const timeSlots = [
-    '03:00 PM', '03:30 PM', '04:00 PM',
-    '04:30 PM', '05:00 PM', '05:30 PM'
-  ];
+  // Generate dates for next 14 days starting from tomorrow
+  const dates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1));
 
-  // Generate dates for next 60 days
-  const dates = Array.from({ length: 60 }, (_, i) => addDays(new Date(), i));
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/api/sessions/${sessionId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch session');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+          setSession(data.session);
+        } else {
+          throw new Error('Failed to fetch session');
+        }
+      } catch (error) {
+        console.error('Error fetching session:', error);
+        toast.error('Failed to load session details');
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      fetchSession();
+    }
+  }, [sessionId, navigate]);
 
   const scrollDates = (direction: 'left' | 'right') => {
     if (!dateSliderRef.current) return;
@@ -80,24 +132,87 @@ const BookingDetails: React.FC = () => {
     });
   };
 
+  const getWeekdayKey = (date: Date) => {
+    const day = date.toLocaleDateString(undefined, { weekday: 'long' }).toUpperCase();
+    return `${day}S`; // Match format like "MONDAYS"
+  };
+  
+
+  const getAvailableTimeSlots = (date: Date) => {
+    if (!session) return [];
+  
+    const dayKey = getWeekdayKey(date);
+    const timeSlot = session.timeSlots.find(slot => slot.day === dayKey);
+  
+    return timeSlot?.available ? timeSlot.timeRanges : [];
+  };
+  
+  const isDateAvailable = (date: Date) => {
+    if (!session) return false;
+  
+    const dayKey = getWeekdayKey(date);
+    const timeSlot = session.timeSlots.find(slot => slot.day === dayKey);
+  
+    return !!timeSlot?.available;
+  };
+
   const handleBooking = async () => {
+    if (!session || !selectedDate || !selectedTime) return;
+
     setBookingState({ ...bookingState, isLoading: true });
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setBookingState({
-      isLoading: false,
-      isSuccess: true,
-      meetingLink: 'https://meet.google.com/abc-defg-hij'
-    });
+    try {
+      const response = await fetch('http://localhost:9000/api/bookings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          date: selectedDate.toISOString(),
+          time: selectedTime,
+          timezone: selectedTimezone.value
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to book session');
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setBookingState({
+          isLoading: false,
+          isSuccess: true,
+          meetingLink: data.meetingLink
+        });
+      } else {
+        throw new Error('Failed to book session');
+      }
+    } catch (error) {
+      console.error('Error booking session:', error);
+      toast.error('Failed to book session. Please try again.');
+      setBookingState({ ...bookingState, isLoading: false });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-gray-700 hover:text-black mb-8"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -115,8 +230,8 @@ const BookingDetails: React.FC = () => {
                   className="w-24 h-24 rounded-full object-cover ring-4 ring-gray-100"
                 />
                 <div>
-                  <h1 className="text-2xl font-bold mb-2">Michael Chen</h1>
-                  <p className="text-gray-600 mb-2">Engineering Manager at Meta</p>
+                  <h1 className="text-2xl font-bold mb-2">{session.sessionName}</h1>
+                  <p className="text-gray-600 mb-2">{session.description}</p>
                   <div className="flex items-center gap-2 text-gray-700">
                     <Star className="w-5 h-5 fill-current text-yellow-400" />
                     <span>4.9 (1.2k+ sessions)</span>
@@ -127,7 +242,7 @@ const BookingDetails: React.FC = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2 text-gray-600">
                   <Clock className="w-5 h-5" />
-                  <span>45 minutes session</span>
+                  <span>{session.duration} minutes session</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Video className="w-5 h-5" />
@@ -135,21 +250,19 @@ const BookingDetails: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className="w-5 h-5" />
-                  <span>Seattle, WA</span>
+                  <span>Remote</span>
                 </div>
               </div>
 
               <div className="border-t border-gray-200 pt-6">
                 <h2 className="text-xl font-bold mb-4">About the Session</h2>
                 <p className="text-gray-600 mb-4">
-                  Get personalized guidance on software architecture, leadership, and career growth in tech. 
-                  Topics we can cover:
+                  {session.description}
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
-                  <li>System design and architecture principles</li>
-                  <li>Engineering leadership and team management</li>
-                  <li>Career progression in tech</li>
-                  <li>Interview preparation for senior roles</li>
+                  {session.topics.map((topic, index) => (
+                    <li key={index}>{topic}</li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -188,52 +301,57 @@ const BookingDetails: React.FC = () => {
                   className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {dates.map((date) => (
-                    <button
-                      key={date.toISOString()}
-                      onClick={() => setSelectedDate(date)}
-                      className={`flex-shrink-0 w-[80px] p-3 rounded-lg text-center transition-all duration-200 border ${
-                        selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                          ? 'bg-black text-white border-black'
-                          : 'hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-xs font-medium">{format(date, 'EEE')}</div>
-                      <div className="text-lg font-bold my-0.5">{format(date, 'd')}</div>
-                      <div className="text-xs">{format(date, 'MMM')}</div>
-                    </button>
-                  ))}
+                  {dates.map((date) => {
+                    const isAvailable = isDateAvailable(date);
+                    
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => isAvailable && setSelectedDate(date)}
+                        className={`flex-shrink-0 w-[80px] p-3 rounded-lg text-center transition-all duration-200 border ${
+                          selectedDate && isSameDay(selectedDate, date)
+                            ? 'bg-black text-white border-black'
+                            : isAvailable
+                              ? 'hover:bg-gray-50 border-gray-200'
+                              : 'opacity-50 cursor-not-allowed border-gray-200'
+                        }`}
+                      >
+                        <div className="text-xs font-medium">{format(date, 'EEE')}</div>
+                        <div className="text-lg font-bold my-0.5">{format(date, 'd')}</div>
+                        <div className="text-xs">{format(date, 'MMM')}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
             {/* Time Selection */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4">Select time of day</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {timeSlots.map((time) => (
-                  <button
-                    key={time}
-                    onClick={() => setSelectedTime(time)}
-                    className={`p-3 rounded-xl text-center transition-all duration-200 ${
-                      selectedTime === time
-                        ? 'bg-black text-white'
-                        : 'bg-gray-50 hover:bg-gray-100'
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
+            {selectedDate && (
+              <div className="mb-8">
+                <h3 className="text-lg font-medium mb-4">Select time of day</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {getAvailableTimeSlots(selectedDate).map((range) => (
+                    <button
+                      key={`${range.start}-${range.end}`}
+                      onClick={() => setSelectedTime(range.start)}
+                      className={`p-3 rounded-xl text-center transition-all duration-200 ${
+                        selectedTime === range.start
+                          ? 'bg-black text-white'
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                    >
+                      {range.start}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Timezone Dropdown */}
             <div className="mb-8 relative">
               <h3 className="text-lg font-medium mb-4">Timezone</h3>
-              <button
-                onClick={() => setIsTimezoneOpen(!isTimezoneOpen)}
-                className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
-              >
+              <div className="w-full flex items-center p-3 rounded-xl border border-gray-200 bg-gray-50">
                 <div className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-gray-600" />
                   <div className="text-left">
@@ -242,38 +360,7 @@ const BookingDetails: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <ChevronDown 
-                  className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
-                    isTimezoneOpen ? 'transform rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {/* Dropdown Menu */}
-              {isTimezoneOpen && (
-                <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                  {timezones.map((timezone) => (
-                    <button
-                      key={timezone.value}
-                      onClick={() => {
-                        setSelectedTimezone(timezone);
-                        setIsTimezoneOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-2 p-3 text-left hover:bg-gray-50 transition-colors ${
-                        selectedTimezone.value === timezone.value
-                          ? 'bg-gray-50'
-                          : ''
-                      }`}
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          ({timezone.offset}) {timezone.label}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Booking Button and Modal */}
@@ -289,7 +376,7 @@ const BookingDetails: React.FC = () => {
               {bookingState.isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : selectedDate && selectedTime ? (
-                'Book Session • ₹1,000'
+                `Book Session • ${session.isPaid ? `₹${session.price}` : 'Free'}`
               ) : (
                 'Select date and time to continue'
               )}
