@@ -3,6 +3,7 @@ interface User {
   email: string;
   role: string;
   token?: string;
+  userId: string;
 }
 
 export const setUserData = (userData: User) => {

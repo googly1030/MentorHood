@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   const handleDashboardClick = () => {
     const userData = getUserData();
     if (userData?.role === 'mentor') {
-      navigate('/dashboard');
+      navigate('/mentor-dashboard');
     } else if (userData?.role === 'user') {
       navigate('/mentee-dashboard');
     }

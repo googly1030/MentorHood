@@ -1,6 +1,8 @@
 import  { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, ArrowRight } from 'lucide-react';
+import { getUserData } from '../utils/auth';
+import { toast } from 'sonner';
 
 interface FormData {
   sessionName: string;
@@ -134,9 +136,8 @@ export function SessionForm({ formData, setFormData, onNext }: {
                     focus:ring-2 focus:ring-[#4937e8] focus:border-transparent transition-all duration-300
                     hover:border-[#4937e8] pl-12 appearance-none cursor-pointer"
                 >
-                  <option value="recurring">Recurring sessions</option>
-                  <option value="one-time">One-time session</option>
-                  <option value="workshop">Workshop</option>
+                  <option value="one-on-one">One-on-One Session</option>
+                  <option value="group-session">Group Session</option>
                 </select>
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                   🔄
@@ -463,11 +464,12 @@ export function AvailabilityForm({ timeSlots, setTimeSlots, onBack, onNext }: {
   );
 }
 
-export function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
+export function ReviewForm({ formData, timeSlots, onBack, onSubmit, finalText }: {
     formData: FormData;
     timeSlots: TimeSlot[];
     onBack: () => void;
     onSubmit: () => void;
+    finalText: string;
   }) {
     return (
       <div className="bg-white p-8">
@@ -610,7 +612,7 @@ export function ReviewForm({ formData, timeSlots, onBack, onSubmit }: {
             onClick={onSubmit}
             className="flex items-center gap-2 bg-[#4937e8] hover:bg-[#4338ca] text-white px-8 py-3 rounded-lg font-medium transition-all duration-300"
           >
-            Create Session
+            {finalText} Session
             <svg
               className="w-5 h-5"
               fill="none"
@@ -629,10 +631,10 @@ function CreateSession() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    sessionName: '1:1 Mentorship with Felix',
+    sessionName: '',
     description: '',
     duration: '30',
-    sessionType: 'recurring',
+    sessionType: 'one-on-one',
     numberOfSessions: '1',
     occurrence: OCCURRENCE_OPTIONS[0],
     topics: [],
@@ -652,9 +654,16 @@ function CreateSession() {
 
   const handleSubmit = async () => {
     try {
+      const userData = getUserData();
+      if (!userData) {
+        toast.error('Please login to create a session');
+        navigate('/login');
+        return;
+      }
+
       const sessionData = {
         ...formData,
-        mentorId: "current-user-id", // You should replace this with actual mentor ID from your auth system
+        userId: userData.userId,
         timeSlots: timeSlots
       };
 
@@ -672,14 +681,14 @@ function CreateSession() {
 
       const result = await response.json();
       if (result.status === 'success') {
-        console.log('Session created successfully with ID:', result.sessionId);
-        navigate('/dashboard/');
+        toast.success('Session created successfully!');
+        navigate('/mentor-dashboard/');
       } else {
         throw new Error('Failed to create session');
       }
     } catch (error) {
       console.error('Error creating session:', error);
-      // You might want to show an error message to the user here
+      toast.error('Failed to create session. Please try again.');
     }
   };
 
@@ -741,6 +750,7 @@ function CreateSession() {
               timeSlots={timeSlots}
               onBack={() => setStep(2)}
               onSubmit={handleSubmit}
+              finalText='Create'
             />
           )}
         </div>

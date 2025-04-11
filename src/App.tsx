@@ -13,7 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 import MentorProfileForm from './components/MentorProfileForm';
-import Dashboard from './pages/Dashboard';
+import MentorDashboard from './pages/MentorDashboard';
 import CreateSession from './pages/CreateSession';
 import MenteeDashboard from './pages/MenteeDashboard';
 import EditSession from './pages/EditSession';
@@ -26,7 +26,7 @@ function App() {
         <Header />
         <main className="flex-grow">
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/mentor-dashboard" element={<MentorDashboard />} />
             <Route path="/mentee-dashboard" element={<MenteeDashboard />} />
             <Route 
               path="/register" 
@@ -51,7 +51,7 @@ function App() {
                 <HomePageLanding />
               </ProtectedRoute>
             } />
-            <Route path="/profile/:id" element={
+            <Route path="/profile/:mentorId" element={
               <ProtectedRoute>
                 <UserProfile />
               </ProtectedRoute>

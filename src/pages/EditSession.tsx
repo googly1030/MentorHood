@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { SessionForm, AvailabilityForm, ReviewForm } from './CreateSession';
+import { getUserData } from '../utils/auth';
+import { toast } from 'sonner';
 
 interface FormData {
   sessionName: string;
@@ -28,11 +30,11 @@ interface TimeSlot {
   timeRanges: TimeRange[];
 }
 
-const TOPICS = [
-  'UX Design', 'Product Management', 'Web Development',
-  'Mobile Development', 'Data Science', 'Marketing',
-  'Leadership', 'Career Development', 'Entrepreneurship'
-];
+// const TOPICS = [
+//   'UX Design', 'Product Management', 'Web Development',
+//   'Mobile Development', 'Data Science', 'Marketing',
+//   'Leadership', 'Career Development', 'Entrepreneurship'
+// ];
 
 const OCCURRENCE_OPTIONS = [
   'Repeats every week',
@@ -54,7 +56,7 @@ function EditSession() {
     sessionName: '',
     description: '',
     duration: '30',
-    sessionType: 'recurring',
+    sessionType: 'one-on-one',
     numberOfSessions: '1',
     occurrence: OCCURRENCE_OPTIONS[0],
     topics: [],
@@ -80,20 +82,20 @@ function EditSession() {
           throw new Error('Failed to fetch session');
         }
         const data = await response.json();
-        if (data.status === 'success' && data.session) {
+        if (data.status === 'success') {
           const session = data.session;
           setFormData({
-            sessionName: session.sessionName || '',
+            sessionName: session.sessionName,
             description: session.description || '',
-            duration: session.duration || '30',
-            sessionType: session.sessionType || 'recurring',
-            numberOfSessions: session.numberOfSessions || '1',
-            occurrence: session.occurrence || OCCURRENCE_OPTIONS[0],
+            duration: session.duration.toString(),
+            sessionType: session.sessionType,
+            numberOfSessions: '1',
+            occurrence: OCCURRENCE_OPTIONS[0],
             topics: session.topics || [],
             allowMenteeTopics: session.allowMenteeTopics || false,
             showOnProfile: session.showOnProfile || true,
             isPaid: session.isPaid || false,
-            price: session.price || '0'
+            price: session.price?.toString() || '0'
           });
           setTimeSlots(session.timeSlots || DAYS.map(day => ({
             day,
@@ -103,19 +105,28 @@ function EditSession() {
         }
       } catch (error) {
         console.error('Error fetching session:', error);
+        toast.error('Failed to load session data');
+        navigate('/mentor-dashboard');
       }
     };
 
     if (sessionId) {
       fetchSession();
     }
-  }, [sessionId]);
+  }, [sessionId, navigate]);
 
   const handleSubmit = async () => {
     try {
+      const userData = getUserData();
+      if (!userData) {
+        toast.error('Please login to edit session');
+        navigate('/login');
+        return;
+      }
+
       const sessionData = {
         ...formData,
-        mentorId: "current-user-id", // Replace with actual mentor ID
+        userId: userData.userId,
         timeSlots: timeSlots
       };
 
@@ -133,12 +144,14 @@ function EditSession() {
 
       const result = await response.json();
       if (result.status === 'success') {
-        navigate('/dashboard/');
+        toast.success('Session updated successfully!');
+        navigate('/mentor-dashboard/');
       } else {
         throw new Error('Failed to update session');
       }
     } catch (error) {
       console.error('Error updating session:', error);
+      toast.error('Failed to update session. Please try again.');
     }
   };
 
@@ -155,7 +168,7 @@ function EditSession() {
 
         const result = await response.json();
         if (result.status === 'success') {
-          navigate('/dashboard/');
+          navigate('/mentor-dashboard/');
         } else {
           throw new Error('Failed to delete session');
         }
@@ -170,7 +183,7 @@ function EditSession() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <button
-            onClick={() => navigate('/dashboard/')}
+            onClick={() => navigate('/mentor-dashboard/')}
             className="flex items-center gap-2 text-gray-600 hover:text-[#4937e8] transition-colors duration-300"
           >
             <ArrowLeft size={20} />
@@ -232,6 +245,7 @@ function EditSession() {
               timeSlots={timeSlots}
               onBack={() => setStep(2)}
               onSubmit={handleSubmit}
+              finalText='Edit'
             />
           )}
         </div>

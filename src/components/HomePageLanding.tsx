@@ -579,7 +579,7 @@ function App() {
                 onClick={() => {
                   const userData = getUserData();
                   if (userData?.role === 'mentor') {
-                    navigate('/dashboard');
+                    navigate('/mentor-dashboard');
                   } else {
                     navigate('/register', { 
                       state: { defaultRole: 'mentor' } 
@@ -684,7 +684,7 @@ function App() {
               </p>
             </div>
             <button 
-              onClick={() => navigate('/mentors?tab=group-sessions')} 
+              onClick={() => navigate('/mentors?tab=group-session')} 
               className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
             >
               View All Sessions
