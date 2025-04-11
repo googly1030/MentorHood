@@ -88,7 +88,7 @@ function EditSession() {
             sessionName: session.sessionName,
             description: session.description || '',
             duration: session.duration.toString(),
-            sessionType: session.type,
+            sessionType: session.sessionType,
             numberOfSessions: '1',
             occurrence: OCCURRENCE_OPTIONS[0],
             topics: session.topics || [],
