@@ -88,6 +88,10 @@ interface MentorProfile {
   }>;
   image?: string;
   companyLogo?: string;
+  services?: Array<{
+    price: string;
+    rating: number;
+  }>;
 }
 
 const mentors: Mentor[] = [
@@ -261,49 +265,31 @@ const AllMentors = () => {
     { id: 'venture-capital', name: 'Venture Capital', icon: Rocket }
   ];
 
-  // Add this filtering logic function
-  const filterMentors = (mentors: Mentor[]) => {
-    const filtered = mentors.filter(mentor => {
+  // Filter mentors based on search and filters
+  const filterMentors = (mentors: MentorProfile[]) => {
+    return mentors.filter(mentor => {
       // Search query filter
       if (searchQuery) {
         const searchLower = searchQuery.toLowerCase();
         const matchesSearch = 
           mentor.name.toLowerCase().includes(searchLower) ||
-          mentor.role.toLowerCase().includes(searchLower) ||
-          mentor.specialization.toLowerCase().includes(searchLower) ||
-          mentor.location.toLowerCase().includes(searchLower);
+          mentor.headline.toLowerCase().includes(searchLower) ||
+          mentor.primaryExpertise.toLowerCase().includes(searchLower) ||
+          mentor.skills.some(skill => skill.toLowerCase().includes(searchLower));
         
         if (!matchesSearch) return false;
       }
 
       // Filter buttons logic
-      if (filters.isPremium && mentor.rating < 4.8) return false;
-      if (filters.quickResponse && mentor.availability !== "Next available: Today") return false;
-      if (filters.mostVisited && mentor.category !== 'most-visited') return false;
-      if (filters.serviceBasedExperts && mentor.category !== 'service-based') return false;
-      if (filters.ventureCapital && mentor.category !== 'venture-capital') return false;
-      if (filters.hotSeller && mentor.bookings < 1200) return false;
+      if (filters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
+      if (filters.quickResponse) return true; // Since we don't have this data, we'll show all
+      if (filters.mostVisited && mentor.reviews?.length < 2) return false;
+      if (filters.serviceBasedExperts && mentor.services?.length === 0) return false;
+      if (filters.ventureCapital) return true; // Since we don't have this data, we'll show all
+      if (filters.hotSeller && mentor.services?.some(service => service.rating >= 4.8)) return false;
 
       return true;
     });
-
-    // Apply sorting
-    if (sortBy) {
-      filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'rating':
-            return b.rating - a.rating;
-          case 'price':
-            return parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, ''));
-          case 'bookings':
-            return b.bookings - a.bookings;
-          default:
-            return 0;
-        }
-      });
-    }
-
-    return filtered;
   };
 
   // Add these handler functions
@@ -532,77 +518,75 @@ const AllMentors = () => {
         </div>
       ) : activeTab === 'all-mentors' ? (
         // Mentors Grid
-        <>
-          <div className="max-w-6xl mx-auto px-4 pb-16">
-            {categories.map(({ id, name }) => {
-              const filteredMentors = filterMentors(mentors.filter(m => m.category === id));
-              
-              return filteredMentors.length > 0 ? (
-                <div key={id} className={`${activeCategory === id ? 'block' : 'hidden'}`}>
-                  <h2 className="text-2xl font-bold mb-8 bg-gradient-to-r from-gray-700 to-gray-800 bg-clip-text text-transparent">
-                    {name}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredMentors.map(mentor => (
-                      <div
-                        key={mentor.id}
-                        className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
-                      >
-                        <div className="flex items-start gap-4 mb-4">
-                          <img
-                            src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
-                            alt={mentor.name}
-                            className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
-                          />
-                          {mentor.companyLogo && (
-                            <img
-                              src={mentor.companyLogo}
-                              alt="Company"
-                              className="w-6 h-6 rounded-full absolute top-4 right-4"
-                            />
-                          )}
-                        </div>
+        <div className="max-w-6xl mx-auto px-4 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filterMentors(mentorProfiles).map(mentor => (
+              <div
+                key={mentor.userId}
+                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <img
+                    src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                    alt={mentor.name}
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
+                  />
+                </div>
 
-                        <h3 className="font-semibold text-lg mb-1">{mentor.name}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{mentor.role}</p>
+                <h3 className="font-semibold text-lg mb-1">{mentor.name}</h3>
+                <p className="text-gray-600 text-sm mb-2">{mentor.headline}</p>
 
-                        <div className="flex items-center gap-2 mb-4">
-                          <Star size={16} className="text-gray-700 fill-current" />
-                          <span className="font-medium">{mentor.rating}</span>
-                          <span className="text-gray-500">•</span>
-                          <span className="text-gray-600">{mentor.bookings}+ sessions</span>
-                        </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Star size={16} className="text-gray-700 fill-current" />
+                  <span className="font-medium">
+                    {mentor.reviews?.length > 0 
+                      ? (mentor.reviews.reduce((acc, rev) => acc + rev.rating, 0) / mentor.reviews.length).toFixed(1)
+                      : "New"}
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-600">{mentor.reviews?.length || 0} reviews</span>
+                </div>
 
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin size={14} className="text-gray-700" />
-                            <span>{mentor.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Clock size={14} className="text-gray-700" />
-                            <span>{mentor.availability}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-bold text-gray-700">{mentor.price}</span>
-                          <span className="text-sm text-gray-500">{mentor.experience}</span>
-                        </div>
-
-                        <button
-                          onClick={() => navigate(`/profile/${mentor.id}`)}
-                          className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 transition-colors"
-                        >
-                          View Profile
-                        </button>
-                      </div>
-                    ))}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Briefcase size={14} className="text-gray-700" />
+                    <span>{mentor.primaryExpertise}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={14} className="text-gray-700" />
+                    <span>{mentor.totalExperience.years}+ years experience</span>
                   </div>
                 </div>
-              ) : null;
-            })}
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {mentor.skills.slice(0, 3).map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-lg font-bold text-gray-700">
+                    {mentor.services && mentor.services.length > 0 
+                      ? `₹${Math.min(...mentor.services.map(s => Number(s.price)))}/session`
+                      : 'Price varies'}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => navigate(`/profile/${mentor.userId}`)}
+                  className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 transition-colors"
+                >
+                  View Profile
+                </button>
+              </div>
+            ))}
           </div>
-        </>
+        </div>
       ) : activeTab === 'one-on-one' ? (
         // One on One Sessions Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
@@ -622,13 +606,6 @@ const AllMentors = () => {
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                     />
-                    {mentor.companyLogo && (
-                      <img
-                        src={mentor.companyLogo}
-                        alt="Company"
-                        className="w-6 h-6 rounded-full absolute top-4 right-4"
-                      />
-                    )}
                   </div>
 
                   <h3 className="font-semibold text-lg mb-1">{session.sessionName}</h3>
@@ -665,9 +642,6 @@ const AllMentors = () => {
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-lg font-bold text-gray-700">
                       {session.isPaid ? `₹${session.price}` : 'Free'}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {`${mentor.totalExperience.years}+ years experience`}
                     </span>
                   </div>
 

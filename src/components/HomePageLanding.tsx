@@ -1268,7 +1268,7 @@ function App() {
         </div>
       </section>
 
-      <section className="bg-white py-24 relative overflow-hidden">
+      {/* <section className="bg-white py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
@@ -1282,7 +1282,6 @@ function App() {
             our AI do the magic
           </p>
 
-          {/* Search Input */}
           <div className="max-w-4xl mx-auto mb-16">
             <div className="relative">
               <input
@@ -1299,7 +1298,6 @@ function App() {
             </div>
           </div>
 
-          {/* Suggestion Cards */}
           <div className="relative w-full overflow-hidden">
             <div
               ref={sliderRef}
@@ -1331,7 +1329,7 @@ function App() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
