@@ -4,6 +4,7 @@ from app.routes import user as user_routes
 from app.routes import questionnaire as questionnaire_routes
 from app.routes import session as session_routes
 from app.utils.email import email_sender
+from app.routes import mentor as mentor_routes
 
 app = FastAPI()
 
@@ -15,7 +16,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Specify exact origins instead of "*"
+    allow_origins=origins,  # Use specific origins instead of "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(user_routes.router, prefix="/api")
 app.include_router(questionnaire_routes.router)
 app.include_router(session_routes.router)
+app.include_router(mentor_routes.router)
 
 @app.get("/")
 def read_root():

@@ -51,7 +51,7 @@ function App() {
                 <HomePageLanding />
               </ProtectedRoute>
             } />
-            <Route path="/profile/:id" element={
+            <Route path="/profile/:mentorId" element={
               <ProtectedRoute>
                 <UserProfile />
               </ProtectedRoute>

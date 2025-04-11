@@ -136,9 +136,8 @@ export function SessionForm({ formData, setFormData, onNext }: {
                     focus:ring-2 focus:ring-[#4937e8] focus:border-transparent transition-all duration-300
                     hover:border-[#4937e8] pl-12 appearance-none cursor-pointer"
                 >
-                  <option value="recurring">Recurring sessions</option>
-                  <option value="one-time">One-time session</option>
-                  <option value="workshop">Workshop</option>
+                  <option value="one-on-one">One-on-One Session</option>
+                  <option value="group-session">Group Session</option>
                 </select>
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                   🔄
@@ -632,10 +631,10 @@ function CreateSession() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    sessionName: '1:1 Mentorship with Felix',
+    sessionName: '',
     description: '',
     duration: '30',
-    sessionType: 'recurring',
+    sessionType: 'one-on-one',
     numberOfSessions: '1',
     occurrence: OCCURRENCE_OPTIONS[0],
     topics: [],
