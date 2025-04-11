@@ -18,45 +18,48 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, field_schema: dict, field: Any) -> None:
         field_schema.update(type="string")
 
-class AuthorBase(BaseModel):
+class Author(BaseModel):
     id: str
     name: str
     initials: str
-    image: Optional[str] = None
 
 class QuestionnaireBase(BaseModel):
     title: str
     content: str
-    category_id: str
+    category_id: Optional[str] = None
+    session_id: Optional[str] = None
 
 class QuestionnaireCreate(QuestionnaireBase):
     pass
 
 class Questionnaire(QuestionnaireBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    authors: List[AuthorBase]
-    upvotes: int
-    answers: int
-    timestamp: datetime
-    created_at: datetime
-    updated_at: datetime
+    authors: List[Author]
+    upvotes: int = 0
+    answers: int = 0
+    timestamp: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         json_encoders = {ObjectId: str}
         populate_by_name = True
         arbitrary_types_allowed = True
 
-class AnswerCreate(BaseModel):
+class AnswerBase(BaseModel):
     content: str
-    author: AuthorBase
+    author: Author
     question_id: str
 
-class Answer(AnswerCreate):
+class AnswerCreate(AnswerBase):
+    pass
+
+class Answer(AnswerBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     upvotes: int = 0
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         json_encoders = {ObjectId: str}

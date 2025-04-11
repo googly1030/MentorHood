@@ -46,7 +46,6 @@ export default function QuestionSection() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -55,9 +54,7 @@ export default function QuestionSection() {
   // Fetch session details when component mounts
   useEffect(() => {
     const fetchSessionDetails = async () => {
-      console.log(params);
       const sessionId = params.sessionId;
-      console.log(sessionId);
       if (!sessionId) {
         setSessionError("No session ID provided");
         setSessionLoading(false);
@@ -234,7 +231,6 @@ export default function QuestionSection() {
 
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
   
     try {
       const response = await fetch('http://localhost:9000/api/questionnaires/register', {
@@ -242,42 +238,86 @@ export default function QuestionSection() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ 
+          email,
+          session_id: sessionId 
+        }),
       });
   
       if (response.ok) {
         setShowSuccessMessage(true);
         setTimeout(() => {
           setShowSuccessMessage(false);
-          setIsSubmitting(false);
           setIsWaitlistModalOpen(false);
           setEmail('');
         }, 2000);
       } else {
-        throw new Error('Registration failed');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
       }
     } catch (error) {
       console.error('Error joining waitlist:', error);
-      setIsSubmitting(false);
+      // Show error message to user
+      alert(error instanceof Error ? error.message : 'Registration failed');
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('http://localhost:9000/api/registrations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: registrationEmail,
+          session_id: sessionId,
+          name: '',  // Optional fields
+          company: '',
+          role: ''
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
+      }
       
       setIsRegistered(true);
       setTimeout(() => {
-        setIsRegisterModalOpen(true);
+        setIsRegisterModalOpen(false);
         setIsRegistered(false);
         setRegistrationEmail('');
       }, 2000);
     } catch (error) {
       console.error('Error registering for session:', error);
+      // Show error message to user
+      alert(error instanceof Error ? error.message : 'Registration failed');
     }
   };
+
+  // Check if user is already registered when component mounts
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (!sessionId || !email) return;
+      
+      try {
+        const response = await fetch(`http://localhost:9000/api/questionnaires/check-registration/${sessionId}/${email}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.is_registered) {
+            // User is already registered, update UI accordingly
+            setIsRegistered(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking registration status:', error);
+      }
+    };
+    
+    checkRegistrationStatus();
+  }, [sessionId, email]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -355,25 +395,27 @@ export default function QuestionSection() {
                 <p className="text-gray-700 mb-6">{sessionDetails.description}</p>
                 
                 <div className="flex flex-wrap gap-4">
-                  <button
-                    onClick={(e) => handleWaitlistSubmit(e)}
-                    disabled={isSubmitting}
-                    className={`px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
-                      transition-all duration-300 transform hover:scale-105 shadow-lg 
-                      flex items-center gap-2 font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Registering...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CalendarIcon size={18} />
-                        Register Now
-                      </>
-                    )}
-                  </button>
+                  {isRegistered ? (
+                    <button
+                      disabled
+                      className="px-6 py-3 rounded-xl bg-gray-300 text-white 
+                        transition-all duration-300 transform shadow-lg 
+                        flex items-center gap-2 font-medium cursor-not-allowed"
+                    >
+                      <Check size={18} />
+                      Already Registered
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                        transition-all duration-300 transform hover:scale-105 shadow-lg 
+                        flex items-center gap-2 font-medium"
+                    >
+                      <CalendarIcon size={18} />
+                      Register Now
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -693,10 +735,10 @@ export default function QuestionSection() {
                   <Check size={48} className="mx-auto" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  You're registered!
+                  You're already registered!
                 </h3>
                 <p className="text-gray-600">
-                  We'll send you a reminder before the session starts.
+                  You've already registered for this session. We'll send you a reminder before it starts.
                 </p>
               </div>
             ) : (

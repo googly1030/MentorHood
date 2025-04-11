@@ -16,18 +16,26 @@ router = APIRouter(
 # Define a schema for the registration request
 class RegistrationRequest(BaseModel):
     email: EmailStr
+    session_id: str
 
 @router.get("/", response_model=List[QuestionnaireSchema])
 async def list_questionnaires(
     skip: int = 0,
     limit: int = 10,
     category_id: str = None,
+    session_id: str = None,
     sort_by: str = "timestamp"  # Default sort by timestamp (newest first)
 ):
     collection = get_collection("questionnaires")
     query = {}
     if category_id and category_id != "all":
         query["category_id"] = category_id
+    
+    # Add session_id filter if provided
+    if session_id:
+        if not ObjectId.is_valid(session_id):
+            raise HTTPException(status_code=400, detail="Invalid session ID")
+        query["session_id"] = session_id
     
     # Determine sort order based on sort_by parameter
     sort_order = -1  # Default to descending (newest first)
@@ -60,6 +68,17 @@ async def create_questionnaire(questionnaire: QuestionnaireCreate):
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     })
+    
+    # If session_id is provided, validate it
+    if questionnaire_dict.get("session_id"):
+        if not ObjectId.is_valid(questionnaire_dict["session_id"]):
+            raise HTTPException(status_code=400, detail="Invalid session ID")
+        
+        # Check if the session exists
+        ama_sessions_collection = get_collection("ama_sessions")
+        session = await ama_sessions_collection.find_one({"_id": ObjectId(questionnaire_dict["session_id"])})
+        if session is None:
+            raise HTTPException(status_code=404, detail="Session not found")
     
     result = await collection.insert_one(questionnaire_dict)
     created_questionnaire = await collection.find_one({"_id": result.inserted_id})
@@ -173,11 +192,51 @@ async def get_questionnaire_answers(
 @router.post("/register", response_model=dict)
 async def register_user(registration: RegistrationRequest):
     """
-    Register a user and send a confirmation email.
+    Register a user for an AMA session and send a confirmation email.
     """
     try:
+        # Check if the session exists
+        if not ObjectId.is_valid(registration.session_id):
+            raise HTTPException(status_code=400, detail="Invalid session ID")
+        
+        ama_sessions_collection = get_collection("ama_sessions")
+        session = await ama_sessions_collection.find_one({"_id": ObjectId(registration.session_id)})
+        if session is None:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Check if the user is already registered
+        registrations_collection = get_collection("registrations")
+        existing_registration = await registrations_collection.find_one({
+            "email": registration.email,
+            "session_id": registration.session_id
+        })
+        
+        if existing_registration:
+            raise HTTPException(status_code=400, detail="You are already registered for this session")
+        
+        # Check if the session is full
+        if session["registrants"] >= session["maxRegistrants"]:
+            raise HTTPException(status_code=400, detail="Session is full")
+        
+        # Create the registration document
+        registration_dict = {
+            "email": registration.email,
+            "session_id": registration.session_id,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Insert the registration
+        await registrations_collection.insert_one(registration_dict)
+        
+        # Increment the registrants count in the session
+        await ama_sessions_collection.update_one(
+            {"_id": ObjectId(registration.session_id)},
+            {"$inc": {"registrants": 1}, "$set": {"updated_at": datetime.utcnow()}}
+        )
+        
         # Send confirmation email
-        subject = "Registration Confirmation - MentorHood"
+        subject = f"Registration Confirmation - {session['title']}"
         body = f"""
         <html>
             <head>
@@ -221,27 +280,12 @@ async def register_user(registration: RegistrationRequest):
                         margin-bottom: 16px;
                         font-size: 16px;
                     }}
-                    .cta-button {{
-                        display: inline-block;
-                        background-color: #000000;
-                        color: #ffffff !important;
-                        text-decoration: none;
-                        padding: 12px 24px;
-                        border-radius: 4px;
-                        font-weight: bold;
-                        margin: 20px 0;
-                    }}
-                    .meet-link {{
+                    .session-details {{
                         background-color: #f5f5f5;
                         border: 1px solid #e0e0e0;
                         padding: 15px;
                         border-radius: 4px;
                         margin: 20px 0;
-                    }}
-                    .meet-link a {{
-                        color: #1a73e8;
-                        text-decoration: none;
-                        font-weight: 500;
                     }}
                     .email-footer {{
                         background-color: #f5f5f5;
@@ -249,15 +293,6 @@ async def register_user(registration: RegistrationRequest):
                         text-align: center;
                         font-size: 14px;
                         color: #666666;
-                    }}
-                    .social-links {{
-                        margin-top: 15px;
-                    }}
-                    .social-links a {{
-                        display: inline-block;
-                        margin: 0 10px;
-                        color: #666666;
-                        text-decoration: none;
                     }}
                 </style>
             </head>
@@ -268,22 +303,19 @@ async def register_user(registration: RegistrationRequest):
                     </div>
                     
                     <div class="email-body">
-                        <h2>Thank you for registering with MentorHood!</h2>
+                        <h2>You're registered for {session['title']}!</h2>
                         
-                        <p>We're excited to have you join our community of mentors and mentees. At MentorHood, we believe in the power of knowledge sharing and professional growth.</p>
+                        <p>Thank you for registering for our upcoming AMA session. We're excited to have you join us!</p>
                         
-                        <p>You can now access all our features and start connecting with others. Explore our platform to find the perfect mentor match for your career goals.</p>
-                        
-                        <div class="meet-link">
-                            <p><strong>Join our new member orientation:</strong></p>
-                            <p>We'd love to welcome you personally to our community. Join our upcoming orientation meeting to learn how to make the most of your MentorHood experience.</p>
-                            <a href="https://meet.google.com/abc-defg-hij" target="_blank">https://meet.google.com/abc-defg-hij</a>
-                            <p><small>Date: Next Friday at 3:00 PM EST</small></p>
+                        <div class="session-details">
+                            <p><strong>Session:</strong> {session['title']}</p>
+                            <p><strong>Date:</strong> {session['date']}</p>
+                            <p><strong>Time:</strong> {session['time']}</p>
+                            <p><strong>Duration:</strong> {session['duration']}</p>
+                            <p><strong>Host:</strong> {session['mentor']['name']}, {session['mentor']['role']}</p>
                         </div>
                         
-                        <p>Get started by completing your profile and browsing available mentors in your field of interest.</p>
-                        
-                        <a href="" class="cta-button">Complete Your Profile</a>
+                        <p>We'll send you a reminder before the session starts. In the meantime, feel free to prepare your questions!</p>
                         
                         <p>If you have any questions, feel free to reach out to our support team at <a href="mailto:support@mentorhood.com">support@mentorhood.com</a>.</p>
                         
@@ -293,12 +325,6 @@ async def register_user(registration: RegistrationRequest):
                     <div class="email-footer">
                         <p>© 2025 MentorHood. All rights reserved.</p>
                         <p>123 Mentorship Avenue, Knowledge City, CA 94103</p>
-                        <div class="social-links">
-                            <a href="#">Twitter</a> | 
-                            <a href="#">LinkedIn</a> | 
-                            <a href="#">Instagram</a>
-                        </div>
-                        <p><small>You're receiving this email because you signed up for MentorHood.</small></p>
                     </div>
                 </div>
             </body>
@@ -318,3 +344,20 @@ async def register_user(registration: RegistrationRequest):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+
+@router.get("/check-registration/{session_id}/{email}", response_model=dict)
+async def check_registration(session_id: str, email: str):
+    """
+    Check if a user is already registered for a session.
+    """
+    registrations_collection = get_collection("registrations")
+    
+    if not ObjectId.is_valid(session_id):
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+    
+    registration = await registrations_collection.find_one({
+        "email": email,
+        "session_id": session_id
+    })
+    
+    return {"is_registered": registration is not None}
