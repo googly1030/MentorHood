@@ -206,12 +206,12 @@ const AllMentors = () => {
 
   // Get the tab from URL parameters
   const searchParams = new URLSearchParams(window.location.search);
-  const defaultTab = searchParams.get('tab') === 'group-sessions' ? 'group-sessions' : 'all-mentors';
+  const defaultTab = searchParams.get('tab') === 'group-session' ? 'group-session' : 'all-mentors';
   
-  const [activeTab, setActiveTab] = useState<'all-mentors' | 'group-sessions'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'all-mentors' | 'group-session'>(defaultTab);
 
   // Modify the setActiveTab function to update the URL
-  const handleTabChange = (tab: 'all-mentors' | 'group-sessions') => {
+  const handleTabChange = (tab: 'all-mentors' | 'group-session') => {
     setActiveTab(tab);
     navigate(`/mentors?tab=${tab}`, { replace: true });
   };
@@ -425,12 +425,12 @@ const AllMentors = () => {
             </button>
             <button
               className={`text-xl font-medium px-4 py-2 relative ${
-                activeTab === "group-sessions" ? "text-[#4937e8]" : "text-gray-500"
+                activeTab === "group-session" ? "text-[#4937e8]" : "text-gray-500"
               }`}
-              onClick={() => handleTabChange("group-sessions")}
+              onClick={() => handleTabChange("group-session")}
             >
               Group Sessions
-              {activeTab === "group-sessions" && (
+              {activeTab === "group-session" && (
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#4937e8]"></div>
               )}
             </button>
