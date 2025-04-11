@@ -30,7 +30,7 @@ class QuestionnaireBase(BaseModel):
     session_id: Optional[str] = None
 
 class QuestionnaireCreate(QuestionnaireBase):
-    pass
+    author: Optional[Author] = None
 
 class Questionnaire(QuestionnaireBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")

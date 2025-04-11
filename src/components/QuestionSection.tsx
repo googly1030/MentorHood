@@ -33,7 +33,7 @@ export default function QuestionSection() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [answer, setAnswer] = useState('');
-  const [activeCategory] = useState('all');
+  const [activeCategory] = useState(sessionId);
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -41,10 +41,10 @@ export default function QuestionSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'timestamp' | 'upvotes'>('timestamp');
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [isEmailSent ] = useState(false);
+  const [email, setEmail] = useState(JSON.parse(localStorage.getItem('user') || '{}').email || '');
+  const [isEmailSent] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [registrationEmail, setRegistrationEmail] = useState('');
+  const [registrationEmail, setRegistrationEmail] = useState(JSON.parse(localStorage.getItem('user') || '{}').email || '');
   const [isRegistered, setIsRegistered] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
@@ -153,6 +153,14 @@ export default function QuestionSection() {
   const submitQuestion = async () => {
     if (!title.trim() || !content.trim()) return;
 
+    // Get user details from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const author = {
+      id: user.userId || 'current-user',
+      name: user.username || 'Current User',
+      initials: user.username ? user.username.substring(0, 2).toUpperCase() : 'CU'
+    };
+
     const response = await fetch('http://localhost:9000/api/questionnaires', {
       method: 'POST',
       headers: {
@@ -161,7 +169,9 @@ export default function QuestionSection() {
       body: JSON.stringify({
         title: title,
         content: content,
-        category_id: activeCategory
+        category_id: activeCategory,
+        session_id: sessionId,
+        author: author
       })
     });
     const newQuestionnaire = await response.json();
@@ -180,9 +190,9 @@ export default function QuestionSection() {
       const answerData = {
         content: answer,
         author: {
-          id: 'current-user',
-          name: 'Current User',
-          initials: 'CU'
+          id: JSON.parse(localStorage.getItem('user') || '{}').userId,
+          name: JSON.parse(localStorage.getItem('user') || '{}').username,
+          initials: JSON.parse(localStorage.getItem('user') || '{}').username.substring(0, 2).toUpperCase()
         },
         question_id: currentQuestion._id
       };
@@ -249,7 +259,6 @@ export default function QuestionSection() {
         setTimeout(() => {
           setShowSuccessMessage(false);
           setIsWaitlistModalOpen(false);
-          setEmail('');
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -407,7 +416,7 @@ export default function QuestionSection() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => setIsRegisterModalOpen(true)}
+                      onClick={handleRegisterSubmit}
                       className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
                         transition-all duration-300 transform hover:scale-105 shadow-lg 
                         flex items-center gap-2 font-medium"
