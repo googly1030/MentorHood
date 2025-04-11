@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Heart, MoreHorizontal, Rocket, Trophy, Users, Sun, Moon, Star, Edit, Settings2 } from 'lucide-react';
+import { Rocket, Trophy, Users, Sun, Moon, Star, Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getUserData } from '../utils/auth';
 
 interface Service {
   _id: string;
@@ -30,17 +31,78 @@ enum TabType {
   SERVICES = 'services'
 }
 
-interface Review {
-  id: number;
-  user: {
-    name: string;
-    image: string;
-    role: string;
-  };
-  rating: number;
-  comment: string;
-  date: string;
-}
+const EMPTY_MENTOR_PROFILE = {
+  userId: '',
+  name: '',
+  headline: 'Professional Developer',
+  membership: 'Member of MentorHood',
+  totalExperience: {
+    years: 0,
+    months: 0
+  },
+  experience: [
+    {
+      title: 'Developer',
+      company: '',
+      description: 'Professional Developer',
+      duration: '0 years'
+    }
+  ],
+  projects: [
+    {
+      title: 'Project Initiative',
+      description: 'Description of the project'
+    }
+  ],
+  resources: [
+    {
+      title: 'Resource Toolkit',
+      description: 'A comprehensive guide.',
+      linkText: 'Download →'
+    }
+  ],
+  services: [
+    {
+      id: 1,
+      title: 'Mentorship Session',
+      duration: '30 minutes',
+      type: 'Video Call',
+      frequency: 'Weekly',
+      sessions: 1,
+      price: 0,
+      rating: 5
+    }
+  ],
+  groupSessions: [
+    {
+      id: 1,
+      title: 'Group Workshop',
+      date: new Date().toISOString().split('T')[0],
+      time: '10:00 AM - 11:00 AM',
+      participants: 0,
+      maxParticipants: 10,
+      price: 0
+    }
+  ],
+  achievements: [
+    {
+      id: 1,
+      title: 'New Mentor',
+      description: 'Joined the MentorHood community',
+      date: new Date().toLocaleDateString()
+    }
+  ],
+  reviews: [],
+  testimonials: [],
+  linkedinUrl: '',
+  githubUrl: '',
+  primaryExpertise: 'Development',
+  disciplines: ['Development'],
+  skills: ['Programming'],
+  mentoringTopics: ['Technical Skills'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
 
 function App() {
   const navigate = useNavigate();
@@ -87,13 +149,45 @@ function App() {
       try {
         const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch mentor profile');
-        }
-        const data = await response.json();
-        if (data.status === 'success') {
-          setMentorProfile(data.mentor);
+          if (response.status === 404 && isCurrentUser) {
+            // Create empty profile if user is the current mentor
+            const newProfile = {
+              ...EMPTY_MENTOR_PROFILE,
+              userId: mentorId,
+              name: getUserData()?.username || ''
+            };
+
+            console.log('Creating new mentor profile:', newProfile);
+
+            const createResponse = await fetch('http://localhost:9000/api/mentors/creatementorprofile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              credentials: 'include',
+              body: JSON.stringify(newProfile)
+            });
+
+            if (!createResponse.ok) {
+              const errorData = await createResponse.json();
+              console.error('Failed to create profile:', errorData);
+              throw new Error(`Failed to create mentor profile: ${errorData.message || 'Unknown error'}`);
+            }
+
+            const data = await createResponse.json();
+            console.log('New profile created:', data);
+            setMentorProfile(data.mentor);
+          } else {
+            throw new Error('Failed to fetch mentor profile');
+          }
         } else {
-          throw new Error('Failed to fetch mentor profile');
+          const data = await response.json();
+          if (data.status === 'success') {
+            setMentorProfile(data.mentor);
+          } else {
+            throw new Error('Failed to fetch mentor profile');
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -137,7 +231,7 @@ function App() {
       fetchServices();
       fetchGroupDiscussions();
     }
-  }, [mentorId]);
+  }, [mentorId, isCurrentUser]);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
