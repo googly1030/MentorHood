@@ -17,6 +17,7 @@ import MentorDashboard from './pages/MentorDashboard';
 import CreateSession from './pages/CreateSession';
 import MenteeDashboard from './pages/MenteeDashboard';
 import EditSession from './pages/EditSession';
+import EditProfile from './pages/editprofile';
 
 function App() {
   return (
@@ -54,6 +55,11 @@ function App() {
             <Route path="/profile/:mentorId" element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/:mentorId/edit" element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             } />
             <Route path="/booking/:serviceId" element={

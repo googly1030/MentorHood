@@ -21,6 +21,12 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleMyProfileClick = () => {
+    if (userData?.userId) {
+      navigate(`/profile/${userData.userId}`);
+    }
+  };
+
   return (
     <nav className="flex justify-between items-center px-8 py-4 bg-white/90 sticky top-0 z-50">
       <div className="flex items-center gap-12">
@@ -42,6 +48,14 @@ const Header: React.FC = () => {
                 {userData.username}
               </span>
             </div>
+            {userData.role === 'mentor' && (
+              <button 
+                onClick={handleMyProfileClick}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#4937e8] transition-all duration-300 rounded-lg hover:bg-gray-50"
+              >
+                <span className="font-medium">My Profile</span>
+              </button>
+            )}
             <button 
               onClick={handleDashboardClick}
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#4937e8] transition-all duration-300 rounded-lg hover:bg-gray-50"

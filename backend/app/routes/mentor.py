@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, HTTPException, status, Query, Body
 from datetime import datetime, UTC
-from typing import List
+from typing import List, Any, Dict
 from app.schemas.mentor import MentorProfile
 from app.database import get_collection
 import uuid
@@ -28,6 +28,35 @@ async def get_mentor_profile(mentor_id: str):
     return {
         "status": "success",
         "mentor": mentor_dict
+    }
+
+@router.post("/{mentor_id}/update")
+async def update_mentor_profile(mentor_id: str, profile: dict = Body(...)):
+    collection = get_collection("mentorProfile")
+
+    if not mentor_id:
+        raise HTTPException(status_code=400, detail="Mentor ID required")
+
+    # Check if mentor exists
+    existing_mentor = await collection.find_one({"userId": mentor_id})
+    if not existing_mentor:
+        raise HTTPException(status_code=404, detail="Mentor profile not found")
+
+    # Update the profile
+    result = await collection.update_one(
+        {"userId": mentor_id},
+        {"$set": profile}
+    )
+
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile"
+        )
+
+    return {
+        "status": "success",
+        "message": "Profile updated successfully"
     }
 
 @router.get("/all")
