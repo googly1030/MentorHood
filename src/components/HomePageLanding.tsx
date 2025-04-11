@@ -725,14 +725,29 @@ function App() {
         </div>
       </div>
 
-      {/* One-on-One Sessions Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">One-on-One Sessions</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Get personalized guidance from experienced mentors in focused one-on-one sessions
-            </p>
+      {/* Upcoming Sessions Section */}
+      <section className="bg-white py-24 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+        </div>
+        <div className="max-w-6xl mx-auto px-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
+            <div>
+              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
+                One-on-One Sessions
+              </h2>
+              <p className="text-gray-700 text-lg max-w-xl">
+                Book targeted mentorship sessions with industry experts and
+                accelerate your career growth
+              </p>
+            </div>
+            <button 
+              onClick={() => navigate('/mentors?tab=one-on-one')} 
+              className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
+            >
+              View All Sessions
+              <ArrowRight size={20} />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -802,6 +817,7 @@ function App() {
           </div>
         </div>
       </section>
+
 
       {/* Upcoming Sessions Section */}
       <section className="bg-white py-24 relative overflow-hidden">
