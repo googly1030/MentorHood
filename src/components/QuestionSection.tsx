@@ -33,7 +33,7 @@ export default function QuestionSection() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [answer, setAnswer] = useState('');
-  const [activeCategory] = useState('all');
+  const [activeCategory] = useState(sessionId);
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
