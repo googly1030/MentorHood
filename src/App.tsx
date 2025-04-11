@@ -62,7 +62,7 @@ function App() {
                 <EditProfile />
               </ProtectedRoute>
             } />
-            <Route path="/booking/:serviceId" element={
+            <Route path="/booking/:sessionId" element={
               <ProtectedRoute>
                 <BookingDetails />
               </ProtectedRoute>
