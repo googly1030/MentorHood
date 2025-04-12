@@ -11,10 +11,22 @@ services:
     ports:
       - "9000:9000"
     env_file:
-      - ./backend/.env
+      - backend.env
     depends_on:
       - mongodb
     restart: unless-stopped
+  
+  frontend:
+    container_name: mentor-hood-local-frontend-container
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.development
+    volumes:
+      - ./frontend:/app
+    env_file:
+      - frontend.env
+    ports:
+      - "5173:5173"
 
   mongodb:
     container_name: mentor-hood-local-mongo-container

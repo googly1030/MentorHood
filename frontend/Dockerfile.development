@@ -1,0 +1,11 @@
+FROM node:18.17.0 
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm run setup
+
+COPY . .
+
+CMD [ "npm" , "run" , "dev" ]
