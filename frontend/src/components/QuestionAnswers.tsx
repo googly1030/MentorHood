@@ -22,7 +22,7 @@ export default function QuestionAnswers() {
         setIsLoading(true);
 
         // Fetch question from API
-        const questionResponse = await fetch(`${API_URL}/api/questionnaires/${questionId}`);
+        const questionResponse = await fetch(`${API_URL}/questionnaires/${questionId}`);
         if (!questionResponse.ok) {
           throw new Error("Failed to fetch question");
         }
@@ -30,7 +30,7 @@ export default function QuestionAnswers() {
         setQuestion(questionData);
 
         // Fetch answers from API
-        const answersResponse = await fetch(`${API_URL}/api/questionnaires/${questionId}/answers`);
+        const answersResponse = await fetch(`${API_URL}/questionnaires/${questionId}/answers`);
         if (!answersResponse.ok) {
           throw new Error("Failed to fetch answers");
         }
@@ -52,7 +52,7 @@ export default function QuestionAnswers() {
   const handleUpvoteAnswer = async (answerId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/answers/${answerId}/upvote`, {
+      const response = await fetch(`${API_URL}/questionnaires/${questionId}/answers/${answerId}/upvote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function QuestionAnswers() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/answer`, {
+      const response = await fetch(`${API_URL}/questionnaires/${questionId}/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
