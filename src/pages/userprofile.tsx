@@ -13,6 +13,7 @@ interface Service {
   price: string;
   isPaid: boolean;
   sessionId?: string;
+  userId?: string;
 }
 
 interface GroupDiscussion {
@@ -23,6 +24,9 @@ interface GroupDiscussion {
   sessionType: string;
   price: string;
   isPaid: boolean;
+
+  sessionId?: string;
+  userId?: string;
 }
 
 enum TabType {
@@ -118,6 +122,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const ensureHttps = (url: string) => {
     if (!url) return '#';
@@ -134,6 +139,7 @@ function App() {
         try {
           const { role, userId } = JSON.parse(userData);
           setUserRole(role);
+          setUserId(userId);
           if (role === 'mentor' && userId === mentorId) {
             setIsCurrentUser(true);
           }
@@ -286,12 +292,12 @@ function App() {
                       {service.description}
                     </p>
                   </div>
-                  <button 
-                    onClick={() => handleBooking(service._id)}
+                 {service.userId !== userId && <button 
+                    onClick={() => handleBooking(service.sessionId || service._id)}
                     className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
                   >
                     {service.isPaid ? `Book • Rs ${service.price}` : 'Book • Free'}
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
@@ -366,12 +372,12 @@ function App() {
                       {session.description}
                     </p>
                   </div>
-                  <button 
-                    onClick={() => handleBooking(session._id)}
+                 {session.userId !== userId && <button 
+                    onClick={() => handleBooking(session.sessionId || session._id)}
                     className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
                   >
                     {session.isPaid ? `Join • Rs ${session.price}` : 'Join • Free'}
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
@@ -680,7 +686,6 @@ function App() {
                     {services.map((service, index) => (
           
                       <div key={`service-${index}`} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
-                                {JSON.stringify(service)}
                         <div className="flex justify-between items-start">
                           <div>
                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">One-on-One</span>
@@ -692,7 +697,7 @@ function App() {
                               {service.description}
                             </p>
                           </div>
-                          <button 
+                          {service.userId !== userId && <button 
                              onClick={() => {
                               // Try to get the session ID from the most likely properties
                               const sessionId = service.sessionId || service._id;
@@ -702,7 +707,7 @@ function App() {
                             className="bg-black text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-800 transition-colors"
                           >
                             Book
-                          </button>
+                          </button>}
                         </div>
                         <p className={`text-lg font-medium mt-2 ${textColor}`}>
                           {service.isPaid ? `Rs ${service.price}` : 'Free'}

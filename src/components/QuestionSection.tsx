@@ -295,11 +295,6 @@ export default function QuestionSection() {
       }
       
       setIsRegistered(true);
-      setTimeout(() => {
-        setIsRegisterModalOpen(false);
-        setIsRegistered(false);
-        setRegistrationEmail('');
-      }, 2000);
     } catch (error) {
       console.error('Error registering for session:', error);
       // Show error message to user
@@ -686,7 +681,6 @@ export default function QuestionSection() {
                       required
                       placeholder="Enter your email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 
                         focus:outline-none focus:ring-2 focus:ring-[#4937e8]"
                     />
