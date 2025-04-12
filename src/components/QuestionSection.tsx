@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X, Mail } from 'lucide-react';
 import { Question } from '../types/question';
+import { API_URL } from '../utils/api';
 
 // New interface for session details
 interface SessionDetails {
@@ -63,7 +64,7 @@ export default function QuestionSection() {
 
       try {
         setSessionLoading(true);
-        const response = await fetch(`http://localhost:9000/ama-sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/ama-sessions/${sessionId}`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -101,7 +102,7 @@ export default function QuestionSection() {
   const handleUpvote = async (questionId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`http://localhost:9000/api/questionnaires/${questionId}/upvote`, {
+      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/upvote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +162,7 @@ export default function QuestionSection() {
       initials: user.username ? user.username.substring(0, 2).toUpperCase() : 'CU'
     };
 
-    const response = await fetch('http://localhost:9000/api/questionnaires', {
+    const response = await fetch(`${API_URL}/api/questionnaires`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ export default function QuestionSection() {
       };
 
       // Call the answer API to store the answer in the database
-      const response = await fetch(`http://localhost:9000/api/questionnaires/${currentQuestion._id}/answer`, {
+      const response = await fetch(`${API_URL}/api/questionnaires/${currentQuestion._id}/answer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +227,7 @@ export default function QuestionSection() {
   const fetchQuestions = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:9000/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
+      const response = await fetch(`${API_URL}/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
       if (!response.ok) {
         throw new Error('Failed to fetch questions');
       }
@@ -243,7 +244,7 @@ export default function QuestionSection() {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://localhost:9000/api/questionnaires/register', {
+      const response = await fetch(`${API_URL}/api/questionnaires/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +275,7 @@ export default function QuestionSection() {
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/api/registrations', {
+      const response = await fetch(`${API_URL}/api/registrations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -312,7 +313,7 @@ export default function QuestionSection() {
       if (!sessionId || !email) return;
       
       try {
-        const response = await fetch(`http://localhost:9000/api/questionnaires/check-registration/${sessionId}/${email}`);
+        const response = await fetch(`${API_URL}/api/questionnaires/check-registration/${sessionId}/${email}`);
         if (response.ok) {
           const data = await response.json();
           if (data.is_registered) {

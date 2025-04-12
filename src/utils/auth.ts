@@ -1,3 +1,5 @@
+import { API_URL } from './api';
+
 interface User {
   username: string;
   email: string;
@@ -25,7 +27,7 @@ export const isAuthenticated = (): boolean => {
 };
 
 export const loginUser = async (email: string, password: string) => {
-  const response = await fetch('http://localhost:9000/api/users/login', {
+  const response = await fetch(`${API_URL}/api/users/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

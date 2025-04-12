@@ -2,6 +2,7 @@ import { ArrowRight, Clock, Users, MessageSquare, Calendar, User, Sparkles, Plus
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 export interface FormData {
     title: string;
@@ -759,7 +760,7 @@ export default function CreateAMASession() {
       };
   
 
-      const response = await fetch('http://localhost:9000/ama-sessions', { 
+      const response = await fetch(`${API_URL}/ama-sessions`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

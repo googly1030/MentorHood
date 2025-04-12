@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getUserData } from '../utils/auth';
 import { toast } from 'sonner';
+import { API_URL } from '../utils/api';
 
 interface Session {
   sessionId: string;
@@ -55,7 +56,7 @@ function Dashboard() {
           return;
         }
 
-        const response = await fetch(`http://localhost:9000/api/sessions/mentor/${userData.userId}`);
+        const response = await fetch(`${API_URL}/api/sessions/mentor/${userData.userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch sessions');
         }

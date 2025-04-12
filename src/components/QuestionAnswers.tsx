@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowUp } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Question, Answer } from "../types/question";
+import { API_URL } from '../utils/api';
 
 export default function QuestionAnswers() {
   const { questionId } = useParams<{ questionId: string }>();
@@ -21,9 +22,7 @@ export default function QuestionAnswers() {
         setIsLoading(true);
 
         // Fetch question from API
-        const questionResponse = await fetch(
-          `http://localhost:9000/api/questionnaires/${questionId}`
-        );
+        const questionResponse = await fetch(`${API_URL}/api/questionnaires/${questionId}`);
         if (!questionResponse.ok) {
           throw new Error("Failed to fetch question");
         }
@@ -31,9 +30,7 @@ export default function QuestionAnswers() {
         setQuestion(questionData);
 
         // Fetch answers from API
-        const answersResponse = await fetch(
-          `http://localhost:9000/api/questionnaires/${questionId}/answers`
-        );
+        const answersResponse = await fetch(`${API_URL}/api/questionnaires/${questionId}/answers`);
         if (!answersResponse.ok) {
           throw new Error("Failed to fetch answers");
         }
@@ -55,15 +52,12 @@ export default function QuestionAnswers() {
   const handleUpvoteAnswer = async (answerId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(
-        `http://localhost:9000/api/questionnaires/${questionId}/answers/${answerId}/upvote`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/answers/${answerId}/upvote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to upvote answer");
@@ -93,26 +87,23 @@ export default function QuestionAnswers() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(
-        `http://localhost:9000/api/questionnaires/${questionId}/answer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newAnswer,
+          author: {
+            id: JSON.parse(localStorage.getItem("user") || "{}").userId,
+            name: JSON.parse(localStorage.getItem("user") || "{}").username,
+            initials: JSON.parse(localStorage.getItem("user") || "{}")
+              .username.substring(0, 2)
+              .toUpperCase(),
           },
-          body: JSON.stringify({
-            content: newAnswer,
-            author: {
-              id: JSON.parse(localStorage.getItem("user") || "{}").userId,
-              name: JSON.parse(localStorage.getItem("user") || "{}").username,
-              initials: JSON.parse(localStorage.getItem("user") || "{}")
-                .username.substring(0, 2)
-                .toUpperCase(),
-            },
-            question_id: questionId,
-          }),
-        }
-      );
+          question_id: questionId,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to submit answer");

@@ -4,6 +4,7 @@ import { ArrowRight, User, Mail, Lock } from 'lucide-react';
 import { setUserData } from '../utils/auth';
 import toast from 'react-hot-toast';
 import MentorProfileForm from '../components/MentorProfileForm';
+import { API_URL } from '../utils/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Register = () => {
     const loadingToast = toast.loading('Creating your account...');
 
     try {
-      const response = await fetch('http://localhost:9000/api/users/register', {
+      const response = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

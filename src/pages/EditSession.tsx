@@ -4,6 +4,7 @@ import { ArrowLeft, Trash2 } from 'lucide-react';
 import { SessionForm, AvailabilityForm, ReviewForm } from './CreateSession';
 import { getUserData } from '../utils/auth';
 import { toast } from 'sonner';
+import { API_URL } from '../utils/api';
 
 interface FormData {
   sessionName: string;
@@ -77,7 +78,7 @@ function EditSession() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/api/sessions/${sessionId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch session');
         }
@@ -130,7 +131,7 @@ function EditSession() {
         timeSlots: timeSlots
       };
 
-      const response = await fetch(`http://localhost:9000/api/sessions/update/${sessionId}`, {
+      const response = await fetch(`${API_URL}/api/sessions/update/${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +159,7 @@ function EditSession() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {
-        const response = await fetch(`http://localhost:9000/api/sessions/delete/${sessionId}`, {
+        const response = await fetch(`${API_URL}/api/sessions/delete/${sessionId}`, {
           method: 'POST',
         });
 

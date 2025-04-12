@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, ArrowRight, CheckCircle, Calendar, Clock, DollarSign, Settings, Users, MessageSquare } from 'lucide-react';
 import { getUserData } from '../utils/auth';
 import { toast } from 'sonner';
+import { API_URL } from '../utils/api';
 
 interface FormData {
   sessionName: string;
@@ -674,7 +675,7 @@ function CreateSession() {
         timeSlots: timeSlots
       };
 
-      const response = await fetch('http://localhost:9000/api/sessions/create', {
+      const response = await fetch(`${API_URL}/api/sessions/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

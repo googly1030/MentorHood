@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star , Clock, Briefcase, TrendingUp, Building2, Rocket , Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from '../utils/api';
 
 
 
@@ -164,7 +165,7 @@ const AllMentors = () => {
     const fetchData = async () => {
       try {
         // Fetch one-on-one sessions
-        const oneOnOneResponse = await fetch('http://localhost:9000/api/sessions/one-on-one/all');
+        const oneOnOneResponse = await fetch(`${API_URL}/api/sessions/one-on-one/all`);
         const oneOnOneData = await oneOnOneResponse.json();
         if (oneOnOneData.status === 'success') {
           setOneOnOneSessions(oneOnOneData.sessions);
@@ -177,7 +178,7 @@ const AllMentors = () => {
         }
 
         // Fetch group sessions
-        const groupResponse = await fetch('http://localhost:9000/api/sessions/group-session/all');
+        const groupResponse = await fetch(`${API_URL}/api/sessions/group-session/all`);
         const groupData = await groupResponse.json();
         if (groupData.status === 'success') {
           setGroupSessions(groupData.sessions);

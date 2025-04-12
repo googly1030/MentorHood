@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Video, Mail,  Calendar, Star, MapPin, Globe, ChevronL
 import { format, addDays, isSameDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { API_URL } from '../utils/api';
 
 interface Timezone {
   value: string;
@@ -42,59 +43,24 @@ interface Session {
   mentorImage?: string;
 }
 
-const timezones: Timezone[] = [
-  {
-    value: 'Asia/Kolkata',
-    label: 'Chennai, Kolkata, Mumbai, New Delhi',
-    offset: 'GMT+5:30'
-  },
-  {
-    value: 'America/Los_Angeles',
-    label: 'Pacific Time',
-    offset: 'GMT-7:00'
-  },
-  {
-    value: 'America/New_York',
-    label: 'Eastern Time',
-    offset: 'GMT-4:00'
-  },
-  {
-    value: 'Europe/London',
-    label: 'London, United Kingdom',
-    offset: 'GMT+1:00'
-  },
-  {
-    value: 'Asia/Singapore',
-    label: 'Singapore, Singapore',
-    offset: 'GMT+8:00'
-  },
-  {
-    value: 'Australia/Sydney',
-    label: 'Sydney, Australia',
-    offset: 'GMT+10:00'
-  }
-];
-
-interface BookingState {
-  isLoading: boolean;
-  isSuccess: boolean;
-  meeting_link: string;
-}
-
 const BookingDetails: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const dateSliderRef = useRef<HTMLDivElement>(null);
-  const [selectedTimezone, setSelectedTimezone] = useState(timezones[0]);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [bookingState, setBookingState] = useState<BookingState>({
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTimezone] = useState<Timezone>({
+    value: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    label: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    offset: new Date().getTimezoneOffset().toString()
+  });
+  const [bookingState, setBookingState] = useState({
     isLoading: false,
     isSuccess: false,
     meeting_link: ''
   });
+  const datesContainerRef = useRef<HTMLDivElement>(null);
 
   // Generate dates for next 14 days starting from tomorrow
   const dates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1));
@@ -102,20 +68,15 @@ const BookingDetails: React.FC = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/api/sessions/${sessionId}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch session');
+          throw new Error('Failed to fetch session details');
         }
         const data = await response.json();
-        if (data.status === 'success') {
-          setSession(data.session);
-        } else {
-          throw new Error('Failed to fetch session');
-        }
-      } catch (error) {
-        console.error('Error fetching session:', error);
+        setSession(data);
+      } catch (err) {
+        console.error('Error fetching session:', err);
         toast.error('Failed to load session details');
-        navigate('/');
       } finally {
         setLoading(false);
       }
@@ -124,13 +85,13 @@ const BookingDetails: React.FC = () => {
     if (sessionId) {
       fetchSession();
     }
-  }, [sessionId, navigate]);
+  }, [sessionId]);
 
   const scrollDates = (direction: 'left' | 'right') => {
-    if (!dateSliderRef.current) return;
+    if (!datesContainerRef.current) return;
     const scrollAmount = 200; 
-    const newScrollLeft = dateSliderRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-    dateSliderRef.current.scrollTo({
+    const newScrollLeft = datesContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+    datesContainerRef.current.scrollTo({
       left: newScrollLeft,
       behavior: 'smooth'
     });
@@ -163,60 +124,39 @@ const BookingDetails: React.FC = () => {
   const handleBooking = async () => {
     if (!session || !selectedDate || !selectedTime) return;
 
-    setBookingState({ ...bookingState, isLoading: true });
-    
+    setBookingState(prev => ({ ...prev, isLoading: true }));
+    const userEmail = localStorage.getItem('userEmail');
+
     try {
-      // Get user details from localStorage
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userEmail = user.email || '';
-      
-      // Prepare session data to send with the request
-      const sessionData = {
-        title: session.sessionName,
-        description: session.description,
-        duration: session.duration,
-        mentor: {
-          name: session.mentorName || 'Mentor',
-          role: session.mentorRole || '',
-          company: session.mentorCompany || '',
-          image: session.mentorImage || 'https://via.placeholder.com/50'
-        },
-        tag: session.sessionType || '',
-        _id: sessionId
-      };
-      
-      const response = await fetch('http://localhost:9000/api/bookings/create', {
+      const response = await fetch(`${API_URL}/api/bookings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           session_id: sessionId,
-          date: selectedDate.toISOString(),
+          date: format(selectedDate, 'yyyy-MM-dd'),
           time: selectedTime,
           timezone: selectedTimezone.value,
-          email: userEmail,
-          session_data: sessionData
+          email: userEmail
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to book session');
+        throw new Error('Failed to create booking');
       }
 
       const data = await response.json();
       setBookingState({
         isLoading: false,
         isSuccess: true,
-        meeting_link: data.meeting_link || ''
+        meeting_link: data.meeting_link
       });
-      
       toast.success('Booking confirmed! Check your email for details.');
-    } catch (error) {
-      console.error('Error booking session:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to book session. Please try again.');
-      setBookingState({ ...bookingState, isLoading: false });
+    } catch (err) {
+      console.error('Error creating booking:', err);
+      setBookingState(prev => ({ ...prev, isLoading: false }));
+      toast.error('Failed to create booking. Please try again.');
     }
   };
 
@@ -321,7 +261,7 @@ const BookingDetails: React.FC = () => {
 
               <div className="relative">
                 <div 
-                  ref={dateSliderRef}
+                  ref={datesContainerRef}
                   className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
