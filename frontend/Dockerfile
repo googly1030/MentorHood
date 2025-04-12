@@ -1,6 +1,6 @@
 FROM node:18.17.0 as build
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 COPY package.json ./
 RUN npm run setup
