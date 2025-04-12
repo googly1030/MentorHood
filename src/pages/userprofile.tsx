@@ -11,6 +11,7 @@ interface Service {
   sessionType: string;
   price: string;
   isPaid: boolean;
+  sessionId?: string;
 }
 
 interface GroupDiscussion {
@@ -676,7 +677,9 @@ function App() {
                   
                   <div className="space-y-4">
                     {services.map((service, index) => (
+          
                       <div key={`service-${index}`} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
+                                {JSON.stringify(service)}
                         <div className="flex justify-between items-start">
                           <div>
                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">One-on-One</span>
@@ -689,7 +692,12 @@ function App() {
                             </p>
                           </div>
                           <button 
-                            onClick={() => handleBooking(service._id)}
+                             onClick={() => {
+                              // Try to get the session ID from the most likely properties
+                              const sessionId = service.sessionId || service._id;
+                              console.log("Booking session with ID:", sessionId);
+                              handleBooking(sessionId);
+                            }}
                             className="bg-black text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-800 transition-colors"
                           >
                             Book

@@ -11,7 +11,7 @@ const Register = () => {
     username: '',
     email: '',
     password: '',
-    role: '',
+    role: 'user',
   });
   const [showMentorForm, setShowMentorForm] = useState(false);
   const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);

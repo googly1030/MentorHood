@@ -17,6 +17,7 @@ export const getUserData = (): User | null => {
 
 export const removeUserData = () => {
   localStorage.removeItem('user');
+  localStorage.removeItem('mentorFormData');
 };
 
 export const isAuthenticated = (): boolean => {
