@@ -82,6 +82,15 @@ interface BookingState {
   meeting_link: string;
 }
 
+// Fix the any type by providing a proper interface
+interface BookingResponse {
+  date: string;
+  time: string;
+  timezone: string;
+  meeting_link?: string;
+  _id: string;
+}
+
 const BookingDetails: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -96,6 +105,13 @@ const BookingDetails: React.FC = () => {
     isSuccess: false,
     meeting_link: ''
   });
+  const [isAlreadyBooked, setIsAlreadyBooked] = useState(false);
+  const [bookedDetails, setBookedDetails] = useState<{
+    date: string;
+    time: string;
+    timezone: string;
+  } | null>(null);
+  const [bookedDates, setBookedDates] = useState<Set<string>>(new Set());
 
   // Generate dates for next 14 days starting from tomorrow
   const dates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1));
@@ -126,6 +142,54 @@ const BookingDetails: React.FC = () => {
       fetchSession();
     }
   }, [sessionId, navigate]);
+
+  useEffect(() => {
+    const checkBookingStatus = async () => {
+      if (!sessionId) return;
+      
+      // Get user details from localStorage
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userEmail = user.email || '';
+      
+      if (!userEmail) return; // Skip check if no email available
+      
+      try {
+        const response = await fetch(
+          `${API_URL}/api/bookings/check/${sessionId}/${userEmail}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.bookings && data.bookings.length > 0) {
+            // Set isAlreadyBooked to true if there are any bookings
+            setIsAlreadyBooked(data.bookings.length > 0);
+            
+            // Store all booked dates in a Set for easy checking
+            const bookedDatesSet = new Set<string>(
+              data.bookings.map((booking: BookingResponse) => {
+                // Extract just the date part for comparison
+                return new Date(booking.date).toISOString().split('T')[0];
+              })
+            );
+            setBookedDates(bookedDatesSet);
+            
+            // Store details of the first booking for display
+            if (data.bookings[0]) {
+              setBookedDetails({
+                date: data.bookings[0].date,
+                time: data.bookings[0].time,
+                timezone: data.bookings[0].timezone
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking booking status:", error);
+      }
+    };
+
+    checkBookingStatus();
+  }, [sessionId]);
 
   const scrollDates = (direction: 'left' | 'right') => {
     if (!dateSliderRef.current) return;
@@ -159,6 +223,11 @@ const BookingDetails: React.FC = () => {
     const timeSlot = session.timeSlots.find(slot => slot.day === dayKey);
   
     return !!timeSlot?.available;
+  };
+
+  const isDateAlreadyBooked = (date: Date) => {
+    const dateString = date.toISOString().split('T')[0];
+    return bookedDates.has(dateString);
   };
 
   const handleBooking = async () => {
@@ -328,22 +397,36 @@ const BookingDetails: React.FC = () => {
                 >
                   {dates.map((date) => {
                     const isAvailable = isDateAvailable(date);
+                    const alreadyBooked = isDateAlreadyBooked(date);
                     
                     return (
                       <button
                         key={date.toISOString()}
-                        onClick={() => isAvailable && setSelectedDate(date)}
+                        onClick={() => {
+                          if (isAvailable && !alreadyBooked) {
+                            setSelectedDate(date);
+                            setSelectedTime(''); // Reset time selection when date changes
+                          }
+                        }}
                         className={`flex-shrink-0 w-[80px] p-3 rounded-lg text-center transition-all duration-200 border ${
                           selectedDate && isSameDay(selectedDate, date)
                             ? 'bg-black text-white border-black'
-                            : isAvailable
-                              ? 'hover:bg-gray-50 border-gray-200'
-                              : 'opacity-50 cursor-not-allowed border-gray-200'
+                            : alreadyBooked
+                              ? 'bg-gray-100 border-gray-200 cursor-not-allowed'
+                              : isAvailable
+                                ? 'hover:bg-gray-50 border-gray-200'
+                                : 'opacity-50 cursor-not-allowed border-gray-200'
                         }`}
+                        disabled={!isAvailable || alreadyBooked}
                       >
                         <div className="text-xs font-medium">{format(date, 'EEE')}</div>
                         <div className="text-lg font-bold my-0.5">{format(date, 'd')}</div>
                         <div className="text-xs">{format(date, 'MMM')}</div>
+                        {alreadyBooked && (
+                          <div className="mt-1 text-xs bg-gray-200 rounded-full px-2 py-0.5 text-gray-700">
+                            Booked
+                          </div>
+                        )}
                       </button>
                     );
                   })}
@@ -376,36 +459,103 @@ const BookingDetails: React.FC = () => {
             {/* Timezone Dropdown */}
             <div className="mb-8 relative">
               <h3 className="text-lg font-medium mb-4">Timezone</h3>
-              <div className="w-full flex items-center p-3 rounded-xl border border-gray-200 bg-gray-50">
-                <div className="flex items-center gap-2">
+              <div className="relative">
+                <select
+                  value={selectedTimezone.value}
+                  onChange={(e) => {
+                    const newTimezone = timezones.find(tz => tz.value === e.target.value);
+                    if (newTimezone) setSelectedTimezone(newTimezone);
+                  }}
+                  className="w-full p-3 pr-10 rounded-xl border border-gray-200 bg-gray-50 appearance-none"
+                >
+                  {timezones.map(timezone => (
+                    <option key={timezone.value} value={timezone.value}>
+                      ({timezone.offset}) {timezone.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
                   <Globe className="w-5 h-5 text-gray-600" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-gray-900">
-                      ({selectedTimezone.offset}) {selectedTimezone.label}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Booking Button and Modal */}
-            <button
-              disabled={!selectedDate || !selectedTime || bookingState.isLoading}
-              onClick={handleBooking}
-              className={`w-full py-4 rounded-xl text-white text-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-                selectedDate && selectedTime && !bookingState.isLoading
-                  ? 'bg-black hover:bg-gray-800'
-                  : 'bg-gray-300 cursor-not-allowed'
-              }`}
-            >
-              {bookingState.isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : selectedDate && selectedTime ? (
-                `Book Session • ${session.isPaid ? `₹${session.price}` : 'Free'}`
-              ) : (
-                'Select date and time to continue'
-              )}
-            </button>
+            {/* Booking Button or Already Booked State */}
+            {selectedDate && isDateAlreadyBooked(selectedDate) ? (
+              <div className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 text-lg font-medium flex items-center justify-center gap-2 border border-gray-200">
+                <Check className="w-5 h-5 text-green-600" />
+                Already Booked
+              </div>
+            ) : (
+              <button
+                disabled={!selectedDate || !selectedTime || bookingState.isLoading}
+                onClick={handleBooking}
+                className={`w-full py-4 rounded-xl text-white text-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+                  selectedDate && selectedTime && !bookingState.isLoading
+                    ? 'bg-black hover:bg-gray-800'
+                    : 'bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                {bookingState.isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : selectedDate && selectedTime ? (
+                  `Book Session • ${session.isPaid ? `₹${session.price}` : 'Free'}`
+                ) : (
+                  'Select date and time to continue'
+                )}
+              </button>
+            )}
+
+            {/* Show booking details only if the selected date is booked */}
+            {selectedDate && isDateAlreadyBooked(selectedDate) && bookedDetails && (
+              <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <h3 className="font-medium text-green-800">You've already booked this session</h3>
+                </div>
+                
+                <div className="mb-4 p-3 bg-white rounded-lg border border-green-100">
+                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                    <Calendar className="w-4 h-4" />
+                    <span className="font-medium">
+                      {new Date(bookedDetails.date).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700 mb-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{bookedDetails.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                    <Globe className="w-3 h-3" />
+                    <span>
+                      {timezones.find(tz => tz.value === bookedDetails.timezone)?.label || bookedDetails.timezone}
+                    </span>
+                  </div>
+                </div>
+                
+                <p className="text-green-700 text-sm mb-3">
+                  You can find all your booking details in your email inbox.
+                </p>
+                <div className="flex gap-3 mt-4">
+                  <a 
+                    href="https://mail.google.com/mail/u/0/#inbox" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex-1 text-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Check Email
+                    </div>
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Success Modal */}
             <AnimatePresence>

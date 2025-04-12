@@ -1,8 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowUp, MessageSquare, Clock, TrendingUp , Check, Video, Calendar as CalendarIcon, X, Mail } from 'lucide-react';
-import { Question } from '../types/question';
-import { API_URL } from '../utils/api';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowUp,
+  MessageSquare,
+  Clock,
+  TrendingUp,
+  Check,
+  Video,
+  Calendar as CalendarIcon,
+  X,
+  Mail,
+} from "lucide-react";
+import { Question } from "../types/question";
+import { API_URL } from "../utils/api";
 
 // New interface for session details
 interface SessionDetails {
@@ -31,26 +41,34 @@ export default function QuestionSection() {
   const params = useParams();
   const sessionId = params.sessionId;
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [answer, setAnswer] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [answer, setAnswer] = useState("");
   const [activeCategory] = useState(sessionId);
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'timestamp' | 'upvotes'>('timestamp');
+  const [sortBy, setSortBy] = useState<"timestamp" | "upvotes">("timestamp");
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
-  const [email, setEmail] = useState(JSON.parse(localStorage.getItem('user') || '{}').email || '');
+  const [email, setEmail] = useState(
+    JSON.parse(localStorage.getItem("user") || "{}").email || ""
+  );
   const [isEmailSent] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [registrationEmail, setRegistrationEmail] = useState(JSON.parse(localStorage.getItem('user') || '{}').email || '');
+  const registrationEmail =
+    JSON.parse(localStorage.getItem("user") || "{}").email || "";
   const [isRegistered, setIsRegistered] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(
+    null
+  );
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [showRegistrationSuccessModal, setShowRegistrationSuccessModal] =
+    useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // Fetch session details when component mounts
   useEffect(() => {
@@ -65,7 +83,7 @@ export default function QuestionSection() {
       try {
         setSessionLoading(true);
         const response = await fetch(`${API_URL}/ama-sessions/${sessionId}`);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             setSessionError("Session not found");
@@ -75,12 +93,12 @@ export default function QuestionSection() {
           setSessionLoading(false);
           return;
         }
-        
+
         const data = await response.json();
         setSessionDetails(data);
         setSessionLoading(false);
       } catch (error) {
-        console.error('Error fetching session details:', error);
+        console.error("Error fetching session details:", error);
         setSessionError("An error occurred while loading session details");
         setSessionLoading(false);
       }
@@ -95,39 +113,43 @@ export default function QuestionSection() {
   }, [activeCategory, sortBy]);
 
   // Filter questions based on active category
-  const filteredQuestions = activeCategory === 'all' 
-    ? questions 
-    : questions.filter(q => q.category_id === activeCategory);
+  const filteredQuestions =
+    activeCategory === "all"
+      ? questions
+      : questions.filter((q) => q.category_id === activeCategory);
 
   const handleUpvote = async (questionId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`${API_URL}/api/questionnaires/${questionId}/upvote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${API_URL}/api/questionnaires/${questionId}/upvote`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to upvote question');
+        throw new Error("Failed to upvote question");
       }
 
       const updatedQuestion = await response.json();
-      
+
       // Update the questions state with the updated question
-      setQuestions(prev => prev.map(q => 
-        q._id === questionId ? updatedQuestion : q
-      ));
+      setQuestions((prev) =>
+        prev.map((q) => (q._id === questionId ? updatedQuestion : q))
+      );
 
       // Update the upvotedQuestions state
       if (upvotedQuestions.includes(questionId)) {
-        setUpvotedQuestions(prev => prev.filter(id => id !== questionId));
+        setUpvotedQuestions((prev) => prev.filter((id) => id !== questionId));
       } else {
-        setUpvotedQuestions(prev => [...prev, questionId]);
+        setUpvotedQuestions((prev) => [...prev, questionId]);
       }
     } catch (error) {
-      console.error('Error upvoting question:', error);
+      console.error("Error upvoting question:", error);
     }
   };
 
@@ -137,12 +159,11 @@ export default function QuestionSection() {
   };
 
   useEffect(() => {
-    const userKey = localStorage.getItem('user');
+    const userKey = localStorage.getItem("user");
     if (userKey) {
       // You can use the userKey here for authentication or other purposes
       const userObj = JSON.parse(userKey);
       setEmail(userObj.email);
-
     }
   }, []);
 
@@ -155,31 +176,33 @@ export default function QuestionSection() {
     if (!title.trim() || !content.trim()) return;
 
     // Get user details from localStorage
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const author = {
-      id: user.userId || 'current-user',
-      name: user.username || 'Current User',
-      initials: user.username ? user.username.substring(0, 2).toUpperCase() : 'CU'
+      id: user.userId || "current-user",
+      name: user.username || "Current User",
+      initials: user.username
+        ? user.username.substring(0, 2).toUpperCase()
+        : "CU",
     };
 
     const response = await fetch(`${API_URL}/api/questionnaires`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         title: title,
         content: content,
         category_id: activeCategory,
         session_id: sessionId,
-        author: author
-      })
+        author: author,
+      }),
     });
     const newQuestionnaire = await response.json();
 
-    setQuestions(prev => [newQuestionnaire, ...prev]);
-    setTitle('');
-    setContent('');
+    setQuestions((prev) => [newQuestionnaire, ...prev]);
+    setTitle("");
+    setContent("");
     setIsAskModalOpen(false);
   };
 
@@ -191,50 +214,59 @@ export default function QuestionSection() {
       const answerData = {
         content: answer,
         author: {
-          id: JSON.parse(localStorage.getItem('user') || '{}').userId,
-          name: JSON.parse(localStorage.getItem('user') || '{}').username,
-          initials: JSON.parse(localStorage.getItem('user') || '{}').username.substring(0, 2).toUpperCase()
+          id: JSON.parse(localStorage.getItem("user") || "{}").userId,
+          name: JSON.parse(localStorage.getItem("user") || "{}").username,
+          initials: JSON.parse(localStorage.getItem("user") || "{}")
+            .username.substring(0, 2)
+            .toUpperCase(),
         },
-        question_id: currentQuestion._id
+        question_id: currentQuestion._id,
       };
 
       // Call the answer API to store the answer in the database
-      const response = await fetch(`${API_URL}/api/questionnaires/${currentQuestion._id}/answer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(answerData)
-      });
+      const response = await fetch(
+        `${API_URL}/api/questionnaires/${currentQuestion._id}/answer`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(answerData),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to submit answer');
+        throw new Error("Failed to submit answer");
       }
 
       // Update the questions state to reflect the new answer count
-      setQuestions(prev => prev.map(q => 
-        q._id === currentQuestion._id ? {...q, answers: q.answers + 1} : q
-      ));
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q._id === currentQuestion._id ? { ...q, answers: q.answers + 1 } : q
+        )
+      );
 
-      setAnswer('');
+      setAnswer("");
       setIsAnswerModalOpen(false);
       setCurrentQuestion(null);
     } catch (error) {
-      console.error('Error submitting answer:', error);
+      console.error("Error submitting answer:", error);
     }
   };
 
   const fetchQuestions = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`);
+      const response = await fetch(
+        `${API_URL}/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        throw new Error("Failed to fetch questions");
       }
       const questionnaires = await response.json();
       setQuestions(questionnaires);
     } catch (error) {
-      console.error('Error fetching questions:', error);
+      console.error("Error fetching questions:", error);
     } finally {
       setIsLoading(false);
     }
@@ -242,19 +274,19 @@ export default function QuestionSection() {
 
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       const response = await fetch(`${API_URL}/api/questionnaires/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email,
-          session_id: sessionId 
+          session_id: sessionId,
         }),
       });
-  
+
       if (response.ok) {
         setShowSuccessMessage(true);
         setTimeout(() => {
@@ -263,42 +295,47 @@ export default function QuestionSection() {
         }, 2000);
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        throw new Error(errorData.detail || "Registration failed");
       }
     } catch (error) {
-      console.error('Error joining waitlist:', error);
+      console.error("Error joining waitlist:", error);
       // Show error message to user
-      alert(error instanceof Error ? error.message : 'Registration failed');
+      alert(error instanceof Error ? error.message : "Registration failed");
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsRegistering(true);
     try {
       const response = await fetch(`${API_URL}/api/registrations`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: registrationEmail,
           session_id: sessionId,
-          name: '',  // Optional fields
-          company: '',
-          role: ''
+          name: "", // Optional fields
+          company: "",
+          role: "",
         }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        throw new Error(errorData.detail || "Registration failed");
       }
-      
+
       setIsRegistered(true);
+      // Show registration success modal
+      setShowRegistrationSuccessModal(true);
     } catch (error) {
-      console.error('Error registering for session:', error);
+      console.error("Error registering for session:", error);
       // Show error message to user
-      alert(error instanceof Error ? error.message : 'Registration failed');
+      alert(error instanceof Error ? error.message : "Registration failed");
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -306,9 +343,11 @@ export default function QuestionSection() {
   useEffect(() => {
     const checkRegistrationStatus = async () => {
       if (!sessionId || !email) return;
-      
+
       try {
-        const response = await fetch(`${API_URL}/api/questionnaires/check-registration/${sessionId}/${email}`);
+        const response = await fetch(
+          `${API_URL}/api/questionnaires/check-registration/${sessionId}/${email}`
+        );
         if (response.ok) {
           const data = await response.json();
           if (data.is_registered) {
@@ -317,10 +356,10 @@ export default function QuestionSection() {
           }
         }
       } catch (error) {
-        console.error('Error checking registration status:', error);
+        console.error("Error checking registration status:", error);
       }
     };
-    
+
     checkRegistrationStatus();
   }, [sessionId, email]);
 
@@ -330,13 +369,13 @@ export default function QuestionSection() {
       <div className="hero-section relative">
         <div className="mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
           <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
-          Questions for this AMA
+            Questions for this AMA
           </h1>
           <p className="text-xl mb-8 text-gray-700 text-center max-w-2xl mx-auto">
-            Ask questions, share knowledge, and connect with tech professionals 
+            Ask questions, share knowledge, and connect with tech professionals
             from top companies worldwide.
           </p>
-          
+
           {/* Session Details Card */}
           {sessionLoading ? (
             <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100 mb-8 p-8 flex justify-center">
@@ -351,20 +390,27 @@ export default function QuestionSection() {
               {/* Session Header */}
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center gap-4">
-                  <img 
+                  <img
                     src={sessionDetails.mentor.image}
                     alt={sessionDetails.mentor.name}
                     className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
                   />
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{sessionDetails.title}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {sessionDetails.title}
+                    </h2>
                     <p className="text-gray-700 mt-1">
-                      Hosted by <span className="font-semibold">{sessionDetails.mentor.name}</span>, {sessionDetails.mentor.role} at {sessionDetails.mentor.company}
+                      Hosted by{" "}
+                      <span className="font-semibold">
+                        {sessionDetails.mentor.name}
+                      </span>
+                      , {sessionDetails.mentor.role} at{" "}
+                      {sessionDetails.mentor.company}
                     </p>
                   </div>
                 </div>
               </div>
-              
+
               {/* Session Details */}
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -396,9 +442,11 @@ export default function QuestionSection() {
                     </div>
                   </div>
                 </div>
-                
-                <p className="text-gray-700 mb-6">{sessionDetails.description}</p>
-                
+
+                <p className="text-gray-700 mb-6">
+                  {sessionDetails.description}
+                </p>
+
                 <div className="flex flex-wrap gap-4">
                   {isRegistered ? (
                     <button
@@ -413,12 +461,22 @@ export default function QuestionSection() {
                   ) : (
                     <button
                       onClick={handleRegisterSubmit}
+                      disabled={isRegistering}
                       className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
                         transition-all duration-300 transform hover:scale-105 shadow-lg 
                         flex items-center gap-2 font-medium"
                     >
-                      <CalendarIcon size={18} />
-                      Register Now
+                      {isRegistering ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                          Registering...
+                        </>
+                      ) : (
+                        <>
+                          <CalendarIcon size={18} />
+                          Register Now
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -432,25 +490,27 @@ export default function QuestionSection() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-12 mt-8">
             {/* Sort Options - Moved to replace All Questions filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 font-medium">Sort by:</span>
+              <span className="text-sm text-gray-600 font-medium">
+                Sort by:
+              </span>
               <button
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
-                  sortBy === 'timestamp' 
-                    ? "bg-gray-900 text-white" 
+                  sortBy === "timestamp"
+                    ? "bg-gray-900 text-white"
                     : "border border-gray-300 bg-white hover:bg-gray-50"
                 }`}
-                onClick={() => setSortBy('timestamp')}
+                onClick={() => setSortBy("timestamp")}
               >
                 <Clock size={14} />
                 <span>Latest</span>
               </button>
               <button
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
-                  sortBy === 'upvotes' 
-                    ? "bg-gray-900 text-white" 
+                  sortBy === "upvotes"
+                    ? "bg-gray-900 text-white"
                     : "border border-gray-300 bg-white hover:bg-gray-50"
                 }`}
-                onClick={() => setSortBy('upvotes')}
+                onClick={() => setSortBy("upvotes")}
               >
                 <TrendingUp size={14} />
                 <span>Most Upvoted</span>
@@ -478,22 +538,24 @@ export default function QuestionSection() {
           </div>
         ) : filteredQuestions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-xl text-gray-600">No questions found. Be the first to ask a question!</p>
+            <p className="text-xl text-gray-600">
+              No questions found. Be the first to ask a question!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredQuestions.map(question => (
+            {filteredQuestions.map((question) => (
               <div
                 key={question._id}
                 className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
               >
                 <h2 className="text-xl font-semibold mb-4">{question.title}</h2>
-                
+
                 <div className="flex items-center mb-4">
                   <div className="flex -space-x-2 mr-2">
                     {question.authors.map((author, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-sm font-medium"
                       >
                         {author.initials}
@@ -501,12 +563,12 @@ export default function QuestionSection() {
                     ))}
                   </div>
                 </div>
-                
+
                 <p className="text-gray-600 mb-6">{question.content}</p>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex space-x-3">
-                    <button 
+                    <button
                       className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
                         upvotedQuestions.includes(question._id)
                           ? "bg-black text-white border-black"
@@ -514,20 +576,31 @@ export default function QuestionSection() {
                       }`}
                       onClick={() => handleUpvote(question._id)}
                     >
-                      <ArrowUp size={16} className={upvotedQuestions.includes(question._id) ? "text-white" : ""} />
-                      <span>Upvote {question.upvotes > 0 && `(${question.upvotes})`}</span>
+                      <ArrowUp
+                        size={16}
+                        className={
+                          upvotedQuestions.includes(question._id)
+                            ? "text-white"
+                            : ""
+                        }
+                      />
+                      <span>
+                        Upvote {question.upvotes > 0 && `(${question.upvotes})`}
+                      </span>
                     </button>
-                    
-                    <button 
+
+                    <button
                       className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
                       onClick={() => handleQuestionClick(question)}
                     >
                       <MessageSquare size={16} />
-                      <span>Answer {question.answers > 0 && `(${question.answers})`}</span>
+                      <span>
+                        Answer {question.answers > 0 && `(${question.answers})`}
+                      </span>
                     </button>
 
                     {question.answers > 0 && (
-                      <button 
+                      <button
                         className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-gray-200 transition-colors"
                         onClick={() => handleViewAnswers(question)}
                       >
@@ -535,7 +608,7 @@ export default function QuestionSection() {
                       </button>
                     )}
                   </div>
-                  
+
                   <span className="text-sm text-gray-500">
                     {new Date(question.timestamp).toLocaleDateString()}
                   </span>
@@ -551,7 +624,7 @@ export default function QuestionSection() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Ask a question</h2>
-            
+
             <div className="space-y-4 mb-4">
               <div>
                 <input
@@ -571,15 +644,15 @@ export default function QuestionSection() {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
-              <button 
+              <button
                 onClick={() => setIsAskModalOpen(false)}
                 className="px-4 py-2 border rounded-md text-gray-700"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={submitQuestion}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
@@ -596,7 +669,7 @@ export default function QuestionSection() {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-xl font-semibold">{currentQuestion.title}</h3>
-              <button 
+              <button
                 onClick={() => {
                   setIsAnswerModalOpen(false);
                   setCurrentQuestion(null);
@@ -606,11 +679,11 @@ export default function QuestionSection() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-gray-700">{currentQuestion.content}</p>
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-medium mb-2">Your Answer</h4>
               <textarea
@@ -621,7 +694,7 @@ export default function QuestionSection() {
                 placeholder="Type your answer here..."
               />
             </div>
-            
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
@@ -654,7 +727,7 @@ export default function QuestionSection() {
             >
               ×
             </button>
-            
+
             {isEmailSent ? (
               <div className="text-center py-8">
                 <div className="mb-4 text-green-500">
@@ -673,7 +746,7 @@ export default function QuestionSection() {
                 <p className="text-gray-600 mb-6">
                   Be the first to know when this AMA session goes live.
                 </p>
-                
+
                 <form onSubmit={handleWaitlistSubmit}>
                   <div className="mb-6">
                     <input
@@ -711,7 +784,8 @@ export default function QuestionSection() {
                 Registration Successful!
               </h3>
               <p className="text-gray-600">
-                We've sent a confirmation email with all the details. Check your inbox!
+                We've sent a confirmation email with all the details. Check your
+                inbox!
               </p>
               <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
                 <Mail size={14} />
@@ -732,48 +806,48 @@ export default function QuestionSection() {
             >
               ×
             </button>
-            
-            {isRegistered ? (
-              <div className="text-center py-8">
-                <div className="mb-4 text-green-500">
-                  <Check size={48} className="mx-auto" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  You're already registered!
-                </h3>
-                <p className="text-gray-600">
-                  You've already registered for this session. We'll send you a reminder before it starts.
-                </p>
+          </div>
+        </div>
+      )}
+
+      {/* Registration Success Modal */}
+      {showRegistrationSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="mb-4">
+                <Check size={48} className="mx-auto text-green-500" />
               </div>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold mb-2">Register for the Session</h2>
-                <p className="text-gray-600 mb-6">
-                  Enter your email to register for the AMA session.
-                </p>
-                
-                <form onSubmit={handleRegisterSubmit}>
-                  <div className="mb-6">
-                    <input
-                      type="email"
-                      required
-                      placeholder="Enter your email"
-                      value={registrationEmail}
-                      onChange={(e) => setRegistrationEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 
-                        focus:outline-none focus:ring-2 focus:ring-[#4937e8]"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full px-6 py-3 rounded-xl bg-[#4937e8] text-white 
-                      hover:bg-[#4338ca] transition-all duration-300"
-                  >
-                    Register Now
-                  </button>
-                </form>
-              </>
-            )}
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                Registration Successful!
+              </h3>
+              <p className="text-gray-600 mb-6">
+                You have successfully registered for this AMA session. A
+                confirmation email with all the details has been sent to your
+                inbox.
+              </p>
+              <div className="mb-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <Mail size={14} />
+                <span>{registrationEmail}</span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRegistrationSuccessModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Close
+                </button>
+                <a
+                  href="https://mail.google.com/mail/u/0/#inbox"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  Check Email
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}

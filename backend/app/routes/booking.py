@@ -108,6 +108,37 @@ async def get_booking(booking_id: str):
     booking["_id"] = str(booking["_id"])
     return booking
 
+@router.get("/check/{session_id}/{email}")
+async def check_booking_status(session_id: str, email: str):
+    """
+    Check if a user has already booked a specific session.
+    Returns a list of all dates the user has booked for this session.
+    """
+    try:
+        bookings_collection = get_collection("bookings")
+        
+        # Find all bookings with matching session_id and email
+        cursor = bookings_collection.find({
+            "session_id": session_id,
+            "email": email
+        })
+        
+        bookings = await cursor.to_list(length=100)
+        
+        # Convert ObjectId to string for each booking
+        for booking in bookings:
+            booking["_id"] = str(booking["_id"])
+        
+        return {
+            "has_bookings": len(bookings) > 0,
+            "bookings": bookings
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error checking booking status: {str(e)}"
+        )
+
 async def send_booking_confirmation_email(email: str, session_data: dict, booking_request: BookingRequest, meeting_link: str):
     """
     Send a confirmation email for a booking.
@@ -324,4 +355,4 @@ async def send_booking_confirmation_email(email: str, session_data: dict, bookin
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send confirmation email")
     
-    return {"message": "Confirmation email sent successfully"} 
+    return {"message": "Confirmation email sent successfully"}
