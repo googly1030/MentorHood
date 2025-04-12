@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  backend:
+    container_name: mentor-hood-local-backend-container
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+    ports:
+      - "9000:9000"
+    env_file:
+      - prod.backend.env
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+  
+  frontend:
+    container_name: mentor-hood-local-frontend-container
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - /usr/src/app/node_modules
+    env_file:
+      - prod.frontend.env
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  mongodb:
+    container_name: mentor-hood-local-mongo-container
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mentor-hood-mongo:/data/db
+
+volumes:
+  mentor-hood-mongo:
+  mentor-hood-redis:
