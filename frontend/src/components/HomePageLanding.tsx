@@ -500,7 +500,7 @@ function App() {
                     visibleCards[index] ? "visible" : ""
                   }`}
                 >
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex items-center gap-4 mb-4">
                     <img
                       src={mentor.profilePhoto || `https://ui-avatars.com/api/?name=${mentor.name}&background=random`}
                       alt={mentor.name}
@@ -508,10 +508,10 @@ function App() {
                     />
                     <div>
                       <h3 className="font-semibold text-lg">{mentor.name}</h3>
-                      <div className="flex items-center gap-1 text-yellow-500">
+                      {/* <div className="flex items-center gap-1 text-yellow-500">
                         <Star size={16} fill="currentColor" />
                         <span>{mentor.rating || 4.5}/5</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   <p className="text-gray-700 mb-2">{mentor.headline}</p>
@@ -595,18 +595,17 @@ function App() {
               
               return (
                 <div key={session.sessionId} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-600">
-                        {mentor?.name?.charAt(0) || 'M'}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{session.sessionName}</h3>
-                      <p className="text-gray-600">{mentor?.headline}</p>
-                    </div>
+                <div className="flex items-center gap-4 mb-6 ">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl font-bold text-gray-600">
+                      {mentor?.name?.charAt(0) || 'M'}
+                    </span>
                   </div>
-
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-gray-900 truncate">{session.sessionName}</h3>
+                    <p className="text-gray-600 text-sm line-clamp-2">{mentor?.headline}</p>
+                  </div>
+                </div>
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center gap-2 text-gray-600">
                       <Clock className="w-5 h-5" />
@@ -636,11 +635,11 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="mt-6 flex items-center justify-end">
+                    {/* <div className="flex items-center gap-2">
                       <Star className="w-5 h-5 fill-current text-yellow-400" />
                       <span className="font-medium">4.9 (1.2k+ sessions)</span>
-                    </div>
+                    </div> */}
                     <button
                       onClick={() => navigate(`/booking/${session.sessionId}`)}
                       className="px-4 py-2 bg-black text-white rounded-full flex items-center gap-2 

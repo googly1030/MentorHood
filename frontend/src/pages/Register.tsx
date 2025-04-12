@@ -105,9 +105,9 @@ const Register = () => {
           <div className="flex justify-center space-x-4 mb-8">
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, role: 'mentee' })}
+              onClick={() => setFormData({ ...formData, role: 'user' })}
               className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-                formData.role === 'mentee'
+                formData.role === 'user'
                   ? 'bg-black text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}

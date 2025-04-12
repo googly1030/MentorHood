@@ -8,6 +8,7 @@ from app.utils.email import email_sender
 from app.routes import mentor as mentor_routes
 from app.routes import registration as registration_routes
 from app.routes import booking as booking_routes
+from app.routes import dashboard
 
 app = FastAPI()
 
@@ -33,6 +34,7 @@ app.include_router(mentor_routes.router)
 app.include_router(ama_session_routes.router)
 app.include_router(registration_routes.router)
 app.include_router(booking_routes.router)
+app.include_router(dashboard.router)
 
 @app.get("/")
 def read_root():
