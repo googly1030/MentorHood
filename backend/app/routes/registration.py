@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 from datetime import datetime
 from bson import ObjectId
+import uuid
 
 from ..database import get_collection
 from ..schemas.registration import RegistrationCreate, Registration
@@ -41,9 +42,22 @@ async def create_registration(registration: RegistrationCreate):
     if session["registrants"] >= session["maxRegistrants"]:
         raise HTTPException(status_code=400, detail="Session is full")
     
-    # Create the registration document
+    # Generate a unique meeting link
+    meeting_id = str(uuid.uuid4())
+    meeting_link = f"https://meet.mentorhood.com/{meeting_id}"
+    
+    # Create the registration document with session details and meeting link
     registration_dict = registration.dict()
     registration_dict.update({
+        "meeting_link": meeting_link,
+        "meeting_id": meeting_id,
+        "session_title": session.get("title", ""),
+        "session_date": session.get("date", ""),
+        "session_time": session.get("time", ""),
+        "session_duration": session.get("duration", ""),
+        "mentor_name": session.get("mentor", {}).get("name", ""),
+        "mentor_role": session.get("mentor", {}).get("role", ""),
+        "mentor_company": session.get("mentor", {}).get("company", ""),
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     })
@@ -121,6 +135,22 @@ async def create_registration(registration: RegistrationCreate):
                         font-size: 14px;
                         color: #666666;
                     }}
+                    .meeting-link {{
+                        background-color: #f0f8ff;
+                        border: 1px solid #cce6ff;
+                        padding: 15px;
+                        border-radius: 4px;
+                        margin: 20px 0;
+                        word-break: break-all;
+                    }}
+                    .meeting-link a {{
+                        color: #0066cc;
+                        text-decoration: none;
+                        font-weight: bold;
+                    }}
+                    .meeting-link a:hover {{
+                        text-decoration: underline;
+                    }}
                 </style>
             </head>
             <body>
@@ -140,6 +170,12 @@ async def create_registration(registration: RegistrationCreate):
                             <p><strong>Time:</strong> {session['time']}</p>
                             <p><strong>Duration:</strong> {session['duration']}</p>
                             <p><strong>Host:</strong> {session['mentor']['name']}, {session['mentor']['role']}</p>
+                        </div>
+                        
+                        <div class="meeting-link">
+                            <p style="margin-top: 0;"><strong>Your Meeting Link:</strong></p>
+                            <a href="{meeting_link}">{meeting_link}</a>
+                            <p style="margin-bottom: 0; font-size: 14px;">This link will be active 5 minutes before your scheduled session.</p>
                         </div>
                         
                         <p>We'll send you a reminder before the session starts. In the meantime, feel free to prepare your questions!</p>
