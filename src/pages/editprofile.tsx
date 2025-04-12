@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, Save, X, ChevronDown, ChevronUp, Briefcase, FolderOpen, BookOpen, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { API_URL } from '../utils/api';
 
 // Interface remains the same
 interface MentorProfile {
@@ -106,7 +107,7 @@ export default function EditProfile() {
           return;
         }
 
-        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}`);
+        const response = await fetch(`${API_URL}/api/mentors/${mentorId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch profile');
         }
@@ -130,7 +131,7 @@ export default function EditProfile() {
     if (!profile) return;
 
     try {
-      const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/update`, {
+      const response = await fetch(`${API_URL}/api/mentors/${mentorId}/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

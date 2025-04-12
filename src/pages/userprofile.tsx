@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Rocket, Trophy, Users, Sun, Moon, Star, Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getUserData } from '../utils/auth';
+import { API_URL } from '../utils/api';
 
 interface Service {
   _id: string;
@@ -147,7 +148,7 @@ function App() {
   useEffect(() => {
     const fetchMentorProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}`);
+        const response = await fetch(`${API_URL}/api/mentors/${mentorId}`);
         if (!response.ok) {
           if (response.status === 404 && isCurrentUser) {
             // Create empty profile if user is the current mentor
@@ -159,7 +160,7 @@ function App() {
 
             console.log('Creating new mentor profile:', newProfile);
 
-            const createResponse = await fetch('http://localhost:9000/api/mentors/creatementorprofile', {
+            const createResponse = await fetch(`${API_URL}/api/mentors/creatementorprofile`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ function App() {
 
     const fetchServices = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=one-on-one`);
+        const response = await fetch(`${API_URL}/api/mentors/${mentorId}/sessions?type=one-on-one`);
         if (!response.ok) {
           throw new Error('Failed to fetch services');
         }
@@ -213,7 +214,7 @@ function App() {
 
     const fetchGroupDiscussions = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/api/mentors/${mentorId}/sessions?type=group-session`);
+        const response = await fetch(`${API_URL}/api/mentors/${mentorId}/sessions?type=group-session`);
         if (!response.ok) {
           throw new Error('Failed to fetch group discussions');
         }

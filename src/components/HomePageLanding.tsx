@@ -28,6 +28,7 @@ import mentor5 from '../MentoImg/mentor5.jpg'
 import mentor6 from '../MentoImg/mentor6.jpg'
 import mentor7 from '../MentoImg/mentor7.jpg'
 import mentor8 from '../MentoImg/mentor8.jpg'
+import { API_URL } from '../utils/api';
 
 
 interface Session {
@@ -236,7 +237,7 @@ function App() {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const response = await fetch('http://localhost:9000/api/mentors/all');
+        const response = await fetch(`${API_URL}/api/mentors/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch mentors');
         }
@@ -254,7 +255,7 @@ function App() {
 
     const fetchOneOnOneSessions = async () => {
       try {
-        const response = await fetch('http://localhost:9000/api/sessions/one-on-one/all');
+        const response = await fetch(`${API_URL}/api/sessions/one-on-one/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch sessions');
         }
@@ -272,7 +273,7 @@ function App() {
 
     const fetchGroupSessions = async () => {
       try {
-        const response = await fetch('http://localhost:9000/api/sessions/group-session/all');
+        const response = await fetch(`${API_URL}/api/sessions/group-session/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch group sessions');
         }
@@ -294,8 +295,8 @@ function App() {
     const fetchAMASessions = async () => {
       try {
         const [amaResponse, womenTechResponse] = await Promise.all([
-          fetch('http://localhost:9000/ama-sessions?is_woman_tech=false'),
-          fetch('http://localhost:9000/ama-sessions?is_woman_tech=true')
+          fetch(`${API_URL}/ama-sessions?is_woman_tech=false`),
+          fetch(`${API_URL}/ama-sessions?is_woman_tech=true`)
         ]);
 
         if (!amaResponse.ok || !womenTechResponse.ok) {

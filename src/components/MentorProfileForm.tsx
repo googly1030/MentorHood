@@ -6,6 +6,7 @@ import { MentorProfile } from '../types/mentor';
 import toast from 'react-hot-toast';
 import CustomSelect from './CustomSelect';
 import { setUserData } from '../utils/auth';
+import { API_URL } from '../utils/api';
 
 const DISCIPLINES = [
   "Frontend Development",
@@ -282,7 +283,7 @@ const MentorProfileForm = () => {
         targetMentees: [formData.relationshipType], // Convert relationshipType to array
       };
   
-      const response = await fetch('http://localhost:9000/api/users/mentors/profile', {
+      const response = await fetch(`${API_URL}/api/users/mentors/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
