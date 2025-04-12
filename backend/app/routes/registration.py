@@ -9,7 +9,7 @@ from ..schemas.registration import RegistrationCreate, Registration
 from ..utils.email import email_sender
 
 router = APIRouter(
-    prefix="/api/registrations",
+    prefix="/registrations",
     tags=["registrations"]
 )
 
