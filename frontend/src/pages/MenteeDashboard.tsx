@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, BookOpen, ArrowUpRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../utils/api';
 
 // Define types for our data
 interface User {
@@ -38,8 +39,7 @@ interface DashboardData {
   learningProgress: LearningProgress;
 }
 
-// API URL - should match your backend configuration
-const API_URL = 'http://localhost:9000';
+
 
 function MenteeDashboard() {
   const navigate = useNavigate();
