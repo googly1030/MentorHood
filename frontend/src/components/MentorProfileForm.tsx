@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload, Linkedin, ArrowRight } from 'lucide-react';
 import { getUserData } from '../utils/auth';
 import { MentorProfile } from '../types/mentor';
-import toast from 'react-hot-toast';
+import { toast, Toaster } from 'sonner';
 import CustomSelect from './CustomSelect';
 import { setUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
@@ -320,6 +320,13 @@ const MentorProfileForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4">
+      <Toaster
+        position="top-center"
+        expand={true}
+        richColors
+        closeButton
+        theme="system"
+      />
       <div className="max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
           Submit your mentorship application
