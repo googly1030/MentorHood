@@ -82,7 +82,7 @@ export default function QuestionSection() {
 
       try {
         setSessionLoading(true);
-        const response = await fetch(`${API_URL}/ama-sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/api/ama-sessions/${sessionId}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -122,7 +122,7 @@ export default function QuestionSection() {
     try {
       // Call the upvote API
       const response = await fetch(
-        `${API_URL}/questionnaires/${questionId}/upvote`,
+        `${API_URL}/api/questionnaires/${questionId}/upvote`,
         {
           method: "POST",
           headers: {
@@ -185,7 +185,7 @@ export default function QuestionSection() {
         : "CU",
     };
 
-    const response = await fetch(`${API_URL}/questionnaires`, {
+    const response = await fetch(`${API_URL}/api/questionnaires`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -225,7 +225,7 @@ export default function QuestionSection() {
 
       // Call the answer API to store the answer in the database
       const response = await fetch(
-        `${API_URL}/questionnaires/${currentQuestion._id}/answer`,
+        `${API_URL}/api/questionnaires/${currentQuestion._id}/answer`,
         {
           method: "POST",
           headers: {
@@ -258,7 +258,7 @@ export default function QuestionSection() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`
+        `${API_URL}/api/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch questions");
@@ -276,7 +276,7 @@ export default function QuestionSection() {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${API_URL}/questionnaires/register`, {
+      const response = await fetch(`${API_URL}/api/questionnaires/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -308,7 +308,7 @@ export default function QuestionSection() {
     e.preventDefault();
     setIsRegistering(true);
     try {
-      const response = await fetch(`${API_URL}/registrations`, {
+      const response = await fetch(`${API_URL}/api/registrations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -346,7 +346,7 @@ export default function QuestionSection() {
 
       try {
         const response = await fetch(
-          `${API_URL}/questionnaires/check-registration/${sessionId}/${email}`
+          `${API_URL}/api/questionnaires/check-registration/${sessionId}/${email}`
         );
         if (response.ok) {
           const data = await response.json();
