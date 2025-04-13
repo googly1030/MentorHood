@@ -17,6 +17,7 @@ origins = [
     "http://localhost:5173",  
     "http://127.0.0.1:5173",
     "https://ec2-13-201-134-80.ap-south-1.compute.amazonaws.com",
+    "https://mentorhood.guvi.world",
 ]
 
 app.add_middleware(
