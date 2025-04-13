@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(user_routes.router, prefix="/api")
+app.include_router(user_routes.router)
 app.include_router(questionnaire_routes.router)
 app.include_router(session_routes.router)
 app.include_router(mentor_routes.router)
