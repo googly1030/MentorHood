@@ -16,6 +16,14 @@ export default function QuestionAnswers() {
   const [newAnswer, setNewAnswer] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load upvoted answers from localStorage on component mount
+  useEffect(() => {
+    const storedUpvotes = localStorage.getItem('upvotedAnswers');
+    if (storedUpvotes) {
+      setUpvotedAnswers(JSON.parse(storedUpvotes));
+    }
+  }, []);
+
   useEffect(() => {
     const fetchQuestionAndAnswers = async () => {
       try {
@@ -52,12 +60,15 @@ export default function QuestionAnswers() {
   const handleUpvoteAnswer = async (answerId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`${API_URL}/questionnaires/${questionId}/answers/${answerId}/upvote/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/questionnaires/${questionId}/answers/${answerId}/upvote/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upvote answer");
@@ -70,12 +81,15 @@ export default function QuestionAnswers() {
         prev.map((a) => (a._id === answerId ? updatedAnswer : a))
       );
 
-      // Update the upvotedAnswers state
+      // Update the upvotedAnswers state and localStorage
+      let newUpvotedAnswers: string[];
       if (upvotedAnswers.includes(answerId)) {
-        setUpvotedAnswers((prev) => prev.filter((id) => id !== answerId));
+        newUpvotedAnswers = upvotedAnswers.filter((id) => id !== answerId);
       } else {
-        setUpvotedAnswers((prev) => [...prev, answerId]);
+        newUpvotedAnswers = [...upvotedAnswers, answerId];
       }
+      setUpvotedAnswers(newUpvotedAnswers);
+      localStorage.setItem('upvotedAnswers', JSON.stringify(newUpvotedAnswers));
     } catch (error) {
       console.error("Error upvoting answer:", error);
     }
@@ -220,6 +234,7 @@ export default function QuestionAnswers() {
                         : "text-gray-700 border-gray-200 hover:bg-gray-50"
                     }`}
                   onClick={() => handleUpvoteAnswer(answer._id)}
+                  disabled={upvotedAnswers.includes(answer._id)}
                 >
                   <ArrowUp size={16} />
                   <span>

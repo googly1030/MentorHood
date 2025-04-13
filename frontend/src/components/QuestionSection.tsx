@@ -70,6 +70,14 @@ export default function QuestionSection() {
     useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  // Load upvoted questions from localStorage on component mount
+  useEffect(() => {
+    const storedUpvotes = localStorage.getItem('upvotedQuestions');
+    if (storedUpvotes) {
+      setUpvotedQuestions(JSON.parse(storedUpvotes));
+    }
+  }, []);
+
   // Fetch session details when component mounts
   useEffect(() => {
     const fetchSessionDetails = async () => {
@@ -142,12 +150,15 @@ export default function QuestionSection() {
         prev.map((q) => (q._id === questionId ? updatedQuestion : q))
       );
 
-      // Update the upvotedQuestions state
+      // Update the upvotedQuestions state and localStorage
+      let newUpvotedQuestions: string[];
       if (upvotedQuestions.includes(questionId)) {
-        setUpvotedQuestions((prev) => prev.filter((id) => id !== questionId));
+        newUpvotedQuestions = upvotedQuestions.filter((id) => id !== questionId);
       } else {
-        setUpvotedQuestions((prev) => [...prev, questionId]);
+        newUpvotedQuestions = [...upvotedQuestions, questionId];
       }
+      setUpvotedQuestions(newUpvotedQuestions);
+      localStorage.setItem('upvotedQuestions', JSON.stringify(newUpvotedQuestions));
     } catch (error) {
       console.error("Error upvoting question:", error);
     }
@@ -575,6 +586,7 @@ export default function QuestionSection() {
                           : "border-gray-200 hover:bg-gray-50"
                       }`}
                       onClick={() => handleUpvote(question._id)}
+                      disabled={upvotedQuestions.includes(question._id)}
                     >
                       <ArrowUp
                         size={16}
