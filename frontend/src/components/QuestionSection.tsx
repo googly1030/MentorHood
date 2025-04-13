@@ -308,7 +308,7 @@ export default function QuestionSection() {
     e.preventDefault();
     setIsRegistering(true);
     try {
-      const response = await fetch(`${API_URL}/registrations`, {
+      const response = await fetch(`${API_URL}/registrations/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
