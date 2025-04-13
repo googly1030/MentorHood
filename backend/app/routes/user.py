@@ -57,7 +57,7 @@ router = APIRouter(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user: UserCreate):
-    try:
+    # try:
         # Check if user exists
         if await user_collection.find_one({"email": user.email}):
             raise HTTPException(
@@ -87,11 +87,11 @@ async def register(user: UserCreate):
             "role": user_dict["role"],
             "created_at": user_dict["created_at"]
         }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Could not register user: {str(e)}"
-        )
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail=f"Could not register user: {str(e)}"
+    #     )
 
 # Update the login function to properly handle password fields
 @router.post("/login", response_model=UserResponse)

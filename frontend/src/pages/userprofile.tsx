@@ -145,7 +145,7 @@ function App() {
           }
         } catch (err) {
           console.error('Error parsing token:', err);
-        }
+        } 
       }
     };
 
@@ -176,7 +176,8 @@ function App() {
               credentials: 'include',
               body: JSON.stringify(newProfile)
             });
-
+            window.location.reload();
+            
             if (!createResponse.ok) {
               const errorData = await createResponse.json();
               console.error('Failed to create profile:', errorData);

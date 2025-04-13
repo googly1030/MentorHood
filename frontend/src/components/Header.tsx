@@ -9,7 +9,7 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     removeUserData();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleDashboardClick = () => {

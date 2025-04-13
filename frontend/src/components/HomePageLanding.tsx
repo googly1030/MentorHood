@@ -53,6 +53,7 @@ interface Session {
     }[];
   }[];
   userId: string;
+  created_at?: string; // Adding optional created_at
 }
 
 interface Mentor {
@@ -76,6 +77,7 @@ interface Mentor {
   profilePhoto?: string;
   rating?: number;
   bookings?: number;
+  created_at?: string; // Adding optional created_at
 }
 
 interface AMASession {
@@ -94,6 +96,7 @@ interface AMASession {
   questions: string[];
   isWomanTech: boolean;
   tag?: string;
+  created_at?: string; // Adding optional created_at
 }
 
 
@@ -492,7 +495,15 @@ function App() {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
-              {mentors.map((mentor, index) => (
+              {mentors
+                .sort((a, b) => {
+                  // Fallback to 0 if created_at is undefined
+                  const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                  const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                  return dateB - dateA;
+                })
+                .slice(0, 4)
+                .map((mentor, index) => (
                 <div
                   key={mentor.userId}
                   ref={(el) => (cardsRef.current[index] = el)}
@@ -590,7 +601,14 @@ function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {oneOnOneSessions.map((session) => {
+            {oneOnOneSessions
+              .sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+              })
+              .slice(0, 4)
+              .map((session) => {
               const mentor = mentors.find(m => m.userId === session.userId);
               
               return (
@@ -683,7 +701,14 @@ function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 sessions-grid">
-            {groupSessions.map((session, index) => {
+            {groupSessions
+              .sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+              })
+              .slice(0, 4)
+              .map((session, index) => {
               const mentor = mentors.find(m => m.userId === session.userId);
               return (
                 <div
@@ -776,7 +801,14 @@ function App() {
             <div className="text-center">Loading sessions...</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {amaSessions.map((session) => (
+              {amaSessions
+                .sort((a, b) => {
+                  const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                  const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                  return dateB - dateA;
+                })
+                .slice(0, 4)
+                .map((session) => (
                 <div
                   key={session._id}
                   className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
@@ -886,7 +918,14 @@ function App() {
             <div className="text-center">Loading sessions...</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {womenTechSessions.map((session) => (
+              {womenTechSessions
+                .sort((a, b) => {
+                  const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                  const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                  return dateB - dateA;
+                })
+                .slice(0, 4)
+                .map((session) => (
                 <div
                   key={session._id}
                   className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"

@@ -50,9 +50,7 @@ function App() {
 
             {/* Protected Routes */}
             <Route path="/" element={
-              <ProtectedRoute>
                 <HomePageLanding />
-              </ProtectedRoute>
             } />
             <Route path="/profile/:mentorId" element={
               <ProtectedRoute>

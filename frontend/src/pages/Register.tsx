@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock } from 'lucide-react';
 import { setUserData } from '../utils/auth';
-import toast from 'react-hot-toast';
+import { toast, Toaster } from 'sonner';
 import MentorProfileForm from '../components/MentorProfileForm';
 import { API_URL } from '../utils/api';
 
@@ -40,8 +40,12 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.message.includes('already exists')) {
-          toast.error('Email already registered. Please login instead.', {
+        console.log("HERE")
+        console.log(data)
+        if (data.detail) {
+          console.log("HERE2")  
+          // alert(data.detail)
+          toast.error(data.detail, {
             id: loadingToast,
           });
         } else {
@@ -50,6 +54,8 @@ const Register = () => {
           });
         }
         return;
+      } else {
+        console.log(response)
       }
 
       setUserData({
@@ -91,6 +97,13 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Toaster
+        position="top-center"
+        expand={true}
+        richColors
+        closeButton
+        theme="system"
+      />
       <div className="max-w-md mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
