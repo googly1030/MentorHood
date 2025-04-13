@@ -365,3 +365,43 @@ async def check_registration(session_id: str, email: str):
     })
     
     return {"is_registered": registration is not None}
+
+@router.post("/{question_id}/answers/{answer_id}/upvote", response_model=AnswerSchema)
+async def upvote_answer(question_id: str, answer_id: str):
+    """Upvote an answer for a specific question"""
+    # Validate question_id
+    if not ObjectId.is_valid(question_id):
+        raise HTTPException(status_code=400, detail="Invalid question ID")
+        
+    # Validate answer_id
+    if not ObjectId.is_valid(answer_id):
+        raise HTTPException(status_code=400, detail="Invalid answer ID")
+    
+    # Get answers collection
+    answers_collection = get_collection("answers")
+    
+    # Check if answer exists and belongs to the question
+    answer = await answers_collection.find_one({
+        "_id": ObjectId(answer_id),
+        "question_id": question_id
+    })
+    
+    if not answer:
+        raise HTTPException(status_code=404, detail="Answer not found for this question")
+    
+    # Increment upvotes
+    result = await answers_collection.update_one(
+        {"_id": ObjectId(answer_id)},
+        {"$inc": {"upvotes": 1}, "$set": {"updated_at": datetime.utcnow()}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to upvote answer")
+    
+    # Get updated answer
+    updated_answer = await answers_collection.find_one({"_id": ObjectId(answer_id)})
+    
+    # Convert ObjectId to string for JSON serialization
+    updated_answer["_id"] = str(updated_answer["_id"])
+    
+    return updated_answer

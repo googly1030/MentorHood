@@ -52,7 +52,7 @@ export default function QuestionAnswers() {
   const handleUpvoteAnswer = async (answerId: string) => {
     try {
       // Call the upvote API
-      const response = await fetch(`${API_URL}/questionnaires/${questionId}/answers/${answerId}/upvote`, {
+      const response = await fetch(`${API_URL}/questionnaires/${questionId}/answers/${answerId}/upvote/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
