@@ -809,7 +809,8 @@ export default function CreateAMASession() {
           <div className="w-full max-w-3xl flex items-center">
             {[
               { num: 1, label: "Session Details" },
-              { num: 2, label: "Review" }
+              { num: 2, label: "Availability" },
+              { num: 3, label: "Review" }
             ].map((stepItem) => (
               <div key={stepItem.num} className="flex-1 flex flex-col items-center relative">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2
