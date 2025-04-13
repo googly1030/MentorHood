@@ -6,7 +6,7 @@ from app.database import get_collection
 import uuid
 
 router = APIRouter(
-    prefix="/api/sessions",
+    prefix="/sessions",
     tags=["sessions"]
 )
 

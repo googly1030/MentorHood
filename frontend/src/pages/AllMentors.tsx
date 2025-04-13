@@ -165,7 +165,7 @@ const AllMentors = () => {
     const fetchData = async () => {
       try {
         // Fetch one-on-one sessions
-        const oneOnOneResponse = await fetch(`${API_URL}/api/sessions/one-on-one/all`);
+        const oneOnOneResponse = await fetch(`${API_URL}/sessions/one-on-one/all`);
         const oneOnOneData = await oneOnOneResponse.json();
         if (oneOnOneData.status === 'success') {
           setOneOnOneSessions(oneOnOneData.sessions);
@@ -178,7 +178,7 @@ const AllMentors = () => {
         }
 
         // Fetch group sessions
-        const groupResponse = await fetch(`${API_URL}/api/sessions/group-session/all`);
+        const groupResponse = await fetch(`${API_URL}/sessions/group-session/all`);
         const groupData = await groupResponse.json();
         if (groupData.status === 'success') {
           setGroupSessions(groupData.sessions);
@@ -383,7 +383,7 @@ const AllMentors = () => {
               >
                 <div className="flex items-start gap-4 mb-4">
                   <img
-                    src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                    src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
                     alt={mentor.name}
                     className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                   />
@@ -458,7 +458,7 @@ const AllMentors = () => {
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <img
-                      src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                     />
@@ -535,7 +535,7 @@ const AllMentors = () => {
 
                   <div className="flex items-center gap-4 mb-6">
                     <img
-                      src={mentor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
                       alt={mentor.name}
                       className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
                     />

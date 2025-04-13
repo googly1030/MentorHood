@@ -675,7 +675,7 @@ function CreateSession() {
         timeSlots: timeSlots
       };
 
-      const response = await fetch(`${API_URL}/api/sessions/create`, {
+      const response = await fetch(`${API_URL}/sessions/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

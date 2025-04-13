@@ -70,7 +70,7 @@ function MenteeDashboard() {
           return;
         }
         
-        const response = await fetch(`${API_URL}/api/dashboard/mentee/${userEmail}`);
+        const response = await fetch(`${API_URL}/dashboard/mentee/${userEmail}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');

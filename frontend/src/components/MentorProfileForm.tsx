@@ -283,7 +283,7 @@ const MentorProfileForm = () => {
         targetMentees: [formData.relationshipType], // Convert relationshipType to array
       };
   
-      const response = await fetch(`${API_URL}/api/users/mentors/profile`, {
+      const response = await fetch(`${API_URL}/users/mentors/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ const Register = () => {
     const loadingToast = toast.loading('Creating your account...');
 
     try {
-      const response = await fetch(`${API_URL}/api/users/register`, {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
