@@ -502,7 +502,7 @@ const AllMentors = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate(`/book-session/${session.sessionId}`)}
+                    onClick={() => navigate(`/booking/${session.sessionId}`)}
                     className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 transition-colors"
                   >
                     Book Session
@@ -563,7 +563,7 @@ const AllMentors = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate(`/book-session/${session.sessionId}`)}
+                    onClick={() => navigate(`/booking/${session.sessionId}`)}
                     className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors"
                   >
                     Join Session
