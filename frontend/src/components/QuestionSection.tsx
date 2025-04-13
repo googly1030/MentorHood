@@ -185,7 +185,7 @@ export default function QuestionSection() {
         : "CU",
     };
 
-    const response = await fetch(`${API_URL}/questionnaires`, {
+    const response = await fetch(`${API_URL}/questionnaires/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -258,7 +258,7 @@ export default function QuestionSection() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/questionnaires?category_id=${activeCategory}&sort_by=${sortBy}`
+        `${API_URL}/questionnaires/?category_id=${activeCategory}&sort_by=${sortBy}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch questions");
