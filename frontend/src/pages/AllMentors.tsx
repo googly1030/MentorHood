@@ -84,8 +84,14 @@ interface MentorProfile {
 
 const AllMentors = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({
+  
+  // Separate search states for each tab
+  const [allMentorsSearch, setAllMentorsSearch] = useState('');
+  const [oneOnOneSearch, setOneOnOneSearch] = useState('');
+  const [groupSessionSearch, setGroupSessionSearch] = useState('');
+
+  // Separate filter states for each tab
+  const [allMentorsFilters, setAllMentorsFilters] = useState({
     isPremium: false,
     quickResponse: false,
     mostVisited: false,
@@ -94,12 +100,33 @@ const AllMentors = () => {
     hotSeller: false,
   });
 
-  // Add sorting state
-  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
+  const [oneOnOneFilters, setOneOnOneFilters] = useState({
+    isPremium: false,
+    quickResponse: false,
+    mostVisited: false,
+    serviceBasedExperts: false,
+    ventureCapital: false,
+    hotSeller: false,
+  });
 
-  // Add state for API data
-  const [oneOnOneSessions, setOneOnOneSessions] = useState<Session[]>([]);
-  const [groupSessions, setGroupSessions] = useState<Session[]>([]);
+  const [groupSessionFilters, setGroupSessionFilters] = useState({
+    isPremium: false,
+    quickResponse: false,
+    mostVisited: false,
+    serviceBasedExperts: false,
+    ventureCapital: false,
+    hotSeller: false,
+  });
+
+  // Separate sorting states for each tab
+  const [allMentorsSortBy, setAllMentorsSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
+  const [oneOnOneSortBy, setOneOnOneSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
+  const [groupSessionSortBy, setGroupSessionSortBy] = useState<'rating' | 'price' | 'bookings' | ''>('');
+
+  // Separate data states for each tab
+  const [allMentorsData, setAllMentorsData] = useState<MentorProfile[]>([]);
+  const [oneOnOneData, setOneOnOneData] = useState<Session[]>([]);
+  const [groupSessionData, setGroupSessionData] = useState<Session[]>([]);
   const [mentorProfiles, setMentorProfiles] = useState<MentorProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -114,19 +141,11 @@ const AllMentors = () => {
     navigate(`/mentors?tab=${tab}`, { replace: true });
   };
 
-  const categories = [
-    { id: 'most-visited', name: 'Most Visited', icon: TrendingUp },
-    { id: 'service-based', name: 'Service Based', icon: Building2 },
-    { id: 'company-experts', name: 'Company Experts', icon: Briefcase },
-    { id: 'venture-capital', name: 'Venture Capital', icon: Rocket }
-  ];
-
-  // Filter mentors based on search and filters
-  const filterMentors = (mentors: MentorProfile[]) => {
+  // Separate filter functions for each tab
+  const filterAllMentors = (mentors: MentorProfile[]) => {
     return mentors.filter(mentor => {
-      // Search query filter
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
+      if (allMentorsSearch) {
+        const searchLower = allMentorsSearch.toLowerCase();
         const matchesSearch = 
           mentor.name.toLowerCase().includes(searchLower) ||
           mentor.headline.toLowerCase().includes(searchLower) ||
@@ -136,68 +155,149 @@ const AllMentors = () => {
         if (!matchesSearch) return false;
       }
 
-      // Filter buttons logic
-      if (filters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
-      if (filters.quickResponse) return true; // Since we don't have this data, we'll show all
-      if (filters.mostVisited && mentor.reviews?.length < 2) return false;
-      if (filters.serviceBasedExperts && mentor.services?.length === 0) return false;
-      if (filters.ventureCapital) return true; // Since we don't have this data, we'll show all
-      if (filters.hotSeller && mentor.services?.some(service => service.rating >= 4.8)) return false;
+      if (allMentorsFilters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
+      if (allMentorsFilters.quickResponse) return true;
+      if (allMentorsFilters.mostVisited && mentor.reviews?.length < 2) return false;
+      if (allMentorsFilters.serviceBasedExperts && mentor.services?.length === 0) return false;
+      if (allMentorsFilters.ventureCapital) return true;
+      if (allMentorsFilters.hotSeller && mentor.services?.some(service => service.rating >= 4.8)) return false;
 
       return true;
     });
   };
 
-  // Add these handler functions
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const filterOneOnOneSessions = (sessions: Session[]) => {
+    return sessions.filter(session => {
+      if (oneOnOneSearch) {
+        const searchLower = oneOnOneSearch.toLowerCase();
+        const mentor = mentorProfiles.find(m => m.userId === session.userId);
+        if (!mentor) return false;
+        
+        const matchesSearch = 
+          session.sessionName.toLowerCase().includes(searchLower) ||
+          session.description.toLowerCase().includes(searchLower) ||
+          session.topics.some(topic => topic.toLowerCase().includes(searchLower)) ||
+          mentor.name.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Apply filters based on mentor profile
+      const mentor = mentorProfiles.find(m => m.userId === session.userId);
+      if (!mentor) return false;
+
+      if (oneOnOneFilters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
+      if (oneOnOneFilters.quickResponse) return true;
+      if (oneOnOneFilters.mostVisited && mentor.reviews?.length < 2) return false;
+      if (oneOnOneFilters.serviceBasedExperts && mentor.services?.length === 0) return false;
+      if (oneOnOneFilters.ventureCapital) return true;
+      if (oneOnOneFilters.hotSeller && mentor.services?.some(service => service.rating >= 4.8)) return false;
+
+      return true;
+    });
   };
 
-  const handleFilterClick = (filterName: keyof typeof filters) => {
-    setFilters(prev => ({
+  const filterGroupSessions = (sessions: Session[]) => {
+    return sessions.filter(session => {
+      if (groupSessionSearch) {
+        const searchLower = groupSessionSearch.toLowerCase();
+        const mentor = mentorProfiles.find(m => m.userId === session.userId);
+        if (!mentor) return false;
+        
+        const matchesSearch = 
+          session.sessionName.toLowerCase().includes(searchLower) ||
+          session.description.toLowerCase().includes(searchLower) ||
+          session.topics.some(topic => topic.toLowerCase().includes(searchLower)) ||
+          mentor.name.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Apply filters based on mentor profile
+      const mentor = mentorProfiles.find(m => m.userId === session.userId);
+      if (!mentor) return false;
+
+      if (groupSessionFilters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
+      if (groupSessionFilters.quickResponse) return true;
+      if (groupSessionFilters.mostVisited && mentor.reviews?.length < 2) return false;
+      if (groupSessionFilters.serviceBasedExperts && mentor.services?.length === 0) return false;
+      if (groupSessionFilters.ventureCapital) return true;
+      if (groupSessionFilters.hotSeller && mentor.services?.some(service => service.rating >= 4.8)) return false;
+
+      return true;
+    });
+  };
+
+  // Add these handler functions for each tab
+  const handleAllMentorsSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAllMentorsSearch(e.target.value);
+  };
+
+  const handleOneOnOneSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOneOnOneSearch(e.target.value);
+  };
+
+  const handleGroupSessionSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGroupSessionSearch(e.target.value);
+  };
+
+  const handleAllMentorsFilterClick = (filterName: keyof typeof allMentorsFilters) => {
+    setAllMentorsFilters(prev => ({
       ...prev,
       [filterName]: !prev[filterName]
     }));
   };
 
-  // Add useEffect for fetching data
+  const handleOneOnOneFilterClick = (filterName: keyof typeof oneOnOneFilters) => {
+    setOneOnOneFilters(prev => ({
+      ...prev,
+      [filterName]: !prev[filterName]
+    }));
+  };
+
+  const handleGroupSessionFilterClick = (filterName: keyof typeof groupSessionFilters) => {
+    setGroupSessionFilters(prev => ({
+      ...prev,
+      [filterName]: !prev[filterName]
+    }));
+  };
+
+  // Add useEffect for fetching data based on active tab
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch one-on-one sessions
-        const oneOnOneResponse = await fetch(`${API_URL}/sessions/one-on-one/all`);
-        const oneOnOneData = await oneOnOneResponse.json();
-        if (oneOnOneData.status === 'success') {
-          setOneOnOneSessions(oneOnOneData.sessions);
-          // Create a Set of unique mentor IDs to avoid duplicates
-          const uniqueMentors = new Map();
-          oneOnOneData.mentors.forEach((mentor: MentorProfile) => {
-            uniqueMentors.set(mentor.userId, mentor);
-          });
-          setMentorProfiles(Array.from(uniqueMentors.values()));
-        }
-
-        // Fetch group sessions
-        const groupResponse = await fetch(`${API_URL}/sessions/group-session/all`);
-        const groupData = await groupResponse.json();
-        if (groupData.status === 'success') {
-          setGroupSessions(groupData.sessions);
-          // Add new mentors without duplicates
-          const uniqueMentors = new Map(mentorProfiles.map(m => [m.userId, m]));
-          groupData.mentors.forEach((mentor: MentorProfile) => {
-            uniqueMentors.set(mentor.userId, mentor);
-          });
-          setMentorProfiles(Array.from(uniqueMentors.values()));
+        setLoading(true);
+        
+        if (activeTab === 'all-mentors') {
+          const response = await fetch(`${API_URL}/mentors/all`);
+          const data = await response.json();
+          if (data.status === 'success') {
+            setAllMentorsData(data.mentors);
+          }
+        } else if (activeTab === 'one-on-one') {
+          const response = await fetch(`${API_URL}/sessions/one-on-one/all`);
+          const data = await response.json();
+          if (data.status === 'success') {
+            setOneOnOneData(data.sessions);
+            setMentorProfiles(data.mentors);
+          }
+        } else if (activeTab === 'group-session') {
+          const response = await fetch(`${API_URL}/sessions/group-session/all`);
+          const data = await response.json();
+          if (data.status === 'success') {
+            setGroupSessionData(data.sessions);
+            setMentorProfiles(data.mentors);
+          }
         }
       } catch (error) {
-        console.error('Error fetching sessions:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -224,8 +324,12 @@ const AllMentors = () => {
                 <div className="relative">
                   <input
                     type="text" 
-                    value={searchQuery}
-                    onChange={handleSearchChange}
+                    value={activeTab === 'all-mentors' ? allMentorsSearch : 
+                           activeTab === 'one-on-one' ? oneOnOneSearch : 
+                           groupSessionSearch}
+                    onChange={activeTab === 'all-mentors' ? handleAllMentorsSearchChange :
+                             activeTab === 'one-on-one' ? handleOneOnOneSearchChange :
+                             handleGroupSessionSearchChange}
                     placeholder="Search by skills (e.g. 'System Design') or company..."
                     className="w-full px-6 py-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                   />
@@ -241,8 +345,14 @@ const AllMentors = () => {
           {/* Sort dropdown */}
           <div className="relative group">
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              value={activeTab === 'all-mentors' ? allMentorsSortBy :
+                     activeTab === 'one-on-one' ? oneOnOneSortBy :
+                     groupSessionSortBy}
+              onChange={(e) => {
+                if (activeTab === 'all-mentors') setAllMentorsSortBy(e.target.value as typeof allMentorsSortBy);
+                else if (activeTab === 'one-on-one') setOneOnOneSortBy(e.target.value as typeof oneOnOneSortBy);
+                else setGroupSessionSortBy(e.target.value as typeof groupSessionSortBy);
+              }}
               className="appearance-none px-4 py-2 pr-10 rounded-full border border-gray-300 
                 bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-[#4937e8] focus:border-transparent
@@ -265,66 +375,102 @@ const AllMentors = () => {
           {/* Filter buttons */}
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.isPremium 
+              (activeTab === 'all-mentors' ? allMentorsFilters.isPremium :
+               activeTab === 'one-on-one' ? oneOnOneFilters.isPremium :
+               groupSessionFilters.isPremium)
                 ? 'bg-purple-100 text-purple-700 border border-purple-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('isPremium')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('isPremium');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('isPremium');
+              else handleGroupSessionFilterClick('isPremium');
+            }}
           >
             Premium Picks ⭐️
           </button>
           
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.quickResponse 
+              (activeTab === 'all-mentors' ? allMentorsFilters.quickResponse :
+               activeTab === 'one-on-one' ? oneOnOneFilters.quickResponse :
+               groupSessionFilters.quickResponse)
                 ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('quickResponse')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('quickResponse');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('quickResponse');
+              else handleGroupSessionFilterClick('quickResponse');
+            }}
           >
             Available Today
           </button>
 
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.mostVisited 
+              (activeTab === 'all-mentors' ? allMentorsFilters.mostVisited :
+               activeTab === 'one-on-one' ? oneOnOneFilters.mostVisited :
+               groupSessionFilters.mostVisited)
                 ? 'bg-green-100 text-green-700 border border-green-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('mostVisited')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('mostVisited');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('mostVisited');
+              else handleGroupSessionFilterClick('mostVisited');
+            }}
           >
             Most Visited
           </button>
 
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.serviceBasedExperts 
+              (activeTab === 'all-mentors' ? allMentorsFilters.serviceBasedExperts :
+               activeTab === 'one-on-one' ? oneOnOneFilters.serviceBasedExperts :
+               groupSessionFilters.serviceBasedExperts)
                 ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('serviceBasedExperts')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('serviceBasedExperts');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('serviceBasedExperts');
+              else handleGroupSessionFilterClick('serviceBasedExperts');
+            }}
           >
             Service Based
           </button>
 
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.ventureCapital 
+              (activeTab === 'all-mentors' ? allMentorsFilters.ventureCapital :
+               activeTab === 'one-on-one' ? oneOnOneFilters.ventureCapital :
+               groupSessionFilters.ventureCapital)
                 ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('ventureCapital')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('ventureCapital');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('ventureCapital');
+              else handleGroupSessionFilterClick('ventureCapital');
+            }}
           >
             Venture Capital
           </button>
 
           <button 
             className={`px-4 py-2 rounded-full ${
-              filters.hotSeller 
+              (activeTab === 'all-mentors' ? allMentorsFilters.hotSeller :
+               activeTab === 'one-on-one' ? oneOnOneFilters.hotSeller :
+               groupSessionFilters.hotSeller)
                 ? 'bg-orange-100 text-orange-700 border border-orange-200' 
                 : 'border border-gray-300 bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleFilterClick('hotSeller')}
+            onClick={() => {
+              if (activeTab === 'all-mentors') handleAllMentorsFilterClick('hotSeller');
+              else if (activeTab === 'one-on-one') handleOneOnOneFilterClick('hotSeller');
+              else handleGroupSessionFilterClick('hotSeller');
+            }}
           >
             Hot Sellers 🔥
           </button>
@@ -376,9 +522,9 @@ const AllMentors = () => {
         // Mentors Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filterMentors(mentorProfiles).map(mentor => (
+            {filterAllMentors(allMentorsData).map((mentor, index) => (
               <div
-                key={mentor.userId}
+                key={`all-mentors-${mentor.userId}-${index}`}
                 className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
               >
                 <div className="flex items-start gap-4 mb-4">
@@ -417,7 +563,7 @@ const AllMentors = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {mentor.skills.slice(0, 3).map((skill, index) => (
                     <span
-                      key={index}
+                      key={`all-mentors-skill-${index}`}
                       className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
                     >
                       {skill}
@@ -447,13 +593,13 @@ const AllMentors = () => {
         // One on One Sessions Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {oneOnOneSessions.map(session => {
+            {filterOneOnOneSessions(oneOnOneData).map((session, index) => {
               const mentor = mentorProfiles.find(m => m.userId === session.userId);
               if (!mentor) return null;
 
               return (
                 <div
-                  key={session.sessionId}
+                  key={`one-on-one-${session.sessionId}-${index}`}
                   className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-200"
                 >
                   <div className="flex items-start gap-4 mb-4">
@@ -516,13 +662,13 @@ const AllMentors = () => {
         // Group Sessions Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groupSessions.map(session => {
+            {filterGroupSessions(groupSessionData).map((session, index) => {
               const mentor = mentorProfiles.find(m => m.userId === session.userId);
               if (!mentor) return null;
 
               return (
                 <div
-                  key={session.sessionId}
+                  key={`group-session-${session.sessionId}-${index}`}
                   className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
                 >
                   <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium mb-4">
