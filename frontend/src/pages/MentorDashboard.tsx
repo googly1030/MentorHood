@@ -56,7 +56,7 @@ function Dashboard() {
           return;
         }
 
-        const response = await fetch(`${API_URL}/api/sessions/mentor/${userData.userId}`);
+        const response = await fetch(`${API_URL}/sessions/mentor/${userData.userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch sessions');
         }

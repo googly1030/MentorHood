@@ -78,7 +78,7 @@ function EditSession() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/sessions/${sessionId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch session');
         }
@@ -131,7 +131,7 @@ function EditSession() {
         timeSlots: timeSlots
       };
 
-      const response = await fetch(`${API_URL}/api/sessions/update/${sessionId}`, {
+      const response = await fetch(`${API_URL}/sessions/update/${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ function EditSession() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {
-        const response = await fetch(`${API_URL}/api/sessions/delete/${sessionId}`, {
+        const response = await fetch(`${API_URL}/sessions/delete/${sessionId}`, {
           method: 'POST',
         });
 

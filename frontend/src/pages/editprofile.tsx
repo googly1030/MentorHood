@@ -107,7 +107,7 @@ export default function EditProfile() {
           return;
         }
 
-        const response = await fetch(`${API_URL}/api/mentors/${mentorId}`);
+        const response = await fetch(`${API_URL}/mentors/${mentorId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch profile');
         }
@@ -131,7 +131,7 @@ export default function EditProfile() {
     if (!profile) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/mentors/${mentorId}/update`, {
+      const response = await fetch(`${API_URL}/mentors/${mentorId}/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

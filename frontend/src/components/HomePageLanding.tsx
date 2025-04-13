@@ -237,7 +237,7 @@ function App() {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/mentors/all`);
+        const response = await fetch(`${API_URL}/mentors/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch mentors');
         }
@@ -255,7 +255,7 @@ function App() {
 
     const fetchOneOnOneSessions = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/sessions/one-on-one/all`);
+        const response = await fetch(`${API_URL}/sessions/one-on-one/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch sessions');
         }
@@ -273,7 +273,7 @@ function App() {
 
     const fetchGroupSessions = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/sessions/group-session/all`);
+        const response = await fetch(`${API_URL}/sessions/group-session/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch group sessions');
         }
@@ -502,7 +502,7 @@ function App() {
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={mentor.profilePhoto || `https://ui-avatars.com/api/?name=${mentor.name}&background=random`}
+                      src={mentor.profilePhoto || `https://ui-avatars.com/?name=${mentor.name}&background=random`}
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -705,7 +705,7 @@ function App() {
 
                     <div className="flex items-center gap-4 mb-6">
                       <img
-                        src={mentor?.profilePhoto || `https://ui-avatars.com/api/?name=${mentor?.name}&background=random`}
+                        src={mentor?.profilePhoto || `https://ui-avatars.com/?name=${mentor?.name}&background=random`}
                         alt={mentor?.name}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
                       />

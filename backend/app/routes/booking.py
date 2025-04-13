@@ -12,7 +12,7 @@ from ..schemas.booking import BookingCreate, Booking as BookingSchema
 from ..utils.email import email_sender
 
 router = APIRouter(
-    prefix="/api/bookings",
+    prefix="/bookings",
     tags=["bookings"]
 )
 

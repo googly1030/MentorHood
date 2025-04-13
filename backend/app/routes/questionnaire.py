@@ -9,7 +9,7 @@ from ..schemas.questionnaire import QuestionnaireCreate, Questionnaire as Questi
 from ..utils.email import email_sender
 
 router = APIRouter(
-    prefix="/api/questionnaires",
+    prefix="/questionnaires",
     tags=["questionnaires"]
 )
 

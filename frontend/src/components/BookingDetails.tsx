@@ -119,7 +119,7 @@ const BookingDetails: React.FC = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/sessions/${sessionId}`);
+        const response = await fetch(`${API_URL}/sessions/${sessionId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch session');
         }
@@ -155,7 +155,7 @@ const BookingDetails: React.FC = () => {
       
       try {
         const response = await fetch(
-          `${API_URL}/api/bookings/check/${sessionId}/${userEmail}`
+          `${API_URL}/bookings/check/${sessionId}/${userEmail}`
         );
         
         if (response.ok) {
@@ -255,7 +255,7 @@ const BookingDetails: React.FC = () => {
         _id: sessionId
       };
       
-      const response = await fetch(`${API_URL}/api/bookings/create`, {
+      const response = await fetch(`${API_URL}/bookings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
