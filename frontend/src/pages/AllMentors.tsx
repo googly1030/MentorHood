@@ -126,8 +126,9 @@ const AllMentors = () => {
   // Separate data states for each tab
   const [allMentorsData, setAllMentorsData] = useState<MentorProfile[]>([]);
   const [oneOnOneData, setOneOnOneData] = useState<Session[]>([]);
+  const [oneOnOneMentors, setOneOnOneMentors] = useState<MentorProfile[]>([]);
   const [groupSessionData, setGroupSessionData] = useState<Session[]>([]);
-  const [mentorProfiles, setMentorProfiles] = useState<MentorProfile[]>([]);
+  const [groupSessionMentors, setGroupSessionMentors] = useState<MentorProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Get the tab from URL parameters
@@ -170,7 +171,7 @@ const AllMentors = () => {
     return sessions.filter(session => {
       if (oneOnOneSearch) {
         const searchLower = oneOnOneSearch.toLowerCase();
-        const mentor = mentorProfiles.find(m => m.userId === session.userId);
+        const mentor = oneOnOneMentors.find(m => m.userId === session.userId);
         if (!mentor) return false;
         
         const matchesSearch = 
@@ -183,7 +184,7 @@ const AllMentors = () => {
       }
 
       // Apply filters based on mentor profile
-      const mentor = mentorProfiles.find(m => m.userId === session.userId);
+      const mentor = oneOnOneMentors.find(m => m.userId === session.userId);
       if (!mentor) return false;
 
       if (oneOnOneFilters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
@@ -201,7 +202,7 @@ const AllMentors = () => {
     return sessions.filter(session => {
       if (groupSessionSearch) {
         const searchLower = groupSessionSearch.toLowerCase();
-        const mentor = mentorProfiles.find(m => m.userId === session.userId);
+        const mentor = groupSessionMentors.find(m => m.userId === session.userId);
         if (!mentor) return false;
         
         const matchesSearch = 
@@ -214,7 +215,7 @@ const AllMentors = () => {
       }
 
       // Apply filters based on mentor profile
-      const mentor = mentorProfiles.find(m => m.userId === session.userId);
+      const mentor = groupSessionMentors.find(m => m.userId === session.userId);
       if (!mentor) return false;
 
       if (groupSessionFilters.isPremium && !mentor.reviews?.some(review => review.rating >= 4.8)) return false;
@@ -279,14 +280,14 @@ const AllMentors = () => {
           const data = await response.json();
           if (data.status === 'success') {
             setOneOnOneData(data.sessions);
-            setMentorProfiles(data.mentors);
+            setOneOnOneMentors(data.mentors);
           }
         } else if (activeTab === 'group-session') {
           const response = await fetch(`${API_URL}/sessions/group-session/all`);
           const data = await response.json();
           if (data.status === 'success') {
             setGroupSessionData(data.sessions);
-            setMentorProfiles(data.mentors);
+            setGroupSessionMentors(data.mentors);
           }
         }
       } catch (error) {
@@ -594,7 +595,7 @@ const AllMentors = () => {
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filterOneOnOneSessions(oneOnOneData).map((session, index) => {
-              const mentor = mentorProfiles.find(m => m.userId === session.userId);
+              const mentor = oneOnOneMentors.find(m => m.userId === session.userId);
               if (!mentor) return null;
 
               return (
@@ -663,7 +664,7 @@ const AllMentors = () => {
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filterGroupSessions(groupSessionData).map((session, index) => {
-              const mentor = mentorProfiles.find(m => m.userId === session.userId);
+              const mentor = groupSessionMentors.find(m => m.userId === session.userId);
               if (!mentor) return null;
 
               return (
