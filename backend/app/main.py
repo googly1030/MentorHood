@@ -1,3 +1,5 @@
+import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import user as user_routes
@@ -9,6 +11,11 @@ from app.routes import mentor as mentor_routes
 from app.routes import registration as registration_routes
 from app.routes import booking as booking_routes
 from app.routes import dashboard
+from app.routes import upload
+
+# Add this near the start of your application
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -37,6 +44,7 @@ app.include_router(ama_session_routes.router)
 app.include_router(registration_routes.router)
 app.include_router(booking_routes.router)
 app.include_router(dashboard.router)
+app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
 
 @app.get("/")
 def read_root():
@@ -56,3 +64,20 @@ async def test_email():
             return {"message": "Failed to send email"}
     except Exception as e:
         return {"message": f"Error: {str(e)}"}
+
+# Add this to check if environment variables are set (remove before production)
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Checking S3 configuration...")
+    s3_vars = {
+        "AWS_ACCESS_KEY": os.environ.get("AWS_ACCESS_KEY"),
+        "AWS_SECRET_KEY": os.environ.get("AWS_SECRET_KEY"),
+        "S3_REGION": os.environ.get("S3_REGION"),
+        "S3_BUCKET": os.environ.get("S3_BUCKET")
+    }
+    
+    for key, value in s3_vars.items():
+        if value:
+            logger.info(f"{key} is set")
+        else:
+            logger.warning(f"{key} is NOT set!")

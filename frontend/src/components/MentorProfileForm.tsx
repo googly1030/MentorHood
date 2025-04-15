@@ -142,13 +142,50 @@ const MentorProfileForm = () => {
         return;
       }
       
-      // Handle file upload here
-      const formData = new FormData();
-      formData.append('file', file);
+      // Create a preview immediately for better UX
+      const previewUrl = URL.createObjectURL(file);
       setFormData(prev => ({
         ...prev,
-        profilePhoto: URL.createObjectURL(file), // Save the file URL for preview
+        profilePhoto: previewUrl, // Temporary preview
       }));
+      
+      try {
+        // Create FormData for upload
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+        
+        // Show loading toast
+        const loadingToast = toast.loading('Uploading image...');
+        
+        // Upload to S3 via backend
+        const response = await fetch(`${API_URL}/api/upload/profile-photo`, {
+          method: 'POST',
+          body: uploadData,
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Upload error details:', errorData);
+          toast.error(`Upload failed: ${errorData.detail || 'Unknown error'}`, { id: loadingToast });
+          throw new Error('Failed to upload image');
+        }
+        
+        const data = await response.json();
+        
+        // Update form with the actual S3 URL
+        setFormData(prev => ({
+          ...prev,
+          profilePhoto: data.url,
+        }));
+        
+        toast.success('Image uploaded successfully!', { id: loadingToast });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast.error('Failed to upload image. Please try again.');
+        
+        // Keep the preview but add a warning that it's not uploaded
+        toast.warning('Using temporary preview only. Please try uploading again.');
+      }
     }
   };
 
