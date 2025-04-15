@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Rocket, Trophy, Users, Sun, Moon, Star, Edit, Settings2 } from 'lucide-react';
+import {  Trophy, Users, Sun, Moon , Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
@@ -31,9 +31,6 @@ interface GroupDiscussion {
 
 enum TabType {
   OVERVIEW = 'overview',
-  REVIEWS = 'reviews',
-  ACHIEVEMENTS = 'achievements',
-  GROUP_SESSIONS = 'groupSessions',
   SERVICES = 'services'
 }
 
@@ -41,6 +38,7 @@ const EMPTY_MENTOR_PROFILE = {
   userId: '',
   name: '',
   headline: 'Professional Developer',
+  description: 'Share your story and experience to help mentees understand your journey and expertise.',
   membership: 'Member of MentorHood',
   totalExperience: {
     years: 0,
@@ -270,118 +268,100 @@ function App() {
     switch (activeTab) {
       case TabType.SERVICES:
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Available Sessions</h2>
-              <button 
-                onClick={() => navigate('/mentor-dashboard')}
-                className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
-              >
-                <Settings2 size={16} />
-                Manage Sessions
-              </button>
-            </div>
-            {services.map((service, index) => (
-              <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className={`font-medium ${textColor}`}>{service.sessionName}</h3>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      Duration: {service.duration} minutes
-                    </p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      {service.description}
-                    </p>
-                  </div>
-                 {service.userId !== userId && <button 
-                    onClick={() => handleBooking(service.sessionId || service._id)}
-                    className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
+          <div className="space-y-8">
+            {/* One-on-One Sessions */}
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-800">One-on-One Sessions</h2>
+                {isCurrentUser && (
+                  <button 
+                    onClick={() => navigate('/mentor-dashboard')}
+                    className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
                   >
-                    {service.isPaid ? `Book • Rs ${service.price}` : 'Book • Free'}
-                  </button>}
-                </div>
+                    <Settings2 size={16} />
+                    Manage Sessions
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-        );
-
-      case TabType.REVIEWS:
-        return (
-          <div className="space-y-6">
-            {mentorProfile.reviews.map((review: any) => (
-              <div key={review.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                <div className="flex items-start gap-4">
-                  <img src={review.user.image} alt={review.user.name} className="w-12 h-12 rounded-full" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className={`font-medium ${textColor}`}>{review.user.name}</h3>
-                      <span className="flex items-center gap-1">
-                        <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                        <span className={textColor}>{review.rating}</span>
-                      </span>
+              <div className="grid grid-cols-2 gap-4">
+                {services.map((service, index) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+                          One-on-One
+                        </span>
+                        <h3 className={`font-medium mt-2 ${textColor}`}>{service.sessionName}</h3>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          Duration: {service.duration} minutes
+                        </p>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          {service.description}
+                        </p>
+                        <p className={`text-lg font-medium mt-3 ${textColor}`}>
+                          {service.isPaid ? `Rs ${service.price}` : 'Free'}
+                        </p>
+                      </div>
+                      {service.userId !== userId && (
+                        <button 
+                          onClick={() => handleBooking(service.sessionId || service._id)}
+                          className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-teal-700"
+                        >
+                          Book Session
+                        </button>
+                      )}
                     </div>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{review.user.role}</p>
-                    <p className={`mt-3 ${textColor}`}>{review.comment}</p>
-                    <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{review.date}</p>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        );
-
-      case TabType.ACHIEVEMENTS:
-        return (
-          <div className="space-y-6">
-            {mentorProfile.achievements.map((achievement: any) => (
-              <div key={achievement.id} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                <div className="flex items-center gap-4">
-                  <Trophy className="w-12 h-12 text-yellow-500" />
-                  <div>
-                    <h3 className={`font-medium ${textColor}`}>{achievement.title}</h3>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{achievement.description}</p>
-                    <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{achievement.date}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-
-      case TabType.GROUP_SESSIONS:
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Group Sessions</h2>
-              <button 
-                onClick={() => navigate('/mentor-dashboard')}
-                className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
-              >
-                <Settings2 size={16} />
-                Manage Sessions
-              </button>
             </div>
-            {groupDiscussions.map((session, index) => (
-              <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className={`font-medium ${textColor}`}>{session.sessionName}</h3>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      Duration: {session.duration} minutes
-                    </p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      {session.description}
-                    </p>
-                  </div>
-                 {session.userId !== userId && <button 
-                    onClick={() => handleBooking(session.sessionId || session._id)}
-                    className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm"
+
+            {/* Group Sessions */}
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-800">Group Sessions</h2>
+                {isCurrentUser && (
+                  <button 
+                    onClick={() => navigate('/mentor-dashboard')}
+                    className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
                   >
-                    {session.isPaid ? `Join • Rs ${session.price}` : 'Join • Free'}
-                  </button>}
-                </div>
+                    <Settings2 size={16} />
+                    Manage Sessions
+                  </button>
+                )}
               </div>
-            ))}
+              <div className="grid grid-cols-2 gap-4">
+                {groupDiscussions.map((session, index) => (
+                  <div key={index} className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                          Group Session
+                        </span>
+                        <h3 className={`font-medium mt-2 ${textColor}`}>{session.sessionName}</h3>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          Duration: {session.duration} minutes
+                        </p>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                          {session.description}
+                        </p>
+                        <p className={`text-lg font-medium mt-3 ${textColor}`}>
+                          {session.isPaid ? `Rs ${session.price}` : 'Free'}
+                        </p>
+                      </div>
+                      {session.userId !== userId && (
+                        <button 
+                          onClick={() => handleBooking(session.sessionId || session._id)}
+                          className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-teal-700"
+                        >
+                          Join Session
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         );
 
@@ -393,6 +373,37 @@ function App() {
               <p className={textColor}>
                 {mentorProfile.headline}
               </p>
+              
+              {/* Add this new description section */}
+              <div className={`mt-6 ${cardBg} p-6 rounded-lg shadow-sm`}>
+                <div className="flex justify-between items-start">
+                  <h2 className={`text-xl font-bold ${textColor} mb-4`}>About Me</h2>
+                </div>
+                {mentorProfile.description ? (
+                  <p className={`text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {mentorProfile.description}
+                  </p>
+                ) : (
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p>This mentor hasn't added a description yet.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Rest of the Overview content */}
+              <div className={`mt-8 ${cardBg} p-4 rounded-lg`}>
+                <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Skills</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mentorProfile.skills?.map((skill: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className={`${cardBg} p-4 rounded-lg`}>
                   <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Experience</h3>
@@ -408,7 +419,7 @@ function App() {
 
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className={`${cardBg} p-4 rounded-lg`}>
-                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Connect</h3>
+                  <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Mentor Profile</h3>
                   <div className="mt-2 space-y-2">
                     <a
                       href={ensureHttps(mentorProfile.linkedinUrl)}
@@ -443,19 +454,7 @@ function App() {
                 </div>
               </div>
 
-              <div className={`mt-4 ${cardBg} p-4 rounded-lg`}>
-                <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Skills</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {mentorProfile.skills?.map((skill: string, index: number) => (
-                    <span
-                      key={index}
-                      className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
+
 
               <div className={`mt-4 ${cardBg} p-4 rounded-lg`}>
                 <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Mentoring Topics</h3>
@@ -609,34 +608,14 @@ function App() {
               Overview
             </button>
             <button 
-              onClick={() => setActiveTab(TabType.REVIEWS)}
+              onClick={() => setActiveTab(TabType.SERVICES)}
               className={`pb-4 font-medium ${
-                activeTab === TabType.REVIEWS 
+                activeTab === TabType.SERVICES 
                   ? 'text-teal-600 border-b-2 border-teal-600' 
                   : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
               }`}
             >
-              Reviews ({mentorProfile.reviews.length})
-            </button>
-            <button 
-              onClick={() => setActiveTab(TabType.ACHIEVEMENTS)}
-              className={`pb-4 font-medium ${
-                activeTab === TabType.ACHIEVEMENTS 
-                  ? 'text-teal-600 border-b-2 border-teal-600' 
-                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
-              }`}
-            >
-              Achievements
-            </button>
-            <button 
-              onClick={() => setActiveTab(TabType.GROUP_SESSIONS)}
-              className={`pb-4 font-medium ${
-                activeTab === TabType.GROUP_SESSIONS 
-                  ? 'text-teal-600 border-b-2 border-teal-600' 
-                  : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
-              }`}
-            >
-              Group sessions
+              Available Sessions
             </button>
           </div>
 
@@ -647,74 +626,67 @@ function App() {
             </div>
 
             <div className="relative">
-              <div className="sticky top-[7rem]">
+              <div className="sticky top-[7rem] space-y-6">
                 <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
-                  <h2 className={`text-xl font-bold ${textColor}`}>Community statistics</h2>
-                  <div className="mt-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Rocket className="w-5 h-5 text-blue-500" />
-                        <div>
-                          <p className="font-medium">1,170 mins</p>
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total mentoring time</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-pink-500" />
-                        <div>
-                          <p className="font-medium">54</p>
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Sessions completed</p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Trophy className="w-6 h-6 text-yellow-500" />
+                    <h2 className={`text-xl font-bold ${textColor}`}>Career Highlights</h2>
                   </div>
+                  
+                  {mentorProfile.achievements.length > 0 ? (
+                    <div className="space-y-4">
+                      {mentorProfile.achievements.map((achievement: any, index: number) => (
+                        <div key={index} className="pb-4 border-b last:border-0 border-gray-200 dark:border-gray-700">
+                          <h3 className={`font-medium ${textColor}`}>{achievement.title}</h3>
+                          <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {achievement.description}
+                          </p>
+                          <p className={`text-xs mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                            {achievement.date}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {isCurrentUser ? (
+                        <div className="text-center">
+                          <p>Share your career highlights!</p>
+                          <button 
+                            onClick={() => navigate(`/profile/${mentorId}/edit`)}
+                            className="mt-2 text-teal-600 hover:text-teal-700 font-medium flex items-center gap-2 mx-auto"
+                          >
+                            <Edit size={16} />
+                            Add Achievements
+                          </button>
+                        </div>
+                      ) : (
+                        <p>No achievements shared yet.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className={`text-xl font-bold ${textColor}`}>Available sessions</h2>
-                    <button 
-                      onClick={() => navigate('/mentor-dashboard')}
-                      className="text-[#4937e8] hover:text-[#4338ca] font-medium flex items-center gap-2"
-                    >
-                      <Settings2 size={16} />
-                      Manage
-                    </button>
+                <div className={`${cardBg} p-6 rounded-lg shadow-sm`}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-6 h-6 text-blue-500" />
+                    <h2 className={`text-xl font-bold ${textColor}`}>Mentoring Stats</h2>
                   </div>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Book 1:1 sessions from the options based on your needs</p>
-                  
-                  <div className="space-y-4">
-                    {services.map((service, index) => (
-          
-                      <div key={`service-${index}`} className={`${cardBg} p-4 rounded-lg shadow-sm`}>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">One-on-One</span>
-                            <h3 className={`font-medium mt-2 ${textColor}`}>{service.sessionName}</h3>
-                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                              Duration: {service.duration} minutes
-                            </p>
-                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                              {service.description}
-                            </p>
-                          </div>
-                          {service.userId !== userId && <button 
-                             onClick={() => {
-                              // Try to get the session ID from the most likely properties
-                              const sessionId = service.sessionId || service._id;
-                              console.log("Booking session with ID:", sessionId);
-                              handleBooking(sessionId);
-                            }}
-                            className="bg-black text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-800 transition-colors"
-                          >
-                            Book
-                          </button>}
-                        </div>
-                        <p className={`text-lg font-medium mt-2 ${textColor}`}>
-                          {service.isPaid ? `Rs ${service.price}` : 'Free'}
-                        </p>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Sessions completed
+                      </p>
+                      <span className="font-medium">{mentorProfile.stats?.sessionsCompleted || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Total mentoring hours
+                      </p>
+                      <span className="font-medium">
+                        {Math.round((mentorProfile.stats?.totalMentoringMinutes || 0) / 60)} hrs
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

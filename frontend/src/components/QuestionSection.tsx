@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowUp,
+  // ArrowUp,
   MessageSquare,
   Clock,
   TrendingUp,
@@ -48,7 +48,7 @@ export default function QuestionSection() {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
+  // const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"timestamp" | "upvotes">("timestamp");
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
@@ -71,12 +71,12 @@ export default function QuestionSection() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   // Load upvoted questions from localStorage on component mount
-  useEffect(() => {
-    const storedUpvotes = localStorage.getItem('upvotedQuestions');
-    if (storedUpvotes) {
-      setUpvotedQuestions(JSON.parse(storedUpvotes));
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedUpvotes = localStorage.getItem('upvotedQuestions');
+  //   if (storedUpvotes) {
+  //     setUpvotedQuestions(JSON.parse(storedUpvotes));
+  //   }
+  // }, []);
 
   // Fetch session details when component mounts
   useEffect(() => {
@@ -126,43 +126,43 @@ export default function QuestionSection() {
       ? questions
       : questions.filter((q) => q.category_id === activeCategory);
 
-  const handleUpvote = async (questionId: string) => {
-    try {
-      // Call the upvote API
-      const response = await fetch(
-        `${API_URL}/questionnaires/${questionId}/upvote`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // const handleUpvote = async (questionId: string) => {
+  //   try {
+  //     // Call the upvote API
+  //     const response = await fetch(
+  //       `${API_URL}/questionnaires/${questionId}/upvote`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
 
-      if (!response.ok) {
-        throw new Error("Failed to upvote question");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to upvote question");
+  //     }
 
-      const updatedQuestion = await response.json();
+  //     const updatedQuestion = await response.json();
 
-      // Update the questions state with the updated question
-      setQuestions((prev) =>
-        prev.map((q) => (q._id === questionId ? updatedQuestion : q))
-      );
+  //     // Update the questions state with the updated question
+  //     setQuestions((prev) =>
+  //       prev.map((q) => (q._id === questionId ? updatedQuestion : q))
+  //     );
 
-      // Update the upvotedQuestions state and localStorage
-      let newUpvotedQuestions: string[];
-      if (upvotedQuestions.includes(questionId)) {
-        newUpvotedQuestions = upvotedQuestions.filter((id) => id !== questionId);
-      } else {
-        newUpvotedQuestions = [...upvotedQuestions, questionId];
-      }
-      setUpvotedQuestions(newUpvotedQuestions);
-      localStorage.setItem('upvotedQuestions', JSON.stringify(newUpvotedQuestions));
-    } catch (error) {
-      console.error("Error upvoting question:", error);
-    }
-  };
+  //     // Update the upvotedQuestions state and localStorage
+  //     let newUpvotedQuestions: string[];
+  //     if (upvotedQuestions.includes(questionId)) {
+  //       newUpvotedQuestions = upvotedQuestions.filter((id) => id !== questionId);
+  //     } else {
+  //       newUpvotedQuestions = [...upvotedQuestions, questionId];
+  //     }
+  //     setUpvotedQuestions(newUpvotedQuestions);
+  //     localStorage.setItem('upvotedQuestions', JSON.stringify(newUpvotedQuestions));
+  //   } catch (error) {
+  //     console.error("Error upvoting question:", error);
+  //   }
+  // };
 
   const handleQuestionClick = (question: Question) => {
     setCurrentQuestion(question);
@@ -579,7 +579,7 @@ export default function QuestionSection() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex space-x-3">
-                    <button
+                    {/* <button
                       className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
                         upvotedQuestions.includes(question._id)
                           ? "bg-black text-white border-black"
@@ -599,7 +599,7 @@ export default function QuestionSection() {
                       <span>
                         Upvote {question.upvotes > 0 && `(${question.upvotes})`}
                       </span>
-                    </button>
+                    </button> */}
 
                     <button
                       className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"

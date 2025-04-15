@@ -11,7 +11,6 @@ interface FormData {
   duration: string;
   sessionType: string;
   numberOfSessions: string;
-  occurrence: string;
   topics: string[];
   allowMenteeTopics: boolean;
   showOnProfile: boolean;
@@ -31,12 +30,7 @@ const TOPICS = [
   'Leadership', 'Career Development', 'Entrepreneurship'
 ];
 
-const OCCURRENCE_OPTIONS = [
-  'Repeats every week',
-  'Repeats every 2 weeks',
-  'Repeats every month',
-  'Custom'
-];
+
 
 const DAYS = [
   'SUNDAYS', 'MONDAYS', 'TUESDAYS', 'WEDNESDAYS',
@@ -644,7 +638,6 @@ function CreateSession() {
     duration: '30',
     sessionType: 'one-on-one',
     numberOfSessions: '1',
-    occurrence: OCCURRENCE_OPTIONS[0],
     topics: [],
     allowMenteeTopics: false,
     showOnProfile: true,
