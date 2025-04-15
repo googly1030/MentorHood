@@ -8,6 +8,10 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: true, // This enables listening on all network interfaces
-  },
+    host: '0.0.0.0',
+    port: 5173,
+    watch: {
+      usePolling: true,
+    }
+  }
 });
