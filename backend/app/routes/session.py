@@ -114,7 +114,7 @@ async def get_mentor_sessions(mentor_id: str):
 @router.get("/one-on-one/all")
 async def get_all_one_on_one_sessions():
     sessions_collection = get_collection("sessions")
-    mentor_collection = get_collection("mentorProfile")
+    mentor_collection = get_collection("userprofile")
     
     try:
         # Get all one-on-one sessions
@@ -161,7 +161,7 @@ async def get_all_one_on_one_sessions():
 @router.get("/group-session/all")
 async def get_all_group_discussion_sessions():
     sessions_collection = get_collection("sessions")
-    mentor_collection = get_collection("mentorProfile")
+    mentor_collection = get_collection("userprofile")
     
     try:
         # Get all group discussion sessions
