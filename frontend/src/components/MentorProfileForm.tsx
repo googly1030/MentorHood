@@ -158,7 +158,7 @@ const MentorProfileForm = () => {
         const loadingToast = toast.loading('Uploading image...');
         
         // Upload to S3 via backend
-        const response = await fetch(`${API_URL}/api/upload/profile-photo`, {
+        const response = await fetch(`${API_URL}/upload/profile-photo`, {
           method: 'POST',
           body: uploadData,
         });
