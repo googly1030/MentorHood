@@ -518,11 +518,18 @@ footer a:hover::after {
   font-weight: 500;
 }
 
+
 .hide-scrollbar {
-  -ms-overflow-style: none;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+.session-scroll-container {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
