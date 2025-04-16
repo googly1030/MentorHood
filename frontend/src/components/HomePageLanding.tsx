@@ -57,6 +57,7 @@ interface Session {
 interface Mentor {
   userId: string;
   name: string;
+  bio: string;
   headline: string;
   primaryExpertise: string;
   disciplines: string[];
@@ -126,6 +127,7 @@ function App() {
   const navigate = useNavigate();
   // const [activeTab, setActiveTab] = useState("mentee");
 
+  const [allMentors, setAllMentors] = useState<Mentor[]>([]);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -282,6 +284,7 @@ function App() {
     visibleSessionCards,
     isJourneySectionInView,
     mentors.length,
+    allMentors.length
   ]);
 
   useEffect(() => {
@@ -293,7 +296,7 @@ function App() {
         }
         const data = await response.json();
         if (data.status === 'success') {
-          setMentors(data.mentors);
+          setAllMentors(data.mentors);
           setVisibleCards(new Array(data.mentors.length).fill(false));
         }
       } catch (err) {
@@ -494,8 +497,8 @@ function App() {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
-            {mentors
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
+            {allMentors
               .sort((a, b) => {
                 const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
                 const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -512,16 +515,17 @@ function App() {
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={mentor.profilePhoto || `https://ui-avatars.com/?name=${mentor.name}&background=random`}
+                      src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                     <div>
                       <h3 className="font-semibold text-lg">{mentor.name}</h3>
+                      <h6 className="font-semibold text-sm text-gray-500">{mentor.headline}</h6>
                     </div>
                   </div>
                   {/* Past to current experience */}
-                  <p className="text-gray-700 mb-2 line-clamp-1">{mentor.headline}</p>
+                  <p className="text-gray-700 mb-2 line-clamp-1">{mentor.bio}</p>
                   
                   {/* Years of Experience */}
                   <p className="text-gray-700 mb-2">
@@ -614,13 +618,13 @@ function App() {
                   >
                     <div className="flex items-center gap-4 mb-6">
                       <img
-                        src={mentor.profilePhoto || `https://ui-avatars.com/?name=${mentor.name}&background=random`}
+                        src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
                         alt={mentor.name}
                         className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                       />
                       <div>
                         <h3 className="font-medium text-gray-900 text-lg line-clamp-1">{session.sessionName}</h3>
-                        <p className="text-sm text-gray-500 line-clamp-1">{mentor.headline}</p>
+                        <p className="text-sm text-gray-500 line-clamp-1">{mentor.bio}</p>
                       </div>
                     </div>
 
@@ -705,9 +709,9 @@ function App() {
                   className="flex-none w-[300px] select-none bg-white rounded-xl shadow-lg p-6 hover:shadow-xl 
                     transition-all duration-300 border border-gray-200 group"
                 >
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={mentor?.profilePhoto || `https://ui-avatars.com/?name=${mentor?.name}&background=random`}
+                      src={session?.sessionName ? `https://ui-avatars.com/api/?name=${session?.sessionName}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`}
                       alt={mentor?.name}
                       className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
                     />
@@ -725,16 +729,23 @@ function App() {
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar size={16} className="text-[#3730A3]" />
                       <span className="text-sm">
-                        {new Date(session.timeSlots[0]?.day || '').toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
+                      {new Date(session.created_at || '').toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Clock size={16} className="text-[#3730A3]" />
                       <span className="text-sm">{session.duration} mins</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {session.topics.map((topic, index) => (
+                        <span key={index} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                          {topic}
+                        </span>
+                      ))}
                     </div>
                   </div>
 

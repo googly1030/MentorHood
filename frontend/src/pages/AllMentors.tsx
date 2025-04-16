@@ -72,6 +72,7 @@ interface MentorProfile {
     date: string;
   }>;
   image?: string;
+  profilePhoto?: string;
   companyLogo?: string;
   services?: Array<{
     price: string;
@@ -141,6 +142,7 @@ const AllMentors = () => {
         } else if (activeTab === 'group-session') {
           const response = await fetch(`${API_URL}/sessions/group-session/all`);
           const data = await response.json();
+          console.log('Group Session Data:', data);
           if (data.status === 'success') {
             setGroupSessionData(data.sessions);
             setGroupSessionMentors(data.mentors);
@@ -225,7 +227,7 @@ const AllMentors = () => {
               >
                 <div className="flex items-start gap-4 mb-4">
                   <img
-                    src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                    src={mentor.profilePhoto || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
                     alt={mentor.name}
                     className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                   />
@@ -300,7 +302,7 @@ const AllMentors = () => {
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <img
-                      src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      src={mentor.profilePhoto || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                     />
@@ -358,11 +360,20 @@ const AllMentors = () => {
         // Group Sessions Grid
         <div className="max-w-6xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filterGroupSessions(groupSessionData).map((session: Session, index: number) => {
+            {
+              groupSessionData.length === 0 && (
+                <div className="col-span-3 text-center text-gray-500">
+                  No Group Sessions available at the moment.
+                </div>
+              )
+            }
+            {groupSessionData.length > 0 && filterGroupSessions(groupSessionData).map((session: Session, index: number) => {
+           
               const mentor = groupSessionMentors.find((m: MentorProfile) => m.userId === session.userId);
               if (!mentor) return null;
 
               return (
+                
                 <div
                   key={`group-session-${session.sessionId}-${index}`}
                   className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
@@ -377,7 +388,7 @@ const AllMentors = () => {
 
                   <div className="flex items-center gap-4 mb-6">
                     <img
-                      src={mentor.image || `https://ui-avatars.com/?name=${encodeURIComponent(mentor.name)}&background=random`}
+                      src={session?.sessionName ? `https://ui-avatars.com/api/?name=${session?.sessionName}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`}
                       alt={mentor.name}
                       className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
                     />

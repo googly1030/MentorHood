@@ -18,6 +18,7 @@ import CreateSession from './pages/CreateSession';
 import MenteeDashboard from './pages/MenteeDashboard';
 import EditSession from './pages/EditSession';
 import EditProfile from './pages/editprofile';
+import EditMentorProfile from './pages/EditMentorProfile';
 import AMASessionform from './pages/AMASessionform';
 import CreateAMASession from './pages/AMASessionform';
 
@@ -59,7 +60,7 @@ function App() {
             } />
             <Route path="/profile/:mentorId/edit" element={
               <ProtectedRoute>
-                <EditProfile />
+                <EditMentorProfile />
               </ProtectedRoute>
             } />
             <Route path="/booking/:sessionId" element={

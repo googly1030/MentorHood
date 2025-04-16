@@ -1,7 +1,7 @@
 export interface MentorProfile {
   user_id: string;
   profilePhoto: string;
-  experience: {
+  totalExperience: {
     years: number;
     months: number;
   };

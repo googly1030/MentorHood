@@ -774,7 +774,6 @@ export default function CreateAMASession() {
       }
   
       const createdSession = await response.json();
-      console.log('Session created successfully:', createdSession);
   
       // Navigate to dashboard after successful creation
       navigate('/mentor-dashboard');

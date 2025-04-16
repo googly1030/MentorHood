@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {  Trophy, Users, Sun, Moon , Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
 
 interface Service {
@@ -33,80 +32,6 @@ enum TabType {
   OVERVIEW = 'overview',
   SERVICES = 'services'
 }
-
-const EMPTY_MENTOR_PROFILE = {
-  userId: '',
-  name: '',
-  headline: 'Professional Developer',
-  description: 'Share your story and experience to help mentees understand your journey and expertise.',
-  membership: 'Member of MentorHood',
-  totalExperience: {
-    years: 0,
-    months: 0
-  },
-  experience: [
-    {
-      title: 'Developer',
-      company: '',
-      description: 'Professional Developer',
-      duration: '0 years'
-    }
-  ],
-  projects: [
-    {
-      title: 'Project Initiative',
-      description: 'Description of the project'
-    }
-  ],
-  resources: [
-    {
-      title: 'Resource Toolkit',
-      description: 'A comprehensive guide.',
-      linkText: 'Download →'
-    }
-  ],
-  services: [
-    {
-      id: 1,
-      title: 'Mentorship Session',
-      duration: '30 minutes',
-      type: 'Video Call',
-      frequency: 'Weekly',
-      sessions: 1,
-      price: 0,
-      rating: 5
-    }
-  ],
-  groupSessions: [
-    {
-      id: 1,
-      title: 'Group Workshop',
-      date: new Date().toISOString().split('T')[0],
-      time: '10:00 AM - 11:00 AM',
-      participants: 0,
-      maxParticipants: 10,
-      price: 0
-    }
-  ],
-  achievements: [
-    {
-      id: 1,
-      title: 'New Mentor',
-      description: 'Joined the MentorHood community',
-      date: new Date().toLocaleDateString()
-    }
-  ],
-  reviews: [],
-  testimonials: [],
-  linkedinUrl: '',
-  githubUrl: '',
-  primaryExpertise: 'Development',
-  disciplines: ['Development'],
-  skills: ['Programming'],
-  mentoringTopics: ['Technical Skills'],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-};
 
 function App() {
   const navigate = useNavigate();
@@ -154,47 +79,21 @@ function App() {
   useEffect(() => {
     const fetchMentorProfile = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/mentors/${mentorId}`);
-        
+        const response = await fetch(`${API_URL}/users/profile?userId=${mentorId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) {
-          if (response.status === 404 && isCurrentUser) {
-            // Set creating profile state
-            setIsCreatingProfile(true);
-            
-            const newProfile = {
-              ...EMPTY_MENTOR_PROFILE,
-              userId: mentorId,
-              name: getUserData()?.username || ''
-            };
-
-            console.log('Creating new mentor profile:', newProfile);
-
-            const createResponse = await fetch(`${API_URL}/mentors/creatementorprofile`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              credentials: 'include',
-              body: JSON.stringify(newProfile)
-            });
-            
-            if (!createResponse.ok) {
-              console.error('Failed to create profile');
-              setMentorProfile(newProfile); // Use empty profile as fallback
-            } else {
-              const data = await createResponse.json();
-              setMentorProfile(data.mentor);
-            }
-          } else {
-            console.error('Profile not found');
-            setMentorProfile(null);
-          }
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Profile fetch error:', errorData);
+          setError(errorData.message || 'An error occurred');
+          throw new Error(`Failed to fetch mentor profile: ${response.status}`);
         } else {
           const data = await response.json();
           if (data.status === 'success') {
-            setMentorProfile(data.mentor);
+            setMentorProfile(data.profile);
           } else {
             setMentorProfile(null);
           }
@@ -387,18 +286,14 @@ function App() {
           <div className="space-y-8">
             {/* About Section */}
             <div>
-              <p className={textColor}>
-                {mentorProfile.headline}
-              </p>
-              
               {/* Add this new description section */}
               <div className={`mt-6 ${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex justify-between items-start">
                   <h2 className={`text-xl font-bold ${textColor} mb-4`}>About Me</h2>
                 </div>
-                {mentorProfile.description ? (
+                {mentorProfile.bio ? (
                   <p className={`text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {mentorProfile.description}
+                    {mentorProfile.bio}
                   </p>
                 ) : (
                   <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -592,7 +487,7 @@ function App() {
           <div className="flex items-start">
             <div className="flex items-end">
               <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                src={mentorProfile.profilePhoto || `https://ui-avatars.com/api/?name=${mentorProfile.name}&background=random&size=200`}
                 alt="Profile"
                 className="w-40 h-40 rounded-full border-4 border-white shadow-lg"
               />
@@ -600,12 +495,12 @@ function App() {
                 <h1 className={`text-3xl text-white font-bold `}>
                   {mentorProfile.name}
                 </h1>
-                <p className={`mt-1 text-white`}>
+                {/* <p className={`mt-1 text-white`}>
                   {mentorProfile.headline}
-                </p>
+                </p> */}
                 <div className="mt-2">
                   <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>
-                    {mentorProfile.membership}
+                    {mentorProfile.headline}
                   </span>
                 </div>
               </div>
