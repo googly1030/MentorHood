@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {  Trophy, Users, Sun, Moon , Edit, Settings2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
 
 interface Service {
@@ -34,80 +33,6 @@ enum TabType {
   SERVICES = 'services'
 }
 
-const EMPTY_MENTOR_PROFILE = {
-  userId: '',
-  name: '',
-  bio: 'Professional Developer',
-  description: 'Share your story and experience to help mentees understand your journey and expertise.',
-  membership: 'Member of MentorHood',
-  totalExperience: {
-    years: 0,
-    months: 0
-  },
-  experience: [
-    {
-      title: 'Developer',
-      company: '',
-      description: 'Professional Developer',
-      duration: '0 years'
-    }
-  ],
-  projects: [
-    {
-      title: 'Project Initiative',
-      description: 'Description of the project'
-    }
-  ],
-  resources: [
-    {
-      title: 'Resource Toolkit',
-      description: 'A comprehensive guide.',
-      linkText: 'Download →'
-    }
-  ],
-  services: [
-    {
-      id: 1,
-      title: 'Mentorship Session',
-      duration: '30 minutes',
-      type: 'Video Call',
-      frequency: 'Weekly',
-      sessions: 1,
-      price: 0,
-      rating: 5
-    }
-  ],
-  groupSessions: [
-    {
-      id: 1,
-      title: 'Group Workshop',
-      date: new Date().toISOString().split('T')[0],
-      time: '10:00 AM - 11:00 AM',
-      participants: 0,
-      maxParticipants: 10,
-      price: 0
-    }
-  ],
-  achievements: [
-    {
-      id: 1,
-      title: 'New Mentor',
-      description: 'Joined the MentorHood community',
-      date: new Date().toLocaleDateString()
-    }
-  ],
-  reviews: [],
-  testimonials: [],
-  linkedinUrl: '',
-  githubUrl: '',
-  primaryExpertise: 'Development',
-  disciplines: ['Development'],
-  skills: ['Programming'],
-  mentoringTopics: ['Technical Skills'],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-};
-
 function App() {
   const navigate = useNavigate();
   const { mentorId } = useParams();
@@ -121,6 +46,7 @@ function App() {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const ensureHttps = (url: string) => {
     if (!url) return '#';
@@ -162,6 +88,7 @@ function App() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error('Profile fetch error:', errorData);
+          setError(errorData.message || 'An error occurred');
           throw new Error(`Failed to fetch mentor profile: ${response.status}`);
         } else {
           const data = await response.json();
@@ -169,13 +96,15 @@ function App() {
           if (data.status === 'success') {
             setMentorProfile(data.profile);
           } else {
-            throw new Error('Failed to fetch mentor profile');
+            setMentorProfile(null);
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error:', err);
+        setMentorProfile(null);
       } finally {
         setLoading(false);
+        setIsCreatingProfile(false);
       }
     };
 
@@ -228,12 +157,24 @@ function App() {
   const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const cardBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (loading || isCreatingProfile) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mb-4"></div>
+        <p className="text-gray-600">
+          {isCreatingProfile ? 'Creating your profile...' : 'Loading profile information...'}
+        </p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex items-center justify-center min-h-screen text-red-500">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mb-4"></div>
+        <p className="text-gray-600">Loading profile information...</p>
+      </div>
+    );
   }
 
   if (!mentorProfile) {
