@@ -287,18 +287,14 @@ function App() {
           <div className="space-y-8">
             {/* About Section */}
             <div>
-              <p className={textColor}>
-                {mentorProfile.bio}
-              </p>
-              
               {/* Add this new description section */}
               <div className={`mt-6 ${cardBg} p-6 rounded-lg shadow-sm`}>
                 <div className="flex justify-between items-start">
                   <h2 className={`text-xl font-bold ${textColor} mb-4`}>About Me</h2>
                 </div>
-                {mentorProfile.description ? (
+                {mentorProfile.bio ? (
                   <p className={`text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {mentorProfile.description}
+                    {mentorProfile.bio}
                   </p>
                 ) : (
                   <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

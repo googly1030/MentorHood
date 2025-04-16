@@ -57,7 +57,7 @@ interface Session {
 interface Mentor {
   userId: string;
   name: string;
-  headline: string;
+  bio: string;
   primaryExpertise: string;
   disciplines: string[];
   skills: string[];
@@ -523,7 +523,7 @@ function App() {
                     </div>
                   </div>
                   {/* Past to current experience */}
-                  <p className="text-gray-700 mb-2 line-clamp-1">{mentor.headline}</p>
+                  <p className="text-gray-700 mb-2 line-clamp-1">{mentor.bio}</p>
                   
                   {/* Years of Experience */}
                   <p className="text-gray-700 mb-2">
@@ -622,7 +622,7 @@ function App() {
                       />
                       <div>
                         <h3 className="font-medium text-gray-900 text-lg line-clamp-1">{session.sessionName}</h3>
-                        <p className="text-sm text-gray-500 line-clamp-1">{mentor.headline}</p>
+                        <p className="text-sm text-gray-500 line-clamp-1">{mentor.bio}</p>
                       </div>
                     </div>
 
