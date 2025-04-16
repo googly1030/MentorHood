@@ -29,11 +29,13 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 relative overflow-hidden bg-gradient-to-br from-gray-50 via-amber-50/20 to-white">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/inspiration-geometry.png')] opacity-[0.03]"></div>
-      <div className="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-amber-100/30 filter blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-rose-100/20 mix-blend-multiply filter blur-3xl"></div>
+    <section className="py-24 relative overflow-hidden bg-white">
+      {/* Replace gradient background with subtle pattern */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/inspiration-geometry.png')] opacity-[0.02]"></div>
+      
+      {/* Keep subtle decorative elements but with lighter opacity */}
+      <div className="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-indigo-100/20 filter blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-100/10 mix-blend-multiply filter blur-3xl"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-12">

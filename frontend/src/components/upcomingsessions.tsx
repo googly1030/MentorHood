@@ -86,11 +86,13 @@ const UpcomingSessions = ({ groupSessions, mentors }: UpcomingSessionsProps) => 
   };
 
   return (
-    <section className="group-sessions-section py-24 bg-gradient-to-b from-white to-indigo-50/20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.04]"></div>
-      <div className="absolute top-20 right-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
-      <div className="absolute bottom-40 left-10 w-72 h-72 bg-purple-100/20 rounded-full filter blur-3xl"></div>
+    <section className="group-sessions-section py-24 bg-white relative overflow-hidden">
+      {/* Subtle pattern for texture */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
+      
+      {/* Light decorative elements */}
+      <div className="absolute top-20 right-20 w-64 h-64 bg-indigo-100/20 rounded-full filter blur-3xl"></div>
+      <div className="absolute bottom-40 left-10 w-72 h-72 bg-indigo-100/20 rounded-full filter blur-3xl"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center md:text-left mb-16">

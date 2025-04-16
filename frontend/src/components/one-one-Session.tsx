@@ -85,10 +85,13 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
   };
 
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50 py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-50 rounded-full filter blur-3xl opacity-50"></div>
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-50 rounded-full filter blur-3xl opacity-50"></div>
+    <section className="bg-white py-24 relative overflow-hidden">
+      {/* Subtle pattern for texture */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
+      
+      {/* Lighter decorative elements */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-50/30 rounded-full filter blur-3xl opacity-50"></div>
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-50/30 rounded-full filter blur-3xl opacity-50"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
