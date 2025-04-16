@@ -72,6 +72,7 @@ async def register(user: UserCreate):
             "username": user.username,
             "hashed_password": pwd_context.hash(user.password),
             "role": "user",
+            "onBoarded": False,
             "created_at": datetime.now(UTC)
         }
         
@@ -170,6 +171,7 @@ async def register(user: UserCreate):
             "email": user.email,
             "username": user.username,
             "role": user_dict["role"],
+            "onBoarded": user_dict["onBoarded"],
             "created_at": user_dict["created_at"]
         }
     # except Exception as e:

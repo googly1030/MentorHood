@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock } from 'lucide-react';
-import { setUserData } from '../utils/auth';
+import { isOnBoarded, setUserData } from '../utils/auth';
 import { toast, Toaster } from 'sonner';
 import MentorProfileForm from '../components/MentorProfileForm';
 import { API_URL } from '../utils/api';
@@ -64,6 +64,7 @@ const Register = () => {
         email: data.email,
         role: formData.role,
         token: data.id,
+        onBoarded: data.onBoarded,
       });
 
       toast.success('Account created successfully!', {
@@ -91,7 +92,7 @@ const Register = () => {
   };
 
   // If showing mentor form, render MentorProfileForm instead of registration form
-  if (showMentorForm && registeredUserId) {
+  if (showMentorForm && registeredUserId && !isOnBoarded()) {
     return <MentorProfileForm />;
   }
 

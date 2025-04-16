@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Mail, Lock } from 'lucide-react';
-import { setUserData } from '../utils/auth';
+import { isOnBoarded, setUserData } from '../utils/auth';
 import { toast, Toaster } from 'sonner';
 import { API_URL } from '../utils/api';
 
@@ -45,7 +45,8 @@ const Login = () => {
         email: data.email,
         role: data.role,
         token: data.id,
-        userId: data.userId
+        userId: data.userId,
+        onBoarded: data.onBoarded
       });
 
       toast.dismiss(loadingToastId);
@@ -53,7 +54,11 @@ const Login = () => {
         description: 'Successfully signed in to your account',
         duration: 3000,
       });
-      navigate('/');
+      if (!isOnBoarded()) {
+        navigate('/mentor-profile');
+      } else {
+        navigate('/');
+      }
     } catch {
       toast.dismiss(loadingToastId);
       toast.error('Network error', {

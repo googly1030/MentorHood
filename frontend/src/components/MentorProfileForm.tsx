@@ -2,11 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Linkedin, ArrowRight } from 'lucide-react';
 import { getUserData } from '../utils/auth';
-import { MentorProfile } from '../types/mentor';
 import { toast, Toaster } from 'sonner';
 import CustomSelect from './CustomSelect';
 import { setUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
+
+interface MentorProfile {
+  user_id: string;
+  profilePhoto: string;
+  totalExperience: {
+    years: number;
+    months: number;
+  };
+  linkedinUrl: string;
+  primaryExpertise: string;
+  disciplines: string[];
+  tools: string[];
+  skills: string[];
+  bio: string;
+  targetMentees: string[];
+  mentoringTopics: string[];
+  relationshipType: string;
+  aiTools: string[]; 
+}
 
 const DISCIPLINES = [
   "Frontend Development",
@@ -116,7 +134,7 @@ const MentorProfileForm = () => {
   const [formData, setFormData] = useState<MentorProfile>({
     user_id: userData?.token || '',
     profilePhoto: '',
-    experience: {
+    totalExperience: {
       years: 0,
       months: 0,
     },
@@ -223,8 +241,8 @@ const MentorProfileForm = () => {
       errors.push('Please select at least one skill');
     }
   
-    // Make experience validation more flexible
-    if (formData.experience.years === 0 && formData.experience.months === 0) {
+    // Make totalExperience validation more flexible
+    if (formData.totalExperience.years === 0 && formData.totalExperience.months === 0) {
       errors.push('Please specify your experience (years or months)');
     }
   
@@ -414,10 +432,10 @@ const MentorProfileForm = () => {
                   <input
                     type="number"
                     min="0"
-                    value={formData.experience.years}
+                    value={formData.totalExperience.years}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      experience: { ...prev.experience, years: parseInt(e.target.value) }
+                      totalExperience: { ...prev.totalExperience, years: parseInt(e.target.value) }
                     }))}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4937e8]"
                   />
@@ -430,10 +448,10 @@ const MentorProfileForm = () => {
                     type="number"
                     min="0"
                     max="11"
-                    value={formData.experience.months}
+                    value={formData.totalExperience.months}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      experience: { ...prev.experience, months: parseInt(e.target.value) }
+                      totalExperience: { ...prev.totalExperience, months: parseInt(e.target.value) }
                     }))}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4937e8]"
                   />
