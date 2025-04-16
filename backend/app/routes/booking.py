@@ -10,6 +10,7 @@ import re
 from ..database import get_collection
 from ..schemas.booking import BookingCreate, Booking as BookingSchema
 from ..utils.email import email_sender
+from ..utils.meeting_service import MeetingService
 
 router = APIRouter(
     prefix="/bookings",
@@ -24,15 +25,42 @@ class BookingRequest(BaseModel):
     email: Optional[str] = None
     session_data: dict
 
+meeting_service = MeetingService()
+
 @router.post("/create", response_model=BookingSchema)
 async def create_booking(booking_request: BookingRequest):
     """
     Create a new booking and send a confirmation email.
     """
     try:
-        # Generate a unique meeting link
-        meeting_id = str(uuid.uuid4())
-        meeting_link = f"https://meet.mentorhood.com/{meeting_id}"
+        # Get session details
+        session_title = booking_request.session_data.get('title', 'Mentorship Session')
+        session_description = booking_request.session_data.get('description', '')
+        session_duration = int(booking_request.session_data.get('duration', 60))
+        mentor_name = booking_request.session_data.get('mentor', {}).get('name', 'Mentor')
+        
+        # Parse the date and time
+        booking_date_str = booking_request.date
+        if 'T' in booking_date_str:
+            # Handle ISO format
+            booking_date_str = booking_date_str.split('T')[0]
+        
+        # Combine date and time
+        booking_datetime_str = f"{booking_date_str}T{booking_request.time}:00"
+        booking_datetime = datetime.fromisoformat(booking_datetime_str)
+        
+        # Generate a meeting link using Jitsi Meet
+        event_details = meeting_service.create_meet_event(
+            title=f"{session_title} with {mentor_name}",
+            description=session_description,
+            start_time=booking_datetime,
+            duration_minutes=session_duration,
+            attendee_email=booking_request.email
+        )
+        
+        # Get the meeting link from the service
+        meeting_link = event_details['meet_link']
+        meeting_id = event_details['event_id']
         
         # Create the booking document
         booking_dict = {
@@ -325,7 +353,10 @@ async def send_booking_confirmation_email(email: str, session_data: dict, bookin
                     <div class="meeting-link">
                         <p style="margin-top: 0;"><strong>Your Meeting Link:</strong></p>
                         <a href="{meeting_link}">{meeting_link}</a>
-                        <p style="margin-bottom: 0; font-size: 14px;">This link will be active 5 minutes before your scheduled session.</p>
+                        <p style="margin-bottom: 0; font-size: 14px;">
+                            This is a Jitsi Meet link. No downloads required - just click the link at your scheduled time to join from your browser.
+                            For the best experience, we recommend using Chrome or Firefox.
+                        </p>
                     </div>
                     
                     <p>We'll send you a reminder before the session starts. In the meantime, feel free to prepare your questions!</p>
