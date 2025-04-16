@@ -20,6 +20,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     username: str
+    role: str
 
 class UserResponse(BaseModel):
     id: str
@@ -65,16 +66,20 @@ async def register(user: UserCreate):
                 detail="Email already registered"
             )
         
+        role = getattr(user, "role", None) or "user"
+
+        
         # Create user document
         user_dict = {
             "userId": str(uuid.uuid4()),
             "email": user.email,
             "username": user.username,
             "hashed_password": pwd_context.hash(user.password),
-            "role": "user",
+            "role": role,
             "onBoarded": False,
             "created_at": datetime.now(UTC)
         }
+
         
         # Insert into database
         result = await user_collection.insert_one(user_dict)
