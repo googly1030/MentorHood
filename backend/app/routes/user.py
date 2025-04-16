@@ -4,7 +4,7 @@ from typing import List, Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from app.models.user import User, UserModel
-from app.database import get_user, create_user, update_user, delete_user, user_collection, user_profile_collection
+from app.database import get_user, create_user, update_user, delete_user, user_collection, user_profile_collection, get_collection
 from bson import ObjectId  # Add this import at the top
 import uuid
 
@@ -77,6 +77,91 @@ async def register(user: UserCreate):
         
         # Insert into database
         result = await user_collection.insert_one(user_dict)
+
+        if not result.inserted_id:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail="Failed to create user"
+            )
+        
+        profile_dict = {
+            "userId": user_dict["userId"],
+            "name": user_dict["username"],
+            "email": user_dict["email"],
+            "role": user_dict["role"],
+            "profilePhoto": "",
+            "experience": [
+                {
+                "title": "",
+                "company": "",
+                "description": "",
+                "duration": ""
+                }
+            ],
+            "projects": [
+                {
+                "title": "",
+                "description": ""
+                }
+            ],
+            "resources": [
+                {
+                "title": "",
+                "description": "",
+                "linkText": ""
+                }
+            ],
+            "stats": {
+                "sessionsCompleted": 0,
+                "totalHours": 0
+            },
+            "achievements": [
+                {
+                "title": "",
+                "description": "",
+                "date": ""
+                }
+            ],
+            "totalExperience": {
+                "years": 1,
+                "months": 1
+            },
+            "linkedinUrl": "",
+            "githubUrl": "",
+            "primaryExpertise": "",
+            "disciplines": [
+                ""
+            ],
+            "tools": [
+                ""
+            ],
+            "skills": [
+                ""
+            ],
+            "bio": "",
+            "targetMentees": [
+                ""
+            ],
+            "mentoringTopics": [
+                ""
+            ],
+            "relationshipType": "",
+            "aiTools": [
+                ""
+            ],
+            "created_at": datetime.now(UTC),
+            "updated_at": datetime.now(UTC)
+        }
+
+        collection = get_collection("userprofile")
+        
+        insert_result = await collection.insert_one(profile_dict)
+
+        if not insert_result.inserted_id:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail="Failed to create mentor profile"
+            )
         
         # Return user data without password
         return {
