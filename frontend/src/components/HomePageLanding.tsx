@@ -58,6 +58,7 @@ interface Mentor {
   userId: string;
   name: string;
   bio: string;
+  headline: string;
   primaryExpertise: string;
   disciplines: string[];
   skills: string[];
@@ -520,6 +521,7 @@ function App() {
                     />
                     <div>
                       <h3 className="font-semibold text-lg">{mentor.name}</h3>
+                      <h6 className="font-semibold text-sm text-gray-500">{mentor.headline}</h6>
                     </div>
                   </div>
                   {/* Past to current experience */}
