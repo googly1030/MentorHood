@@ -6,6 +6,7 @@ interface User {
   role: string;
   token?: string;
   userId: string;
+  onBoarded: boolean;
 }
 
 export const setUserData = (userData: User) => {
@@ -24,6 +25,11 @@ export const removeUserData = () => {
 
 export const isAuthenticated = (): boolean => {
   return !!getUserData();
+};
+
+export const isOnBoarded = (): boolean => {
+  const userData = getUserData();
+  return userData?.onBoarded || false;
 };
 
 export const loginUser = async (email: string, password: string) => {
