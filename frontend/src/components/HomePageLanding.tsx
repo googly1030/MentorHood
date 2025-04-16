@@ -514,7 +514,7 @@ function App() {
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={mentor.profilePhoto || `https://ui-avatars.com/?name=${mentor.name}&background=random`}
+                      src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
                       alt={mentor.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -616,7 +616,7 @@ function App() {
                   >
                     <div className="flex items-center gap-4 mb-6">
                       <img
-                        src={mentor.profilePhoto || `https://ui-avatars.com/?name=${mentor.name}&background=random`}
+                        src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
                         alt={mentor.name}
                         className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
                       />
@@ -709,7 +709,7 @@ function App() {
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <img
-                      src={mentor?.profilePhoto || `https://ui-avatars.com/?name=${mentor?.name}&background=random`}
+                      src={session?.sessionName ? `https://ui-avatars.com/api/?name=${session?.sessionName}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`}
                       alt={mentor?.name}
                       className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
                     />
