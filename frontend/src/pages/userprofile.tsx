@@ -121,6 +121,7 @@ function App() {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const ensureHttps = (url: string) => {
     if (!url) return '#';
@@ -153,10 +154,14 @@ function App() {
   useEffect(() => {
     const fetchMentorProfile = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`${API_URL}/mentors/${mentorId}`);
+        
         if (!response.ok) {
           if (response.status === 404 && isCurrentUser) {
-            // Create empty profile if user is the current mentor
+            // Set creating profile state
+            setIsCreatingProfile(true);
+            
             const newProfile = {
               ...EMPTY_MENTOR_PROFILE,
               userId: mentorId,
@@ -174,32 +179,32 @@ function App() {
               credentials: 'include',
               body: JSON.stringify(newProfile)
             });
-            window.location.reload();
             
             if (!createResponse.ok) {
-              const errorData = await createResponse.json();
-              console.error('Failed to create profile:', errorData);
-              throw new Error(`Failed to create mentor profile: ${errorData.message || 'Unknown error'}`);
+              console.error('Failed to create profile');
+              setMentorProfile(newProfile); // Use empty profile as fallback
+            } else {
+              const data = await createResponse.json();
+              setMentorProfile(data.mentor);
             }
-
-            const data = await createResponse.json();
-            console.log('New profile created:', data);
-            setMentorProfile(data.mentor);
           } else {
-            throw new Error('Failed to fetch mentor profile');
+            console.error('Profile not found');
+            setMentorProfile(null);
           }
         } else {
           const data = await response.json();
           if (data.status === 'success') {
             setMentorProfile(data.mentor);
           } else {
-            throw new Error('Failed to fetch mentor profile');
+            setMentorProfile(null);
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error:', err);
+        setMentorProfile(null);
       } finally {
         setLoading(false);
+        setIsCreatingProfile(false);
       }
     };
 
@@ -252,12 +257,24 @@ function App() {
   const bgColor = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const cardBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (loading || isCreatingProfile) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mb-4"></div>
+        <p className="text-gray-600">
+          {isCreatingProfile ? 'Creating your profile...' : 'Loading profile information...'}
+        </p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex items-center justify-center min-h-screen text-red-500">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mb-4"></div>
+        <p className="text-gray-600">Loading profile information...</p>
+      </div>
+    );
   }
 
   if (!mentorProfile) {
