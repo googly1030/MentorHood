@@ -126,6 +126,7 @@ function App() {
   const navigate = useNavigate();
   // const [activeTab, setActiveTab] = useState("mentee");
 
+  const [allMentors, setAllMentors] = useState<Mentor[]>([]);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -282,6 +283,7 @@ function App() {
     visibleSessionCards,
     isJourneySectionInView,
     mentors.length,
+    allMentors.length
   ]);
 
   useEffect(() => {
@@ -293,7 +295,7 @@ function App() {
         }
         const data = await response.json();
         if (data.status === 'success') {
-          setMentors(data.mentors);
+          setAllMentors(data.mentors);
           setVisibleCards(new Array(data.mentors.length).fill(false));
         }
       } catch (err) {
@@ -495,7 +497,7 @@ function App() {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
-            {mentors
+            {allMentors
               .sort((a, b) => {
                 const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
                 const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
