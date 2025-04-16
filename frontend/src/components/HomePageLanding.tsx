@@ -144,27 +144,51 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  
+  const oneOnOneScrollContainerRef = useRef<HTMLDivElement>(null);
+  const groupSessionsScrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Create separate handling functions for each container
+  const handleOneOnOneMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    if (scrollContainerRef.current) {
-      setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-      setScrollLeft(scrollContainerRef.current.scrollLeft);
+    if (oneOnOneScrollContainerRef.current) {
+      setStartX(e.pageX - oneOnOneScrollContainerRef.current.offsetLeft);
+      setScrollLeft(oneOnOneScrollContainerRef.current.scrollLeft);
     }
   };
+
+  const handleGroupSessionsMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    if (groupSessionsScrollContainerRef.current) {
+      setStartX(e.pageX - groupSessionsScrollContainerRef.current.offsetLeft);
+      setScrollLeft(groupSessionsScrollContainerRef.current.scrollLeft);
+    }
+  };
+
+  const handleOneOnOneMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !oneOnOneScrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - oneOnOneScrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    oneOnOneScrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleGroupSessionsMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !groupSessionsScrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - groupSessionsScrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    groupSessionsScrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
+
 
   useEffect(() => {
     let rafId: number;
@@ -457,52 +481,6 @@ function App() {
           Navigate your academic journey and accelerate your career with personalized 1:1 mentorship from industry leaders.
 
           </p>
-          {/* <AnimatePresence mode="wait">
-            {activeTab === "mentee" ? (
-              <motion.div
-                key="search"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full max-w-2xl"
-              >
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search for mentors by skills, industry, or role..."
-                    className="w-full px-6 py-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  />
-                  <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
-                    <Search size={20} />
-                    Search
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="become-mentor"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="px-8 py-4 bg-black text-white rounded-full text-lg font-medium hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
-                onClick={() => {
-                  const userData = getUserData();
-                  if (userData?.role === 'mentor') {
-                    navigate('/mentor-dashboard');
-                  } else {
-                    navigate('/register', { 
-                      state: { defaultRole: 'mentor' } 
-                    });
-                  }
-                }}
-              >
-                Become a Mentor
-                <ArrowRight size={20} />
-              </motion.button>
-            )}
-          </AnimatePresence> */}
         </div>
       </div>
 
@@ -608,12 +586,12 @@ function App() {
           </div>
 
           <div 
-            ref={scrollContainerRef}
+            ref={oneOnOneScrollContainerRef}
             className="flex overflow-x-auto gap-6 pb-6 cursor-grab active:cursor-grabbing scroll-smooth hide-scrollbar"
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleOneOnOneMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onMouseMove={handleMouseMove}
+            onMouseMove={handleOneOnOneMouseMove}
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
@@ -702,12 +680,12 @@ function App() {
           </div>
 
           <div 
-            ref={scrollContainerRef}
+            ref={groupSessionsScrollContainerRef}
             className="flex overflow-x-auto gap-6 pb-6 cursor-grab active:cursor-grabbing scroll-smooth hide-scrollbar"
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleGroupSessionsMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onMouseMove={handleMouseMove}
+            onMouseMove={handleGroupSessionsMouseMove}
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
@@ -1160,69 +1138,6 @@ function App() {
           </div>
         </div>
       </section>
-
-      {/* <section className="bg-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        </div>
-
-        <div className="relative z-10 mx-auto text-center">
-          <h2 className="text-5xl leading-normal font-bold bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-            Still looking? Try our AI Search
-          </h2>
-          <p className="text-gray-700 mb-10 text-lg">
-            Just type who you are looking for. Be as specific as you want & see
-            our AI do the magic
-          </p>
-
-          <div className="max-w-4xl mx-auto mb-16">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="I am looking for Software engineering leader for tech insights"
-                className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg shadow-lg"
-              />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-xl transition-all duration-300 flex items-center gap-2">
-                <Search size={20} />
-                Search
-              </button>
-            </div>
-          </div>
-
-          <div className="relative w-full overflow-hidden">
-            <div
-              ref={sliderRef}
-              className="flex gap-4 overflow-x-auto scroll-smooth cursor-grab active:cursor-grabbing touch-pan-x pb-4"
-              onMouseDown={handleMouseDown}
-              onMouseLeave={handleMouseLeave}
-              onMouseUp={handleMouseUp}
-              onMouseMove={handleMouseMove}
-            >
-              {suggestions.map((suggestion) => (
-                <div key={suggestion.id} className="flex-none w-[300px]">
-                  <div
-                    className="bg-white rounded-2xl p-6 shadow-lg h-[160px] flex flex-col
-          hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 
-          border border-gray-200 select-none"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">{suggestion.icon}</span>
-                      <span className="text-sm text-[#3730A3] font-medium">
-                        {suggestion.category}
-                      </span>
-                    </div>
-                    <p className="text-left text-gray-800 font-medium line-clamp-3">
-                      {suggestion.title}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section> */}
     </div>
   );
 }
