@@ -40,11 +40,7 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        console.log("HERE")
-        console.log(data)
         if (data.detail) {
-          console.log("HERE2")  
-          // alert(data.detail)
           toast.error(data.detail, {
             id: loadingToast,
           });
@@ -54,8 +50,6 @@ const Register = () => {
           });
         }
         return;
-      } else {
-        console.log(response)
       }
 
       setUserData({

@@ -180,7 +180,6 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
           throw new Error(`Failed to fetch mentor profile: ${response.status}`);
         } else {
           const data = await response.json();
-          console.log('data', data);
           if (data.status === 'success') {
             setFormData(prev => ({
               ...prev,
@@ -318,15 +317,12 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
     }
   
     // Add debug logging
-    console.log('Validation passed with form data:', formData);
     return true;
   };
   
   // Update the handleNext function to include better debugging
   const handleNext = () => {
-    console.log('Current form data:', formData);
     const isValid = validateStep1();
-    console.log('Validation result:', isValid);
   
     if (isValid) {
       try {
@@ -548,9 +544,7 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
         aiTools: cleanedAiTools,
         targetMentees: [formData.relationshipType].filter(Boolean), // Convert relationshipType to array and remove empty
       };
-    
-      console.log('Submitting form data:', updatedFormData);
-    
+        
       // Choose the correct endpoint based on whether we're creating or updating
       const endpoint = isEdit 
         ? `${API_URL}/users/profile/update?userId=${effectiveUserId}`
@@ -573,7 +567,6 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
       }
       
       const data = await response.json();
-      console.log('Response:', response.status, data);
     
       // Update user role to mentor
       const currentUserData = getUserData();

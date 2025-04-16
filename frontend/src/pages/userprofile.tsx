@@ -92,7 +92,6 @@ function App() {
           throw new Error(`Failed to fetch mentor profile: ${response.status}`);
         } else {
           const data = await response.json();
-          console.log('data', data);
           if (data.status === 'success') {
             setMentorProfile(data.profile);
           } else {
