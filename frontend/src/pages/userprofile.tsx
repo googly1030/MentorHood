@@ -492,7 +492,7 @@ function App() {
           <div className="flex items-start">
             <div className="flex items-end">
               <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                src={mentorProfile.profilePhoto || `https://ui-avatars.com/api/?name=${mentorProfile.name}&background=random&size=200`}
                 alt="Profile"
                 className="w-40 h-40 rounded-full border-4 border-white shadow-lg"
               />

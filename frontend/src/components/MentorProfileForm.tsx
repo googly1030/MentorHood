@@ -621,7 +621,7 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
                 <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center">
                   {formData.profilePhoto ? (
                     <img
-                      src={formData.profilePhoto}
+                      src={formData.profilePhoto || (getUserData()?.username ? `https://ui-avatars.com/api/?name=${getUserData()?.username}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
                       alt="Profile"
                       className="w-full h-full rounded-full object-cover"
                     />

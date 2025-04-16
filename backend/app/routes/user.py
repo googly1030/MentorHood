@@ -124,8 +124,8 @@ async def register(user: UserCreate):
                 }
             ],
             "totalExperience": {
-                "years": 1,
-                "months": 1
+                "years": 0,
+                "months": 0
             },
             "linkedinUrl": "",
             "githubUrl": "",
