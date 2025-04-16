@@ -11,7 +11,7 @@ router = APIRouter(
     tags=["upload"]
 )
 
-@router.post("/profile-photo", status_code=status.HTTP_200_OK)
+@router.post("/upload/profile-photo", status_code=status.HTTP_200_OK)
 async def upload_profile_photo(file: UploadFile = File(...)):
     """
     Upload a profile photo with graceful fallback to avatar service
