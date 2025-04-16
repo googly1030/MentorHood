@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Upload, Linkedin, ArrowRight } from 'lucide-react';
 import { getUserData } from '../utils/auth';
 import { toast, Toaster } from 'sonner';
@@ -131,10 +131,12 @@ const AI_TOOLS = [
   "C3.ai"
 ];
 
-const MentorProfileForm = () => {
+const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
   const navigate = useNavigate();
+  const params = useParams<{ mentorId?: string }>();
   const userData = getUserData();
   const [step, setStep] = useState(1);
+  const [isEdit, setIsEdit] = useState(false);
   const [formData, setFormData] = useState<MentorProfile>({
     profilePhoto: '',
     totalExperience: {
@@ -158,10 +160,13 @@ const MentorProfileForm = () => {
     achievements: []
   });
 
+  // Use mentorId from props or from URL params
+  const effectiveUserId = mentorId || params.mentorId || userData?.userId;
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${API_URL}/users/profile?userId=${userData?.userId}`, {
+        const response = await fetch(`${API_URL}/users/profile?userId=${effectiveUserId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -179,6 +184,8 @@ const MentorProfileForm = () => {
               ...prev,
               ...data.profile
             }));
+            // If we are fetching a profile, we're in edit mode
+            setIsEdit(true);
           } else {
             throw new Error('Failed to fetch mentor profile');
           }
@@ -188,10 +195,10 @@ const MentorProfileForm = () => {
       }
     };
 
-    if (userData?.userId) {
+    if (effectiveUserId) {
       fetchProfile();
     }
-  }, [userData?.userId]);
+  }, [effectiveUserId]);
 
 
   if (!formData || Object.keys(formData).length === 0) {
@@ -535,7 +542,12 @@ const MentorProfileForm = () => {
     
       console.log('Submitting form data:', updatedFormData);
     
-      const response = await fetch(`${API_URL}/users/profile/update?userId=${userData?.userId}`, {
+      // Choose the correct endpoint based on whether we're creating or updating
+      const endpoint = isEdit 
+        ? `${API_URL}/users/profile/update?userId=${effectiveUserId}`
+        : `${API_URL}/users/mentors/profile`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -563,9 +575,11 @@ const MentorProfileForm = () => {
         });
       }
     
-      toast.success('Mentor profile updated successfully!', { id: loadingToast });
+      toast.success(isEdit ? 'Profile updated successfully!' : 'Mentor profile created successfully!', { id: loadingToast });
       localStorage.removeItem('mentorFormData');
-      navigate('/mentor-dashboard');
+      
+      // Navigate to the appropriate page
+      navigate(isEdit ? `/profile/${effectiveUserId}` : '/mentor-dashboard');
       
     } catch (error) {
       console.error('Submission error:', error);
@@ -585,12 +599,17 @@ const MentorProfileForm = () => {
       />
       <div className="max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-          Submit your mentorship application
+          {isEdit ? "Edit your mentor profile" : "Submit your mentorship application"}
         </h2>
         <p className="text-center text-gray-600 mb-8">
-          {step === 1 ? "Review your profile and tell us how you would like to mentor the community" : 
-          step === 2 ? "Tell us about your mentoring preferences" :
-          "Share your additional details to complete your profile"}
+          {isEdit 
+            ? (step === 1 ? "Update your profile information" : 
+               step === 2 ? "Update your mentoring preferences" :
+               "Update your additional details")
+            : (step === 1 ? "Review your profile and tell us how you would like to mentor the community" : 
+              step === 2 ? "Tell us about your mentoring preferences" :
+              "Share your additional details to complete your profile")
+          }
         </p>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -1080,7 +1099,7 @@ const MentorProfileForm = () => {
                 onClick={handleSubmit}
                 className="w-full bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white py-3 px-4 rounded-xl font-medium hover:opacity-90 transition-all duration-200"
               >
-                Complete Profile
+                {isEdit ? "Save Changes" : "Complete Profile"}
               </button>
             </div>
           )}
