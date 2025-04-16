@@ -6,7 +6,10 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/upload",
+    tags=["upload"]
+)
 
 @router.post("/profile-photo", status_code=status.HTTP_200_OK)
 async def upload_profile_photo(file: UploadFile = File(...)):

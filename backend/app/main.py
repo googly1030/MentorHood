@@ -44,7 +44,7 @@ app.include_router(ama_session_routes.router)
 app.include_router(registration_routes.router)
 app.include_router(booking_routes.router)
 app.include_router(dashboard.router)
-app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
+app.include_router(upload.router)
 
 @app.get("/")
 def read_root():
