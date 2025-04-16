@@ -96,6 +96,7 @@ async def register(user: UserCreate):
             "email": user_dict["email"],
             "role": user_dict["role"],
             "profilePhoto": "",
+            "headline": "",
             "experience": [
                 {
                 "title": "",

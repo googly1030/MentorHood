@@ -497,7 +497,7 @@ function App() {
                   {mentorProfile.name}
                 </h1>
                 <p className={`mt-1 text-white`}>
-                  {mentorProfile.bio}
+                  {mentorProfile.headline}
                 </p>
                 <div className="mt-2">
                   <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>

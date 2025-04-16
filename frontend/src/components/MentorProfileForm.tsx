@@ -9,6 +9,7 @@ import { API_URL } from '../utils/api';
 
 interface MentorProfile {
   profilePhoto: string;
+  headline: string;
   totalExperience: {
     years: number;
     months: number;
@@ -139,6 +140,7 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [formData, setFormData] = useState<MentorProfile>({
     profilePhoto: '',
+    headline: '',
     totalExperience: {
       years: 0,
       months: 0
@@ -272,6 +274,13 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
 
     if (!formData.primaryExpertise.trim() || formData.primaryExpertise.length < 2) {
       errors.push('Please enter a meaningful primary expertise');
+    }
+    
+    // Headline validation
+    if (!formData.headline.trim()) {
+      errors.push('Headline is required');
+    } else if (formData.headline.trim().length < 5) {
+      errors.push(`Headline should be at least 5 characters (currently: ${formData.headline.trim().length} characters)`);
     }
   
     // Bio validation - Update minimum length
@@ -739,6 +748,21 @@ const MentorProfileForm = ({ mentorId }: { mentorId?: string }) => {
                 onChange={(values) => setFormData({ ...formData, skills: values })}
                 placeholder="Select skills"
               />
+
+              {/* Headline */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Headline *
+                </label>
+                <input
+                  type="text"
+                  value={formData.headline}
+                  onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4937e8]"
+                  placeholder="Your professional headline (e.g., Senior Frontend Developer at Company)"
+                  required
+                />
+              </div>
 
               {/* Bio */}
               <div>
