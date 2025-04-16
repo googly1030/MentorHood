@@ -494,7 +494,7 @@ function App() {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
             {mentors
               .sort((a, b) => {
                 const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
