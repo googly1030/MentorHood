@@ -8,13 +8,13 @@ import { setUserData } from '../utils/auth';
 import { API_URL } from '../utils/api';
 
 interface MentorProfile {
-  user_id: string;
   profilePhoto: string;
   totalExperience: {
     years: number;
     months: number;
   };
   linkedinUrl: string;
+  githubUrl: string;
   primaryExpertise: string;
   disciplines: string[];
   tools: string[];
@@ -24,6 +24,10 @@ interface MentorProfile {
   mentoringTopics: string[];
   relationshipType: string;
   aiTools: string[]; 
+  projects: { title: string; description: string }[];
+  experience: { title: string; company: string; description: string; duration: string }[];
+  resources: { title: string; description: string; linkText: string }[];
+  achievements: { title: string; description: string; date: string }[];
 }
 
 const DISCIPLINES = [
@@ -132,13 +136,13 @@ const MentorProfileForm = () => {
   const userData = getUserData();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<MentorProfile>({
-    user_id: userData?.token || '',
     profilePhoto: '',
     totalExperience: {
       years: 0,
-      months: 0,
+      months: 0
     },
     linkedinUrl: '',
+    githubUrl: '',
     primaryExpertise: '',
     disciplines: [],
     tools: [],
@@ -147,10 +151,52 @@ const MentorProfileForm = () => {
     targetMentees: [],
     mentoringTopics: [],
     relationshipType: '',
-    aiTools: [], // Add this line
+    aiTools: [],
+    projects: [],
+    experience: [],
+    resources: [],
+    achievements: []
   });
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${API_URL}/users/profile?userId=${userData?.userId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Profile fetch error:', errorData);
+          throw new Error(`Failed to fetch mentor profile: ${response.status}`);
+        } else {
+          const data = await response.json();
+          console.log('data', data);
+          if (data.status === 'success') {
+            setFormData(prev => ({
+              ...prev,
+              ...data.profile
+            }));
+          } else {
+            throw new Error('Failed to fetch mentor profile');
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    };
 
+    if (userData?.userId) {
+      fetchProfile();
+    }
+  }, [userData?.userId]);
+
+
+  if (!formData || Object.keys(formData).length === 0) {
+    return <div>Loading...</div>;
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -320,25 +366,176 @@ const MentorProfileForm = () => {
     return true;
   };
 
+  // Add function to handle step 2 to step 3 transition
+  const handleNextToStep3 = () => {
+    if (validateStep2()) {
+      localStorage.setItem('mentorFormData', JSON.stringify(formData));
+      setStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast.success('Mentoring preferences saved! Please complete your additional details.');
+    }
+  };
+
+  // Handle adding a new project
+  const addProject = () => {
+    setFormData(prev => ({
+      ...prev,
+      projects: [...prev.projects, { title: '', description: '' }]
+    }));
+  };
+
+  // Handle adding a new experience
+  const addExperience = () => {
+    setFormData(prev => ({
+      ...prev,
+      experience: [...prev.experience, { title: '', company: '', description: '', duration: '' }]
+    }));
+  };
+
+  // Handle adding a new resource
+  const addResource = () => {
+    setFormData(prev => ({
+      ...prev,
+      resources: [...prev.resources, { title: '', description: '', linkText: '' }]
+    }));
+  };
+
+  // Handle adding a new achievement
+  const addAchievement = () => {
+    setFormData(prev => ({
+      ...prev,
+      achievements: [...prev.achievements, { title: '', description: '', date: '' }]
+    }));
+  };
+
+  // Handle updating a project field
+  const updateProject = (index: number, field: 'title' | 'description', value: string) => {
+    setFormData(prev => {
+      const updatedProjects = [...prev.projects];
+      updatedProjects[index] = { ...updatedProjects[index], [field]: value };
+      return { ...prev, projects: updatedProjects };
+    });
+  };
+
+  // Handle updating an experience field
+  const updateExperience = (index: number, field: 'title' | 'company' | 'description' | 'duration', value: string) => {
+    setFormData(prev => {
+      const updatedExperiences = [...prev.experience];
+      updatedExperiences[index] = { ...updatedExperiences[index], [field]: value };
+      return { ...prev, experience: updatedExperiences };
+    });
+  };
+
+  // Handle updating a resource field
+  const updateResource = (index: number, field: 'title' | 'description' | 'linkText', value: string) => {
+    setFormData(prev => {
+      const updatedResources = [...prev.resources];
+      updatedResources[index] = { ...updatedResources[index], [field]: value };
+      return { ...prev, resources: updatedResources };
+    });
+  };
+
+  // Handle updating an achievement field
+  const updateAchievement = (index: number, field: 'title' | 'description' | 'date', value: string) => {
+    setFormData(prev => {
+      const updatedAchievements = [...prev.achievements];
+      updatedAchievements[index] = { ...updatedAchievements[index], [field]: value };
+      return { ...prev, achievements: updatedAchievements };
+    });
+  };
+
+  // Handle removing a project
+  const removeProject = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Handle removing an experience
+  const removeExperience = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      experience: prev.experience.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Handle removing a resource
+  const removeResource = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      resources: prev.resources.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Handle removing an achievement
+  const removeAchievement = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      achievements: prev.achievements.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Validate step 3
+  const validateStep3 = () => {
+    // No mandatory fields in step 3, but you can add validations if needed
+    return true;
+  };
+
   // Update the handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    if (!validateStep2()) {
+    if (step === 3 && !validateStep3()) {
       return;
     }
   
-    // Add this debug log
-    console.log('Submitting form data:', formData);
-  
+    // Show loading toast
+    const loadingToast = toast.loading('Saving your profile...');
+    
     try {
-      // Ensure targetMentees is populated based on relationshipType
+      // Clean up empty fields
+      const cleanedExperience = formData.experience.filter(exp => 
+        exp.title.trim() !== '' || exp.company.trim() !== '' || exp.description.trim() !== ''
+      );
+      
+      const cleanedProjects = formData.projects.filter(proj => 
+        proj.title.trim() !== '' || proj.description.trim() !== ''
+      );
+      
+      const cleanedResources = formData.resources.filter(res => 
+        res.title.trim() !== '' || res.description.trim() !== '' || res.linkText.trim() !== ''
+      );
+
+      const cleanedAchievements = formData.achievements.filter(achievement => 
+        achievement.title.trim() !== '' || achievement.description.trim() !== '' || achievement.date.trim() !== ''
+      );
+    
+      // Remove empty strings from arrays
+      const cleanedDisciplines = formData.disciplines.filter(d => d.trim() !== '');
+      const cleanedTools = formData.tools.filter(t => t.trim() !== '');
+      const cleanedSkills = formData.skills.filter(s => s.trim() !== '');
+      const cleanedMentoringTopics = formData.mentoringTopics.filter(t => t.trim() !== '');
+      const cleanedAiTools = formData.aiTools.filter(t => t.trim() !== '');
+    
+      // Update formData with cleaned arrays
       const updatedFormData = {
         ...formData,
-        targetMentees: [formData.relationshipType], // Convert relationshipType to array
+        experience: cleanedExperience,
+        projects: cleanedProjects,
+        resources: cleanedResources,
+        achievements: cleanedAchievements,
+        disciplines: cleanedDisciplines,
+        tools: cleanedTools,
+        skills: cleanedSkills,
+        mentoringTopics: cleanedMentoringTopics,
+        aiTools: cleanedAiTools,
+        targetMentees: [formData.relationshipType].filter(Boolean), // Convert relationshipType to array and remove empty
       };
-  
-      const response = await fetch(`${API_URL}/users/mentors/profile`, {
+    
+      console.log('Submitting form data:', updatedFormData);
+    
+      const response = await fetch(`${API_URL}/users/profile/update?userId=${userData?.userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -346,15 +543,18 @@ const MentorProfileForm = () => {
         body: JSON.stringify(updatedFormData),
         credentials: 'include',
       });
-  
-      // Add this debug log
+    
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Update error details:', errorData);
+        toast.error(`Update failed: ${errorData.detail || 'Unknown error'}`, { id: loadingToast });
+        throw new Error(errorData.detail || 'Failed to update profile');
+      }
+      
       const data = await response.json();
       console.log('Response:', response.status, data);
-  
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to create profile');
-      }
-
+    
+      // Update user role to mentor
       const currentUserData = getUserData();
       if (currentUserData) {
         setUserData({
@@ -362,14 +562,15 @@ const MentorProfileForm = () => {
           role: 'mentor'
         });
       }
-  
-      toast.success('Mentor profile created successfully!');
+    
+      toast.success('Mentor profile updated successfully!', { id: loadingToast });
       localStorage.removeItem('mentorFormData');
       navigate('/mentor-dashboard');
       
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create profile');
+      toast.error(error instanceof Error ? error.message : 'Failed to update profile', 
+        { id: loadingToast });
     }
   };
 
@@ -387,7 +588,9 @@ const MentorProfileForm = () => {
           Submit your mentorship application
         </h2>
         <p className="text-center text-gray-600 mb-8">
-          Review your profile and tell us how you would like to mentor the community
+          {step === 1 ? "Review your profile and tell us how you would like to mentor the community" : 
+          step === 2 ? "Tell us about your mentoring preferences" :
+          "Share your additional details to complete your profile"}
         </p>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -546,7 +749,7 @@ const MentorProfileForm = () => {
                 <ArrowRight size={20} />
               </button>
             </div>
-          ) : (
+          ) : step === 2 ? (
             // Step 2: Mentoring Preferences
             <div className="space-y-6">
               <div className="flex gap-4 mb-6">
@@ -560,7 +763,7 @@ const MentorProfileForm = () => {
                 <h3 className="text-xl font-semibold">Mentoring Preferences</h3>
               </div>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-6">
                 {/* Target Mentees */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -599,12 +802,286 @@ const MentorProfileForm = () => {
                 />
 
                 <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white py-3 px-4 rounded-xl font-medium hover:opacity-90 transition-all duration-200"
+                  type="button"
+                  onClick={handleNextToStep3}
+                  className="w-full bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white py-3 px-4 rounded-xl font-medium hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  Complete Profile
+                  Next Step
+                  <ArrowRight size={20} />
                 </button>
-              </form>
+              </div>
+            </div>
+          ) : (
+            // Step 3: Additional Details
+            <div className="space-y-6">
+              <div className="flex gap-4 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50"
+                >
+                  Back
+                </button>
+                <h3 className="text-xl font-semibold">Additional Details</h3>
+              </div>
+
+              {/* GitHub URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  GitHub URL
+                </label>
+                <input
+                  type="text"
+                  value={formData.githubUrl || ''}
+                  onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4937e8]"
+                  placeholder="github.com/username"
+                />
+              </div>
+
+              {/* Experience */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Work Experience
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addExperience}
+                    className="text-sm text-[#4937e8] hover:text-[#4338ca]"
+                  >
+                    + Add Experience
+                  </button>
+                </div>
+                
+                {formData.experience.map((exp, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Experience {index + 1}</span>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeExperience(index)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={exp.title}
+                        onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Job Title"
+                      />
+                      
+                      <input
+                        type="text"
+                        value={exp.company}
+                        onChange={(e) => updateExperience(index, 'company', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Company"
+                      />
+                      
+                      <input
+                        type="text"
+                        value={exp.duration}
+                        onChange={(e) => updateExperience(index, 'duration', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Duration (e.g., Jan 2020 - Present)"
+                      />
+                      
+                      <textarea
+                        value={exp.description}
+                        onChange={(e) => updateExperience(index, 'description', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        rows={2}
+                        placeholder="Description"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Projects */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Projects
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addProject}
+                    className="text-sm text-[#4937e8] hover:text-[#4338ca]"
+                  >
+                    + Add Project
+                  </button>
+                </div>
+                
+                {formData.projects.map((project, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Project {index + 1}</span>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeProject(index)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={project.title}
+                        onChange={(e) => updateProject(index, 'title', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Project Title"
+                      />
+                      
+                      <textarea
+                        value={project.description}
+                        onChange={(e) => updateProject(index, 'description', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        rows={2}
+                        placeholder="Project Description"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Resources */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Resources
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addResource}
+                    className="text-sm text-[#4937e8] hover:text-[#4338ca]"
+                  >
+                    + Add Resource
+                  </button>
+                </div>
+                
+                {formData.resources.map((resource, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Resource {index + 1}</span>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeResource(index)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={resource.title}
+                        onChange={(e) => updateResource(index, 'title', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Resource Title"
+                      />
+                      
+                      <textarea
+                        value={resource.description}
+                        onChange={(e) => updateResource(index, 'description', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        rows={2}
+                        placeholder="Resource Description"
+                      />
+                      
+                      <input
+                        type="text"
+                        value={resource.linkText}
+                        onChange={(e) => updateResource(index, 'linkText', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Resource URL"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Achievements */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Achievements
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addAchievement}
+                    className="text-sm text-[#4937e8] hover:text-[#4338ca]"
+                  >
+                    + Add Achievement
+                  </button>
+                </div>
+                
+                {formData.achievements.map((achievement, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Achievement {index + 1}</span>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeAchievement(index)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={achievement.title}
+                        onChange={(e) => updateAchievement(index, 'title', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Achievement Title"
+                      />
+                      
+                      <textarea
+                        value={achievement.description}
+                        onChange={(e) => updateAchievement(index, 'description', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        rows={2}
+                        placeholder="Achievement Description"
+                      />
+                      
+                      <input
+                        type="text"
+                        value={achievement.date}
+                        onChange={(e) => updateAchievement(index, 'date', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-xl"
+                        placeholder="Achievement Date"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white py-3 px-4 rounded-xl font-medium hover:opacity-90 transition-all duration-200"
+              >
+                Complete Profile
+              </button>
             </div>
           )}
         </div>

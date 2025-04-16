@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Body
 from datetime import datetime, UTC
 from typing import List, Optional
 from passlib.context import CryptContext
@@ -281,4 +281,70 @@ async def create_mentor_profile(profile: MentorProfile):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not create mentor profile: {str(e)}"
+        )
+
+@router.post("/profile")
+async def get_user_profile(userId: str):
+    try:
+        collection = get_collection("userprofile")
+
+        if not userId:
+            raise HTTPException(status_code=400, detail="User ID required")
+
+        # Check if user profile exists
+        result = await collection.find_one({"userId": userId})
+        if not result:
+            raise HTTPException(status_code=404, detail="User profile not found")
+
+        # Convert ObjectId to string for JSON serialization
+        if "_id" in result:
+            result["_id"] = str(result["_id"])
+
+        return {
+            "status": "success",
+            "profile": result
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching user profile: {str(e)}"
+        )
+
+@router.post("/profile/update")
+async def update_user_profile(userId: str, profile: dict = Body(...)):
+    try:
+        collection = get_collection("userprofile")
+
+        if not userId:
+            raise HTTPException(status_code=400, detail="User ID required")
+
+        # Check if user profile exists
+        existing_user = await collection.find_one({"userId": userId})
+        if not existing_user:
+            raise HTTPException(status_code=404, detail="User profile not found")
+
+        # Remove _id if present in the profile payload (can't be updated)
+        if "_id" in profile:
+            del profile["_id"]
+
+        # Add timestamp for update
+        profile["updated_at"] = datetime.now(UTC)
+
+        # Update the profile
+        result = await collection.update_one(
+            {"userId": userId},
+            {"$set": profile}
+        )
+
+        # Successful even if no changes were made (modified_count could be 0)
+        return {
+            "status": "success",
+            "message": "Profile updated successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update profile: {str(e)}"
         )

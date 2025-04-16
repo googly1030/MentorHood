@@ -37,7 +37,7 @@ enum TabType {
 const EMPTY_MENTOR_PROFILE = {
   userId: '',
   name: '',
-  headline: 'Professional Developer',
+  bio: 'Professional Developer',
   description: 'Share your story and experience to help mentees understand your journey and expertise.',
   membership: 'Member of MentorHood',
   totalExperience: {
@@ -153,45 +153,21 @@ function App() {
   useEffect(() => {
     const fetchMentorProfile = async () => {
       try {
-        const response = await fetch(`${API_URL}/mentors/${mentorId}`);
+        const response = await fetch(`${API_URL}/users/profile?userId=${mentorId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) {
-          if (response.status === 404 && isCurrentUser) {
-            // Create empty profile if user is the current mentor
-            const newProfile = {
-              ...EMPTY_MENTOR_PROFILE,
-              userId: mentorId,
-              name: getUserData()?.username || ''
-            };
-
-            console.log('Creating new mentor profile:', newProfile);
-
-            const createResponse = await fetch(`${API_URL}/mentors/creatementorprofile`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              credentials: 'include',
-              body: JSON.stringify(newProfile)
-            });
-            window.location.reload();
-            
-            if (!createResponse.ok) {
-              const errorData = await createResponse.json();
-              console.error('Failed to create profile:', errorData);
-              throw new Error(`Failed to create mentor profile: ${errorData.message || 'Unknown error'}`);
-            }
-
-            const data = await createResponse.json();
-            console.log('New profile created:', data);
-            setMentorProfile(data.mentor);
-          } else {
-            throw new Error('Failed to fetch mentor profile');
-          }
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Profile fetch error:', errorData);
+          throw new Error(`Failed to fetch mentor profile: ${response.status}`);
         } else {
           const data = await response.json();
+          console.log('data', data);
           if (data.status === 'success') {
-            setMentorProfile(data.mentor);
+            setMentorProfile(data.profile);
           } else {
             throw new Error('Failed to fetch mentor profile');
           }
@@ -371,7 +347,7 @@ function App() {
             {/* About Section */}
             <div>
               <p className={textColor}>
-                {mentorProfile.headline}
+                {mentorProfile.bio}
               </p>
               
               {/* Add this new description section */}
@@ -584,7 +560,7 @@ function App() {
                   {mentorProfile.name}
                 </h1>
                 <p className={`mt-1 text-white`}>
-                  {mentorProfile.headline}
+                  {mentorProfile.bio}
                 </p>
                 <div className="mt-2">
                   <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>
