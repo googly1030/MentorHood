@@ -68,6 +68,5 @@ Thumbs.db
 # Database
 data/
 dump/
-
 *.json
 service-account-key.json
