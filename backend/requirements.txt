@@ -13,3 +13,10 @@ python-jose==3.3.0
 starlette==0.27.0
 aiosmtplib==2.0.2
 boto3==1.29.5
+
+# Google API Client Libraries
+google-api-python-client==2.70.0
+google-auth==2.17.3
+google-auth-oauthlib==1.0.0
+google-auth-httplib2==0.1.0
+pytz==2023.3
