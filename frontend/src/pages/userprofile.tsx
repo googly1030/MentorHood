@@ -495,12 +495,12 @@ function App() {
                 <h1 className={`text-3xl text-white font-bold `}>
                   {mentorProfile.name}
                 </h1>
-                <p className={`mt-1 text-white`}>
+                {/* <p className={`mt-1 text-white`}>
                   {mentorProfile.headline}
-                </p>
+                </p> */}
                 <div className="mt-2">
                   <span className={`inline-block ${isDarkMode ? 'bg-gray-800' : 'bg-black'} text-white text-sm px-3 py-1 rounded-full`}>
-                    {mentorProfile.membership}
+                    {mentorProfile.headline}
                   </span>
                 </div>
               </div>
