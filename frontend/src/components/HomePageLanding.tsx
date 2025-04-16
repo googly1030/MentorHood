@@ -709,7 +709,7 @@ function App() {
                   className="flex-none w-[300px] select-none bg-white rounded-xl shadow-lg p-6 hover:shadow-xl 
                     transition-all duration-300 border border-gray-200 group"
                 >
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex items-center gap-4 mb-4">
                     <img
                       src={session?.sessionName ? `https://ui-avatars.com/api/?name=${session?.sessionName}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`}
                       alt={mentor?.name}
@@ -729,16 +729,23 @@ function App() {
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar size={16} className="text-[#3730A3]" />
                       <span className="text-sm">
-                        {new Date(session.timeSlots[0]?.day || '').toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
+                      {new Date(session.created_at || '').toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Clock size={16} className="text-[#3730A3]" />
                       <span className="text-sm">{session.duration} mins</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {session.topics.map((topic, index) => (
+                        <span key={index} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                          {topic}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
