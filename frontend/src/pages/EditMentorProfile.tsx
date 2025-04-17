@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MentorProfileForm from '../components/MentorProfileForm';
 import { getUserData } from '../utils/auth';
-import { toast, Toaster } from 'sonner';
+import { Toaster } from 'sonner';
 
 const EditMentorProfile = () => {
   const { mentorId } = useParams();

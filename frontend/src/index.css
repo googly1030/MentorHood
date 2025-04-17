@@ -533,3 +533,388 @@ footer a:hover::after {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Add these new animation styles */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Enhanced pulse animation for journey center card */
+@keyframes enhanced-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(79, 70, 229, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}
+
+.journey-center-card {
+  animation: enhanced-pulse 3s infinite;
+}
+
+/* Enhanced card hover effects */
+.mentor-card, .session-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mentor-card:hover, .session-card:hover {
+  transform: translateY(-5px) !important;
+}
+
+/* Mobile responsiveness overrides */
+@media (max-width: 640px) {
+  .journey-section.in-view .journey-card:nth-child(1) {
+    transform: translate(calc(-50% - 160px), calc(-50% - 180px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(2) {
+    transform: translate(calc(-50% + 160px), calc(-50% - 180px)); 
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(3) {
+    transform: translate(calc(-50% - 160px), calc(-50% + 180px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(4) {
+    transform: translate(calc(-50% + 160px), calc(-50% + 180px)); 
+  }
+  
+  .journey-card {
+    width: 260px !important;
+    height: 220px !important;
+  }
+}
+
+/* Animated background elements */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(73, 55, 232, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(73, 55, 232, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Enhanced animations for cards */
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-subtle-bounce {
+  animation: subtle-bounce 5s ease-in-out infinite;
+}
+
+/* Card hover effect - apply to mentor and session cards */
+.card-hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(79, 70, 229, 0.4);
+}
+
+/* Button hover effect */
+@keyframes shine {
+  from {
+    mask-position: 150%;
+  }
+  to {
+    mask-position: -50%;
+  }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 25%, 
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.shine-effect:hover::after {
+  transform: translateX(100%);
+}
+
+/* Card Number Badges */
+.number-badge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #4937e8, #4338ca);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(73, 55, 232, 0.2);
+  border: 2px solid white;
+}
+
+/* Enhanced scroll indicators */
+.scroll-indicator-dots {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.scroll-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.scroll-indicator-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background-color: #4937e8;
+}
+
+/* Improved card aspect ratios */
+.card-aspect-ratio {
+  aspect-ratio: 4/5;
+}
+
+@media (max-width: 640px) {
+  .card-aspect-ratio {
+    aspect-ratio: auto;
+  }
+}
+
+/* Improved mobile responsiveness for journey section */
+@media (max-width: 768px) {
+  .journey-section.in-view .journey-card:nth-child(1) {
+    transform: translate(calc(-50% - 120px), calc(-50% - 140px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(2) {
+    transform: translate(calc(-50% + 120px), calc(-50% - 140px)); 
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(3) {
+    transform: translate(calc(-50% - 120px), calc(-50% + 140px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(4) {
+    transform: translate(calc(-50% + 120px), calc(-50% + 140px)); 
+  }
+}
+
+@media (max-width: 480px) {
+  .journey-section.in-view .journey-card:nth-child(1) {
+    transform: translate(calc(-50% - 80px), calc(-50% - 100px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(2) {
+    transform: translate(calc(-50% + 80px), calc(-50% - 100px)); 
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(3) {
+    transform: translate(calc(-50% - 80px), calc(-50% + 100px));
+  }
+  
+  .journey-section.in-view .journey-card:nth-child(4) {
+    transform: translate(calc(-50% + 80px), calc(-50% + 100px)); 
+  }
+  
+  .journey-card {
+    width: 150px !important;
+    height: 180px !important;
+  }
+}
+
+/* Add these styles to your index.css */
+
+/* For the AMA and Women in Tech sections */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.animate-gentle-float {
+  animation: gentle-float 4s ease-in-out infinite;
+}
+
+/* AMA card shine effect */
+.ama-card-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 25%, 
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 1s;
+}
+
+.ama-card-shine:hover::after {
+  transform: translateX(100%);
+}
+
+/* Staggered card entrance animation */
+.stagger-fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.stagger-fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered delays for cards */
+.stagger-delay-1 { transition-delay: 0.1s; }
+.stagger-delay-2 { transition-delay: 0.2s; }
+.stagger-delay-3 { transition-delay: 0.3s; }
+.stagger-delay-4 { transition-delay: 0.4s; }
+
+/* Additional styling for women in tech cards with less blue */
+.women-tech-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.women-tech-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Add at the end of your file - New styles for AMA and Women in Tech sections */
+
+/* Create a radial gradient spotlight effect */
+.bg-radial-gradient {
+  background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+}
+
+/* Card hover animations */
+.card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+/* Image zoom effect */
+.zoom-effect {
+  transition: transform 0.7s ease-out;
+}
+
+.zoom-effect:hover {
+  transform: scale(1.05);
+}
+
+/* Animated border gradient effect */
+@keyframes border-position {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.border-gradient-animate {
+  background: linear-gradient(90deg, #f97316, #ec4899, #f97316);
+  background-size: 200% 200%;
+  animation: border-position 10s ease infinite;
+}
+
+/* Make a smooth wave animation */
+@keyframes wave {
+  0% { transform: translateX(0) translateZ(0) scaleY(1); }
+  50% { transform: translateX(-25%) translateZ(0) scaleY(0.8); }
+  100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
+}
+
+.animate-wave {
+  animation: wave 10s ease-in-out infinite;
+  animation-fill-mode: forwards;
+  transform-origin: center bottom;
+}
+
+/* Glow effect animation */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 rgba(244, 114, 182, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); }
+}
+
+.glow-effect {
+  animation: glow 4s ease-in-out infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
+.shine-effect:after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 6s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(30deg); }
+  100% { transform: translateX(100%) rotate(30deg); }
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-3000 {
+  animation-delay: 3s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}

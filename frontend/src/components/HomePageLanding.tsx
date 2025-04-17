@@ -1,33 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
-  Star,
   Users,
-  Coffee,
-  BookOpen,
-  Award,
-  Clock,
+  User,
   Calendar,
-  MessageCircle,
-  Users2,
-  // Search,
-  Trophy,
+  Plus,
   Loader2,
+  Share2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-// import { motion, AnimatePresence } from "framer-motion";
-// import { getUserData } from '../utils/auth';
 import img from "../image.webp";
-import mentor1 from '../MentoImg/mentor1.jpg'
-import mentor2 from '../MentoImg/mentor2.jpg'
-import mentor3 from '../MentoImg/mentor3.jpg'
-import mentor4 from '../MentoImg/mentor4.jpg'
-import mentor5 from '../MentoImg/mentor5.jpg'
-import mentor6 from '../MentoImg/mentor6.jpg'
-import mentor7 from '../MentoImg/mentor7.jpg'
-import mentor8 from '../MentoImg/mentor8.jpg'
-import { API_URL } from '../utils/api';
-
+import mentor1 from "../MentoImg/mentor1.jpg";
+import mentor2 from "../MentoImg/mentor2.jpg";
+import mentor3 from "../MentoImg/mentor3.jpg";
+import mentor4 from "../MentoImg/mentor4.jpg";
+import mentor5 from "../MentoImg/mentor5.jpg";
+import mentor6 from "../MentoImg/mentor6.jpg";
+import mentor7 from "../MentoImg/mentor7.jpg";
+import mentor8 from "../MentoImg/mentor8.jpg";
+import { API_URL } from "../utils/api";
+import OneOneSession from "./one-one-Session";
+import UpcomingSessions from "./upcomingsessions";
+import AskMeAnything from "./AskMeAnything";
+import  WomenInTech  from './WomenInTech';
+import { Toaster, toast } from 'sonner';
 
 interface Session {
   sessionId: string;
@@ -98,8 +94,6 @@ interface AMASession {
   created_at?: string; // Adding optional created_at
 }
 
-
-
 function App() {
   const [scrollOpacity, setScrollOpacity] = useState(1);
   const [visibleCards, setVisibleCards] = useState<boolean[]>([]);
@@ -108,21 +102,6 @@ function App() {
   const journeySectionRef = useRef<HTMLDivElement>(null);
   const [isJourneySectionInView, setIsJourneySectionInView] = useState(false);
   // Removed unused emojis state
-  const [centerCardContent] = useState({
-    icon: (
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/6009/6009939.png"
-        alt="Growth Icon"
-        className="h-32 w-32 object-contain drop-shadow-lg"
-      />
-    ),
-    title: "MentorConnect Platform",
-    description:
-      "Our AI-powered platform matches you with the perfect mentor based on your goals, experience, and learning style.",
-    buttonText: "Start Your Journey",
-    bgColor: "from-gray-800 to-blue-500",
-  });
-
 
   const navigate = useNavigate();
   // const [activeTab, setActiveTab] = useState("mentee");
@@ -135,62 +114,35 @@ function App() {
   const [amaSessions, setAmaSessions] = useState<AMASession[]>([]);
   const [womenTechSessions, setWomenTechSessions] = useState<AMASession[]>([]);
 
-
-
   const sessionCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleSessionCards, setVisibleSessionCards] = useState<boolean[]>([]);
 
   const [oneOnOneSessions, setOneOnOneSessions] = useState<Session[]>([]);
   const [groupSessions, setGroupSessions] = useState<Session[]>([]);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  
-  const oneOnOneScrollContainerRef = useRef<HTMLDivElement>(null);
-  const groupSessionsScrollContainerRef = useRef<HTMLDivElement>(null);
-
   // Create separate handling functions for each container
-  const handleOneOnOneMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    if (oneOnOneScrollContainerRef.current) {
-      setStartX(e.pageX - oneOnOneScrollContainerRef.current.offsetLeft);
-      setScrollLeft(oneOnOneScrollContainerRef.current.scrollLeft);
-    }
+
+  const copyShareLink = (userId: string) => {
+    // Use window.location.hostname to determine the base URL
+    const baseUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5173'
+      : 'https://mentorhood.guvi.world';
+  
+    const shareUrl = `${baseUrl}/profile/${userId}?tab=services`;
+    
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        toast.success('Link copied to clipboard!', {
+          duration: 2000,
+          className: 'bg-gray-900 text-white',
+        });
+      })
+      .catch(() => {
+        toast.error('Failed to copy link', {
+          duration: 2000,
+        });
+      });
   };
-
-  const handleGroupSessionsMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    if (groupSessionsScrollContainerRef.current) {
-      setStartX(e.pageX - groupSessionsScrollContainerRef.current.offsetLeft);
-      setScrollLeft(groupSessionsScrollContainerRef.current.scrollLeft);
-    }
-  };
-
-  const handleOneOnOneMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !oneOnOneScrollContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - oneOnOneScrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    oneOnOneScrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleGroupSessionsMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !groupSessionsScrollContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - groupSessionsScrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    groupSessionsScrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-
 
   useEffect(() => {
     let rafId: number;
@@ -284,7 +236,7 @@ function App() {
     visibleSessionCards,
     isJourneySectionInView,
     mentors.length,
-    allMentors.length
+    allMentors.length,
   ]);
 
   useEffect(() => {
@@ -292,15 +244,15 @@ function App() {
       try {
         const response = await fetch(`${API_URL}/mentors/all`);
         if (!response.ok) {
-          throw new Error('Failed to fetch mentors');
+          throw new Error("Failed to fetch mentors");
         }
         const data = await response.json();
-        if (data.status === 'success') {
+        if (data.status === "success") {
           setAllMentors(data.mentors);
           setVisibleCards(new Array(data.mentors.length).fill(false));
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load mentors');
+        setError(err instanceof Error ? err.message : "Failed to load mentors");
       } finally {
         setLoading(false);
       }
@@ -310,15 +262,15 @@ function App() {
       try {
         const response = await fetch(`${API_URL}/sessions/one-on-one/all`);
         if (!response.ok) {
-          throw new Error('Failed to fetch sessions');
+          throw new Error("Failed to fetch sessions");
         }
         const data = await response.json();
-        if (data.status === 'success') {
+        if (data.status === "success") {
           setOneOnOneSessions(data.sessions);
           setMentors(data.mentors);
         }
       } catch (error) {
-        console.error('Error fetching sessions:', error);
+        console.error("Error fetching sessions:", error);
       } finally {
         setLoading(false);
       }
@@ -328,14 +280,14 @@ function App() {
       try {
         const response = await fetch(`${API_URL}/sessions/group-session/all`);
         if (!response.ok) {
-          throw new Error('Failed to fetch group sessions');
+          throw new Error("Failed to fetch group sessions");
         }
         const data = await response.json();
-        if (data.status === 'success') {
+        if (data.status === "success") {
           setGroupSessions(data.sessions);
         }
       } catch (error) {
-        console.error('Error fetching group sessions:', error);
+        console.error("Error fetching group sessions:", error);
       }
     };
 
@@ -349,11 +301,11 @@ function App() {
       try {
         const [amaResponse, womenTechResponse] = await Promise.all([
           fetch(`${API_URL}/ama-sessions?is_woman_tech=false`),
-          fetch(`${API_URL}/ama-sessions?is_woman_tech=true`)
+          fetch(`${API_URL}/ama-sessions?is_woman_tech=true`),
         ]);
 
         if (!amaResponse.ok || !womenTechResponse.ok) {
-          throw new Error('Failed to fetch sessions');
+          throw new Error("Failed to fetch sessions");
         }
 
         const amaData = await amaResponse.json();
@@ -362,7 +314,7 @@ function App() {
         setAmaSessions(amaData);
         setWomenTechSessions(womenTechData);
       } catch (error) {
-        console.error('Error fetching sessions:', error);
+        console.error("Error fetching sessions:", error);
       } finally {
         setLoading(false);
       }
@@ -381,6 +333,12 @@ function App() {
 
   return (
     <div className="min-h-screen">
+       <Toaster 
+        position="top-center"
+        expand={false}
+        richColors
+        closeButton
+      />
       <img
         src={img}
         alt="Background"
@@ -392,763 +350,402 @@ function App() {
         }}
       />
 
-      <div className="hero-section relative">
-        {/* Background Images Grid */}
+      <div className="hero-section relative overflow-hidden bg-gradient-to-b from-gray-50 via-gray-50 to-white">
+        {/* Animated background elements - preserved for all devices */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-100/40 rounded-full filter blur-3xl opacity-70 animate-blob"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/4 w-72 h-72 bg-purple-100/20 rounded-full filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+
+        {/* Background pattern overlay */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
+
+        {/* Background profile images - hide on mobile only */}
         <div className="absolute inset-0 overflow-hidden">
-          {/* Right side images */}
+          {/* All mentor images hidden on mobile */}
           <img
             src={mentor1}
             alt="Mentor1"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float hidden sm:block"
             style={{ left: "2%", top: "23%" }}
           />
           <img
             src={mentor2}
             alt="Mentor2"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float animation-delay-2000 hidden sm:block"
             style={{ right: "2%", top: "23%" }}
           />
           <img
             src={mentor3}
             alt="Mentor3"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "88%", top: "56%" }}
           />
           <img
             src={mentor4}
             alt="Mentor4"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "12%", top: "32%" }}
           />
           <img
             src={mentor5}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "15%", top: "66%" }}
           />
 
           {/* Left side images (mirrored) */}
           <img
-             src={mentor6}
+            src={mentor6}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "88%", top: "56%" }}
           />
           <img
-             src={mentor7}
+            src={mentor7}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "12%", top: "32%" }}
           />
           <img
             src={mentor8}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "15%", top: "66%" }}
           />
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
-          <div className="flex justify-center space-x-8 mb-12 relative">
-            {/* <button
-              className={`text-xl font-medium px-4 py-2 relative ${
-                activeTab === "mentee" ? "text-black" : "text-gray-500"
-              }`}
-              onClick={() => setActiveTab("mentee")}
-            >
-              Mentee
-              {activeTab === "mentee" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500"></div>
-              )}
-            </button>
-            <button
-              className={`text-xl font-medium px-4 py-2 relative ${
-                activeTab === "mentor" ? "text-black" : "text-gray-500"
-              }`}
-              onClick={() => setActiveTab("mentor")}
-            >
-              Mentor
-              {activeTab === "mentor" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500"></div>
-              )}
-            </button> */}
-          </div>
+        {/* Content - improved mobile text sizing and spacing */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col relative z-[2] pt-12 sm:pt-20 pb-16 sm:pb-24 md:pt-28 md:pb-32">
+          {/* Subtle top badge - mobile optimized */}
+          {/* <div className="mb-4 sm:mb-6 bg-white/70 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-sm border border-indigo-100 flex items-center">
+            <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-500 mr-1.5 sm:mr-2"></span>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">
+              500+ Mentors Available Now
+            </span>
+          </div> */}
 
-          <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
-            Unlock Your Dream Career 
+          {/* Main heading with better mobile sizing */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold mb-4 sm:mb-6 max-w-5xl text-center mx-auto leading-tight tracking-tight">
+            Unlock Your{" "}
+            <span className="relative">
+              <span className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
+                Dream Career
+              </span>
+              <svg
+                className="absolute -bottom-1 sm:-bottom-2 left-0 w-full"
+                height="10"
+                viewBox="0 0 280 10"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1 5C21 1.5 109 -1.5 279 5"
+                  stroke="url(#paint0_linear)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient
+                    id="paint0_linear"
+                    x1="1"
+                    y1="5"
+                    x2="279"
+                    y2="5"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="#4937e8" stopOpacity="0" />
+                    <stop offset="0.5" stopColor="#4937e8" />
+                    <stop offset="1" stopColor="#4338ca" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
             <br />
             with Expert Mentor Guidance
           </h1>
-          <p className="text-xl mb-8 text-gray-700 text-center max-w-2xl mx-auto">
-          Navigate your academic journey and accelerate your career with personalized 1:1 mentorship from industry leaders.
 
+          {/* Paragraph with better mobile spacing */}
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-12 text-gray-700 text-center max-w-2xl mx-auto leading-relaxed">
+            Navigate your academic journey and accelerate your career with
+            personalized 1:1 mentorship from industry leaders.
           </p>
-        </div>
-      </div>
 
-      <div className="knowledge-buddies-section py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-8">
-          <h2 className="text-4xl font-bold mb-12 text-center">
-          Our expert mentors
-          </h2>
-          {loading ? (
-            <div className="text-center">Loading mentors...</div>
-          ) : error ? (
-            <div className="text-center text-red-500">{error}</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
-            {allMentors
-              .sort((a, b) => {
-                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                return dateB - dateA;
-              })
-              .slice(0, 4)
-              .map((mentor, index) => (
-                <div
-                  key={mentor.userId}
-                  ref={(el) => (cardsRef.current[index] = el)}
-                  className={`mentor-card bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow ${
-                    visibleCards[index] ? "visible" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
-                      alt={mentor.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-lg">{mentor.name}</h3>
-                      <h6 className="font-semibold text-sm text-gray-500">{mentor.headline}</h6>
-                    </div>
-                  </div>
-                  {/* Past to current experience */}
-                  <p className="text-gray-700 mb-2 line-clamp-1">{mentor.bio}</p>
-                  
-                  {/* Years of Experience */}
-                  <p className="text-gray-700 mb-2">
-                    {mentor.totalExperience?.years || 0}+ years of experience
-                  </p>
-                  
-                  {/* Area of Expertise */}
-                  <p className="text-gray-700 mb-4">
-                    Expert in {mentor.primaryExpertise}
-                  </p>
+          {/* Buttons - stacked on mobile */}
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-5 items-center">
+            <button
+              onClick={() => navigate("/mentors")}
+              className="w-full sm:w-auto relative px-6 py-3.5 sm:px-8 sm:py-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white rounded-xl font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 group overflow-hidden"
+            >
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#4338ca] to-[#4937e8] transition-all duration-300 transform translate-x-full group-hover:translate-x-0 opacity-0 group-hover:opacity-100"></span>
+              <span className="relative z-10">Find a Mentor</span>
+              <ArrowRight
+                size={18}
+                className="relative z-10 transform group-hover:translate-x-1 transition-transform"
+              />
+            </button>
 
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => navigate(`/profile/${mentor.userId}`)}
-                      className="flex-1 bg-gray-100 text-black py-2 rounded-full flex items-center justify-center gap-2 hover:bg-gray-200"
-                    >
-                      <Users size={16} />
-                      View Profile
-                    </button>
-                  </div>
+            {/* <button
+              onClick={() => navigate("/register")}
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 bg-white border border-gray-200 text-gray-800 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-gray-50 transition-all group flex items-center justify-center gap-2"
+            >
+              <span>Join as Mentor</span>
+              <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center transform group-hover:rotate-45 transition-transform">
+                <span className="text-indigo-500 font-bold text-xs">+</span>
+              </div>
+            </button> */}
+          </div>
+
+          {/* Bottom avatars section - mobile optimized */}
+          <div className="mt-8 sm:mt-16 flex flex-col items-center justify-center">
+            <div className="flex -space-x-2 sm:-space-x-3 mb-2 sm:mb-3">
+              {[mentor1, mentor2, mentor3, mentor4].map((img, i) => (
+                <div key={i} className="relative">
+                  <div
+                    className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 animate-pulse"
+                    style={{ animationDelay: `${i * 200}ms` }}
+                  ></div>
+                  <img
+                    src={img}
+                    alt="Mentor"
+                    className="relative w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover shadow-md"
+                  />
                 </div>
               ))}
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-indigo-500 font-bold text-xs sm:text-sm shadow-md">
+                10+
+              </div>
             </div>
-          )}
-
-          <div className="text-center">
+            <div className="text-xs sm:text-sm text-gray-600 font-medium text-center">
+              Join{" "}
+              <span className="font-semibold text-indigo-700">
+                thousands of mentees
+              </span>{" "}
+              already growing their careers
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="expert-mentors-section py-20 md:py-28 bg-white relative">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
+            <div>
+              <div className="inline-block px-3 py-1 bg-gray-900 text-gray-100 rounded-full text-sm font-medium mb-3 border border-gray-800">
+                Vetted & Verified
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent">
+                Choose Your Expert Mentors
+              </h2>
+              <p className="text-gray-600 max-w-xl leading-relaxed">
+                Connect with industry leaders who've been where you want to go.
+                Our mentors are hand-picked for their expertise and passion for
+                helping others grow.
+              </p>
+            </div>
             <button
-              className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
+              className="hidden md:flex items-center gap-3 mt-4 md:mt-0 group relative px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
               onClick={() => navigate("/mentors")}
             >
-              <Users size={20} />
-              View All Mentors
-              <ArrowRight size={20} />
+              {/* Button content */}
+              <div className="relative z-10 flex items-center gap-3">
+                <span className="font-medium">View All Mentors</span>
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
+                  <ArrowRight 
+                    size={16} 
+                    className="text-white transform transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" 
+                  />
+                </div>
+              </div>
             </button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-gray-700" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-20 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="text-gray-700 font-medium">{error}</div>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 text-sm hover:bg-gray-50"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+              {allMentors
+                .sort((a, b) => {
+                  const dateA = a.created_at
+                    ? new Date(a.created_at).getTime()
+                    : 0;
+                  const dateB = b.created_at
+                    ? new Date(b.created_at).getTime()
+                    : 0;
+                  return dateB - dateA;
+                })
+                .slice(0, 6)
+                .map((mentor, index) => (
+                  <div
+                    key={mentor.userId}
+                    ref={(el) => (cardsRef.current[index] = el)}
+                    className={`
+                      flex-none bg-white rounded-xl select-none
+                      shadow-lg hover:shadow-2xl transition-all duration-500
+                      border border-gray-200 hover:border-indigo-200
+                      group overflow-visible relative
+                      transform-gpu
+                      scale-100 hover:scale-105
+                      z-0 hover:z-50
+                      ${visibleCards[index] ? "visible" : ""}
+                    `}
+                    onClick={() => navigate(`/profile/${mentor.userId}`)}
+                  >
+                    {/* Profile Header */}
+                    <div className="relative">
+                      {/* Modern geometric pattern header */}
+                      <div className="h-28 relative overflow-hidden bg-gray-50">
+                        <div className="absolute inset-0 opacity-[0.03]">
+                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
+                        </div>
+                        
+                        {/* Decorative shapes */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-gray-900/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-indigo-500/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                        
+                        {/* Subtle border */}
+                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                      </div>
+                      
+                      {/* Experience Badge - Updated styling */}
+                      <div className="absolute top-4 right-4">
+                        <div className="px-3 py-1.5 bg-white/95 text-gray-900 rounded-full text-xs font-medium shadow-sm border border-gray-200/50 backdrop-blur-sm group-hover:bg-gray-900 group-hover:text-white transition-colors duration-300">
+                          {mentor.totalExperience?.years || 0}+ years
+                        </div>
+                      </div>
+                      
+                      {/* Profile Image - Enhanced styling */}
+                      <div className="absolute -bottom-10 left-6">
+                        <div className="relative">
+                          <div className="w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden group-hover:ring-4 group-hover:ring-indigo-100 transition-all duration-300">
+                            <img
+                              src={
+                                mentor.profilePhoto ||
+                                (mentor.name
+                                  ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200`
+                                  : `https://ui-avatars.com/api/?name=new&background=random&size=200`)
+                              }
+                              alt={mentor.name}
+                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                            />
+                          </div>
+                          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-sm"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Profile Content */}
+                    <div className="pt-12 px-6 pb-6">
+                      {/* Name and Title */}
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                          {mentor.name}
+                        </h3>
+                        <p className="text-gray-600 line-clamp-1">
+                          {mentor.headline || mentor.primaryExpertise}
+                        </p>
+                      </div>
+
+                      {/* Skills */}
+                      <div className="space-y-2 mb-6">
+                        <div className="flex flex-wrap gap-2">
+                          {mentor.disciplines?.slice(0, 2).map((discipline, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-medium"
+                            >
+                              {discipline}
+                            </span>
+                          ))}
+                          {mentor.skills?.slice(0, 1).map((skill, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {((mentor.disciplines?.length || 0) + (mentor.skills?.length || 0)) > 3 && (
+                            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium flex items-center gap-1">
+                              <Plus size={12} />
+                              {((mentor.disciplines?.length || 0) + (mentor.skills?.length || 0)) - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bio/Description */}
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-6 h-10">
+                        {mentor.bio || `Expert in ${mentor.primaryExpertise} with ${mentor.totalExperience?.years || 0}+ years of experience.`}
+                      </p>
+
+                      {/* Action Buttons - Changed book session button to black */}
+                      <div className="flex gap-3">
+                      <button 
+                        className="flex-1 bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-black transition-colors duration-200 flex items-center justify-center gap-2 text-sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent the parent onClick from firing
+                          navigate(`/profile/${mentor.userId}?tab=services`);
+                        }}
+                      >
+                        <Calendar className="w-4 h-4" />
+                        Book a Session
+                      </button>
+                        <button className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
+                          <User className="w-4 h-4" />
+                          View Profile
+                        </button>
+                        <button
+                      className="p-1 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyShareLink(mentor.userId);
+                          }}
+                          title="Share Profile"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+
+          <div className="flex justify-center items-center w-full px-4 md:hidden">
+            <button
+              className="w-full sm:w-auto group px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
+              onClick={() => navigate("/mentors")}
+            >
+              <Users size={18} className="text-white/90" />
+              <span>View All Mentors</span>
+              <ArrowRight 
+                size={18} 
+                className="transform transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" 
+              />
+            </button>
+            
           </div>
         </div>
       </div>
-
-      {/* Upcoming Sessions Section */}
-      <section className="bg-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
-            <div>
-              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-                One-on-One Sessions
-              </h2>
-              <p className="text-gray-700 text-lg max-w-xl">
-                Book targeted mentorship sessions with industry experts and
-                accelerate your career growth
-              </p>
-            </div>
-            <button 
-              onClick={() => navigate('/mentors?tab=one-on-one')} 
-              className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
-            >
-              View All Sessions
-              <ArrowRight size={20} />
-            </button>
-          </div>
-
-          <div 
-            ref={oneOnOneScrollContainerRef}
-            className="flex overflow-x-auto gap-6 pb-6 cursor-grab active:cursor-grabbing scroll-smooth hide-scrollbar"
-            onMouseDown={handleOneOnOneMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onMouseMove={handleOneOnOneMouseMove}
-            style={{ 
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
-          >
-            {oneOnOneSessions
-              .sort((a, b) => {
-                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                return dateB - dateA;
-              })
-              .map((session) => {
-                const mentor = mentors.find(m => m.userId === session.userId);
-                if (!mentor) return null;
-
-                return (
-                  <div
-                    key={session.sessionId}
-                    className="flex-none w-[350px] select-none bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200"
-                  >
-                    <div className="flex items-center gap-4 mb-6">
-                      <img
-                        src={mentor.profilePhoto || (mentor.name ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`)}
-                        alt={mentor.name}
-                        className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200"
-                      />
-                      <div>
-                        <h3 className="font-medium text-gray-900 text-lg line-clamp-1">{session.sessionName}</h3>
-                        <p className="text-sm text-gray-500 line-clamp-1">{mentor.bio}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 mb-6">
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>Duration</span>
-                        <span className="font-medium text-gray-900">{session.duration} mins</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>Topics</span>
-                        <span className="font-medium text-gray-900 line-clamp-1">{session.topics[0]}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-gray-700">
-                        {session.isPaid ? `₹${session.price}` : 'Free'}
-                      </span>
-                      <button
-                        onClick={() => navigate(`/booking/${session.sessionId}`)}
-                        className="px-6 py-3 bg-black text-white rounded-full text-sm hover:bg-gray-800 transition-colors"
-                      >
-                        Book Now
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
-      </section>
+      <OneOneSession oneOnOneSessions={oneOnOneSessions} mentors={mentors} />
+      <UpcomingSessions groupSessions={groupSessions} mentors={mentors} />
+      <AskMeAnything amaSessions={amaSessions} loading={loading} />
+      <WomenInTech womenTechSessions={womenTechSessions} loading={loading} />
 
 
-      {/* Upcoming Sessions Section */}
-      <section className="bg-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
-            <div>
-              <h2 className="text-5xl leading-normal font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-                Upcoming Sessions
-              </h2>
-              <p className="text-gray-700 text-lg max-w-xl">
-                Book targeted mentorship sessions with industry experts and
-                accelerate your career growth
-              </p>
-            </div>
-            <button 
-              onClick={() => navigate('/mentors?tab=group-session')} 
-              className="view-all-btn bg-black text-white py-2 px-4 rounded-full hover:bg-gray-800 flex items-center gap-2"
-            >
-              View All Sessions
-              <ArrowRight size={20} />
-            </button>
-          </div>
-
-          <div 
-            ref={groupSessionsScrollContainerRef}
-            className="flex overflow-x-auto gap-6 pb-6 cursor-grab active:cursor-grabbing scroll-smooth hide-scrollbar"
-            onMouseDown={handleGroupSessionsMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onMouseMove={handleGroupSessionsMouseMove}
-            style={{ 
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
-          >
-            {groupSessions
-              .sort((a, b) => {
-                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                return dateB - dateA;
-              })
-              .map((session) => {
-              const mentor = mentors.find(m => m.userId === session.userId);
-              return (
-                <div
-                  key={session.sessionId}
-                  className="flex-none w-[300px] select-none bg-white rounded-xl shadow-lg p-6 hover:shadow-xl 
-                    transition-all duration-300 border border-gray-200 group"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={session?.sessionName ? `https://ui-avatars.com/api/?name=${session?.sessionName}&background=random&size=200` : `https://ui-avatars.com/api/?name=new&background=random&size=200`}
-                      alt={mentor?.name}
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
-                    />
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-800 line-clamp-1">
-                        {session.sessionName}
-                      </h3>
-                      <p className="text-gray-600 text-sm line-clamp-1">
-                        {mentor?.name}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={16} className="text-[#3730A3]" />
-                      <span className="text-sm">
-                      {new Date(session.created_at || '').toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={16} className="text-[#3730A3]" />
-                      <span className="text-sm">{session.duration} mins</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {session.topics.map((topic, index) => (
-                        <span key={index} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-lg font-bold text-gray-800">
-                      {session.price === '0' ? 'Free' : `₹${session.price}`}
-                    </span>
-                    <button
-                      onClick={() => navigate(`/booking/${session.sessionId}`)}
-                      className="px-4 py-2 bg-black text-white text-sm rounded-full hover:bg-gray-800 
-                      transition-all flex items-center gap-2"
-                    >
-                      Book Now
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Ask Me Anything Sessions Section */}
-      <section className="bg-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-              Ask Me Anything Sessions
-            </h2>
-            <p className="text-gray-700 text-lg max-w-2xl mx-auto">
-              Join interactive group sessions where industry experts answer your
-              burning questions live
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="text-center">Loading sessions...</div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {amaSessions
-                .sort((a, b) => {
-                  const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                  const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                  return dateB - dateA;
-                })
-                .slice(0, 4)
-                .map((session) => (
-                <div
-                  key={session._id}
-                  className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-                >
-                  <div className="flex items-start gap-6 mb-8">
-                    <img
-                      src={session.mentor.image}
-                      alt={session.mentor.name}
-                      className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
-                    />
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2 text-gray-800">
-                        {session.title}
-                      </h3>
-                      <p className="text-gray-800 font-medium">
-                        {session.mentor.name}
-                      </p>
-                      <p className="text-gray-500">{session.mentor.role}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-gray-100 rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-gray-800 mb-1">
-                        <Calendar size={18} className="text-gray-800" />
-                        <span className="font-medium">Date & Time</span>
-                      </div>
-                      <p className="text-gray-500">{session.date}</p>
-                      <p className="text-gray-500">
-                        {session.time} • {session.duration}
-                      </p>
-                    </div>
-                    <div className="bg-gray-100 rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-gray-800 mb-1">
-                        <Users2 size={18} className="text-gray-800" />
-                        <span className="font-medium">Registrants</span>
-                      </div>
-                      <p className="text-gray-500">
-                        {session.registrants}/{session.maxRegistrants}
-                      </p>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${
-                              (session.registrants / session.maxRegistrants) * 100
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                    <div className="flex items-center gap-2 text-gray-800 mb-4">
-                      <MessageCircle size={18} className="text-gray-800" />
-                      <span className="font-medium">Sample Questions</span>
-                    </div>
-                    <ul className="space-y-3">
-                      {session.questions.map((question, qIndex) => (
-                        <li
-                          key={qIndex}
-                          className="flex items-start gap-3 text-gray-500"
-                        >
-                          <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
-                          {question}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <button 
-                    className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={() => navigate(`/questions/${session._id}`)}
-                  >
-                    Register Now
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Women in Tech Section */}
-      <section className="bg-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 bg-blue-100 text-[#4937e8] rounded-full text-sm font-medium mb-4">
-              Featured: Women in Tech Series
-            </span>
-            <h2 className="text-5xl font-bold mb-4 leading-normal bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-              Empowering Women in Technology
-            </h2>
-            <p className="text-gray-700 text-lg max-w-2xl mx-auto">
-              Join exclusive sessions with accomplished women leaders in technology sharing their journey, 
-              insights, and strategies for success in the tech industry
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="text-center">Loading sessions...</div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {womenTechSessions
-                .sort((a, b) => {
-                  const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                  const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                  return dateB - dateA;
-                })
-                .slice(0, 4)
-                .map((session) => (
-                <div
-                  key={session._id}
-                  className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-                >
-                  <div className="flex items-start gap-6 mb-8">
-                    <img
-                      src={session.mentor.image}
-                      alt={session.mentor.name}
-                      className="w-16 h-16 rounded-full object-cover ring-4 ring-gray-200"
-                    />
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2 text-gray-800">
-                        {session.title}
-                      </h3>
-                      <p className="text-gray-800 font-medium">
-                        {session.mentor.name}
-                      </p>
-                      <p className="text-gray-500">{session.mentor.role}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-gray-100 rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-gray-800 mb-1">
-                        <Calendar size={18} className="text-gray-800" />
-                        <span className="font-medium">Date & Time</span>
-                      </div>
-                      <p className="text-gray-500">{session.date}</p>
-                      <p className="text-gray-500">
-                        {session.time} • {session.duration}
-                      </p>
-                    </div>
-                    <div className="bg-gray-100 rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-gray-800 mb-1">
-                        <Users2 size={18} className="text-gray-800" />
-                        <span className="font-medium">Registrants</span>
-                      </div>
-                      <p className="text-gray-500">
-                        {session.registrants}/{session.maxRegistrants}
-                      </p>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] h-2 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${
-                              (session.registrants / session.maxRegistrants) * 100
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                    <div className="flex items-center gap-2 text-gray-800 mb-4">
-                      <MessageCircle size={18} className="text-gray-800" />
-                      <span className="font-medium">Sample Questions</span>
-                    </div>
-                    <ul className="space-y-3">
-                      {session.questions.map((question, qIndex) => (
-                        <li
-                          key={qIndex}
-                          className="flex items-start gap-3 text-gray-500"
-                        >
-                          <span className="w-2 h-2 mt-2 rounded-full bg-gray-800"></span>
-                          {question}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <button 
-                    className="w-full bg-black text-white py-4 rounded-xl font-medium hover:shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={() => navigate(`/questions/${session._id}`)}
-                  >
-                    Register Now
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section
-        ref={journeySectionRef}
-        className={`journey-section py-16 pb-32 bg-white relative overflow-hidden min-h-[600px] ${
-          isJourneySectionInView ? "in-view" : ""
-        }`}
-      >
-        <div className="max-w-5xl mx-auto px-8 relative z-10">
-          <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
-            Your Growth Journey
-          </h2>
-          <p className="text-lg text-gray-700 text-center mb-12 max-w-2xl mx-auto">
-            Our mentorship platform follows a simple yet effective process to
-            help you achieve your career goals
-          </p>
-
-          <div className="relative h-[500px] flex items-center justify-center">
-            {/* First Card */}
-            <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-gray-200 p-3 rounded-full inline-block">
-                    <BookOpen size={30} className="text-[#3730A3]" />
-                  </div>
-                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 1</span>
-                </div>
-                <h4 className="font-bold text-lg mb-3">1. Discover</h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  Browse our curated network of experts who match your career goals.
-                </p>
-                <div className="mt-2 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Users size={16} className="text-gray-500" />
-                    <span>500+ Verified Mentors</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Tech Leaders</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Product</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Design</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Second Card */}
-            <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-gray-200 p-3 rounded-full inline-block">
-                    <Clock size={30} className="text-[#3730A3]" />
-                  </div>
-                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 2</span>
-                </div>
-                <h4 className="font-bold text-lg mb-3">2. Connect</h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  Schedule personalized sessions that fit your calendar.
-                </p>
-                <div className="mt-2 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Calendar size={16} className="text-gray-500" />
-                    <span>Flexible Scheduling</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">1:1 Sessions</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Group Sessions</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Chat</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Third Card */}
-            <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-gray-200 p-3 rounded-full inline-block">
-                    <Coffee size={30} className="text-[#3730A3]" />
-                  </div>
-                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 3</span>
-                </div>
-                <h4 className="font-bold text-lg mb-3">3. Transform</h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  Gain insights through interactive sessions with industry leaders.
-                </p>
-                <div className="mt-2 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Star size={16} className="text-gray-500" />
-                    <span>4.9/5 Average Rating</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Live Sessions</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Resources</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Recordings</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fourth Card */}
-            <div className="journey-card">
-              <div className="bg-white rounded-xl p-6 shadow-xl w-[25rem] h-[17rem] hover:shadow-2xl transition-all duration-300 border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-gray-200 p-3 rounded-full inline-block">
-                    <Award size={30} className="text-[#3730A3]" />
-                  </div>
-                  <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600">Step 4</span>
-                </div>
-                <h4 className="font-bold text-lg mb-3">4. Succeed</h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  Track your progress and celebrate achievements.
-                </p>
-                <div className="mt-2 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Trophy size={16} className="text-gray-500" />
-                    <span>Track Your Growth</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Goals</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Progress</span>
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Milestones</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Center Card remains unchanged */}
-            <div className="journey-center-card w-[400px] bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
-              <div
-                className={`h-40 bg-gradient-to-r from-[#4937e8] to-[#4338ca] rounded-xl mb-6 overflow-hidden relative p-4 flex items-center justify-center`}
-              >
-                <div className="absolute inset-0 opacity-30 bg-white/95"></div>
-                <div className="relative z-10 transform hover:scale-105 transition-transform">
-                  {centerCardContent.icon}
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-[#4937e8] via-[#4937e8] to-[#4338ca] bg-clip-text text-transparent [text-shadow:_0_1px_1px_rgb(0_0_0_/_10%)]">
-                {centerCardContent.title}
-              </h3>
-              <p className="text-gray-700 text-center mb-6 text-base leading-relaxed">
-                {centerCardContent.description}
-              </p>
-              <div className="flex justify-center">
-                <button onClick={() => navigate('/mentors')} className="px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-full text-base font-medium transition-all transform hover:scale-105">
-                  {centerCardContent.buttonText}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
