@@ -387,12 +387,12 @@ function App() {
         {/* Content - improved mobile text sizing and spacing */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col relative z-[2] pt-12 sm:pt-20 pb-16 sm:pb-24 md:pt-28 md:pb-32">
           {/* Subtle top badge - mobile optimized */}
-          <div className="mb-4 sm:mb-6 bg-white/70 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-sm border border-indigo-100 flex items-center">
+          {/* <div className="mb-4 sm:mb-6 bg-white/70 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-sm border border-indigo-100 flex items-center">
             <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-500 mr-1.5 sm:mr-2"></span>
             <span className="text-xs sm:text-sm font-medium text-gray-600">
               500+ Mentors Available Now
             </span>
-          </div>
+          </div> */}
 
           {/* Main heading with better mobile sizing */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold mb-4 sm:mb-6 max-w-5xl text-center mx-auto leading-tight tracking-tight">
@@ -504,7 +504,7 @@ function App() {
                 Vetted & Verified
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent">
-                Our Expert Mentors
+                Choose Your Expert Mentors
               </h2>
               <p className="text-gray-600 max-w-xl leading-relaxed">
                 Connect with industry leaders who've been where you want to go.

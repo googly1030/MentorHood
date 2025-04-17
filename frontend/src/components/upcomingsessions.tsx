@@ -105,7 +105,7 @@ const UpcomingSessions = ({ groupSessions, mentors }: UpcomingSessionsProps) => 
             <div className="mb-6 md:mb-0">
               {/* Changed gradient colors to gray/black */}
               <h2 className="text-3xl md:text-4xl lg:text-5xl leading-tight font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
-                Upcoming Group Sessions
+                Thunder Sessions
               </h2>
               <p className="text-gray-600 text-lg max-w-xl leading-relaxed">
                 Learn with peers in expert-led group mentorship sessions
