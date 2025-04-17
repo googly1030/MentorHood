@@ -55,7 +55,7 @@ const Login = () => {
         duration: 3000,
       });
       if (!isOnBoarded()) {
-        navigate('/mentor-profile');
+        navigate('/mentor-dashboard');
       } else {
         navigate('/');
       }
