@@ -321,7 +321,7 @@ function App() {
       />
 
       <div className="hero-section relative overflow-hidden bg-gradient-to-b from-gray-50 via-gray-50 to-white">
-        {/* Animated background elements */}
+        {/* Animated background elements - preserved for all devices */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-100/40 rounded-full filter blur-3xl opacity-70 animate-blob"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/30 rounded-full filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
         <div className="absolute top-1/2 left-1/4 w-72 h-72 bg-purple-100/20 rounded-full filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
@@ -329,37 +329,37 @@ function App() {
         {/* Background pattern overlay */}
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
 
-        {/* Background profile images - keep existing code but with enhanced animations */}
+        {/* Background profile images - hide on mobile only */}
         <div className="absolute inset-0 overflow-hidden">
-          {/* We'll keep existing profile images but add animation classes */}
+          {/* All mentor images hidden on mobile */}
           <img
             src={mentor1}
             alt="Mentor1"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float hidden sm:block"
             style={{ left: "2%", top: "23%" }}
           />
           <img
             src={mentor2}
             alt="Mentor2"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float animation-delay-2000"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 animate-float animation-delay-2000 hidden sm:block"
             style={{ right: "2%", top: "23%" }}
           />
           <img
             src={mentor3}
             alt="Mentor3"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "88%", top: "56%" }}
           />
           <img
             src={mentor4}
             alt="Mentor4"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "12%", top: "32%" }}
           />
           <img
             src={mentor5}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "15%", top: "66%" }}
           />
 
@@ -367,41 +367,42 @@ function App() {
           <img
             src={mentor6}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ right: "88%", top: "56%" }}
           />
           <img
             src={mentor7}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "12%", top: "32%" }}
           />
           <img
             src={mentor8}
             alt="Mentor"
-            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110"
+            className="absolute w-[80px] h-[80px] object-cover rounded-full opacity-[0.8] hover:opacity-40 transition-all duration-300 transform hover:scale-110 hidden sm:block"
             style={{ left: "15%", top: "66%" }}
           />
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col relative z-[2] pt-20 pb-24 md:pt-28 md:pb-32">
-          {/* Subtle top badge */}
-          <div className="mb-6 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-indigo-100 flex items-center">
-            <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-            <span className="text-sm font-medium text-gray-600">
+        {/* Content - improved mobile text sizing and spacing */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col relative z-[2] pt-12 sm:pt-20 pb-16 sm:pb-24 md:pt-28 md:pb-32">
+          {/* Subtle top badge - mobile optimized */}
+          <div className="mb-4 sm:mb-6 bg-white/70 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-sm border border-indigo-100 flex items-center">
+            <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-500 mr-1.5 sm:mr-2"></span>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">
               500+ Mentors Available Now
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 max-w-5xl text-center mx-auto leading-tight tracking-tight">
+          {/* Main heading with better mobile sizing */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold mb-4 sm:mb-6 max-w-5xl text-center mx-auto leading-tight tracking-tight">
             Unlock Your{" "}
             <span className="relative">
               <span className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
                 Dream Career
               </span>
               <svg
-                className="absolute -bottom-2 left-0 w-full"
+                className="absolute -bottom-1 sm:-bottom-2 left-0 w-full"
                 height="10"
                 viewBox="0 0 280 10"
                 fill="none"
@@ -433,27 +434,29 @@ function App() {
             with Expert Mentor Guidance
           </h1>
 
-          <p className="text-lg md:text-xl mb-12 text-gray-700 text-center max-w-2xl mx-auto leading-relaxed">
+          {/* Paragraph with better mobile spacing */}
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-12 text-gray-700 text-center max-w-2xl mx-auto leading-relaxed">
             Navigate your academic journey and accelerate your career with
             personalized 1:1 mentorship from industry leaders.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5 items-center">
+          {/* Buttons - stacked on mobile */}
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-5 items-center">
             <button
               onClick={() => navigate("/mentors")}
-              className="relative px-8 py-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white rounded-xl font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-1 flex items-center gap-3 group overflow-hidden"
+              className="w-full sm:w-auto relative px-6 py-3.5 sm:px-8 sm:py-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white rounded-xl font-medium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 group overflow-hidden"
             >
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#4338ca] to-[#4937e8] transition-all duration-300 transform translate-x-full group-hover:translate-x-0 opacity-0 group-hover:opacity-100"></span>
               <span className="relative z-10">Find a Mentor</span>
               <ArrowRight
-                size={20}
+                size={18}
                 className="relative z-10 transform group-hover:translate-x-1 transition-transform"
               />
             </button>
 
             <button
               onClick={() => navigate("/register")}
-              className="px-8 py-4 bg-white border border-gray-200 text-gray-800 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-gray-50 transition-all group flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 bg-white border border-gray-200 text-gray-800 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-gray-50 transition-all group flex items-center justify-center gap-2"
             >
               <span>Join as Mentor</span>
               <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center transform group-hover:rotate-45 transition-transform">
@@ -462,8 +465,9 @@ function App() {
             </button>
           </div>
 
-          <div className="mt-16 flex flex-col items-center justify-center">
-            <div className="flex -space-x-3 mb-3">
+          {/* Bottom avatars section - mobile optimized */}
+          <div className="mt-8 sm:mt-16 flex flex-col items-center justify-center">
+            <div className="flex -space-x-2 sm:-space-x-3 mb-2 sm:mb-3">
               {[mentor1, mentor2, mentor3, mentor4].map((img, i) => (
                 <div key={i} className="relative">
                   <div
@@ -473,15 +477,15 @@ function App() {
                   <img
                     src={img}
                     alt="Mentor"
-                    className="relative w-12 h-12 rounded-full border-2 border-white object-cover shadow-md"
+                    className="relative w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover shadow-md"
                   />
                 </div>
               ))}
-              <div className="w-12 h-12 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-indigo-500 font-bold text-sm shadow-md">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-indigo-500 font-bold text-xs sm:text-sm shadow-md">
                 500+
               </div>
             </div>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-xs sm:text-sm text-gray-600 font-medium text-center">
               Join{" "}
               <span className="font-semibold text-indigo-700">
                 thousands of mentees
