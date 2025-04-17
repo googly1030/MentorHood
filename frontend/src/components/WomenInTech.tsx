@@ -1,5 +1,6 @@
-import { ArrowRight, Calendar, Users2, Loader2 } from "lucide-react";
+import { ArrowRight, Calendar, Users2, Loader2 ,Share2} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'sonner';
 
 interface AMASession {
   _id: string;
@@ -24,6 +25,27 @@ interface WomenInTechProps {
   womenTechSessions: AMASession[];
   loading: boolean;
 }
+
+const copyShareLink = (sessionId: string) => {
+  const baseUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5173'
+    : 'https://mentorhood.guvi.world';
+  
+  const shareUrl = `${baseUrl}/questions/${sessionId}`;
+  
+  navigator.clipboard.writeText(shareUrl)
+    .then(() => {
+      toast.success('Link copied to clipboard!', {
+        duration: 2000,
+        className: 'bg-gray-900 text-white',
+      });
+    })
+    .catch(() => {
+      toast.error('Failed to copy link', {
+        duration: 2000,
+      });
+    });
+};
 
 const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
   const navigate = useNavigate();
@@ -123,18 +145,32 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                           {womenTechSessions[0].title}
                         </p>
 
-                        <button
-                          onClick={() =>
-                            navigate(`/questions/${womenTechSessions[0]._id}`)
-                          }
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors self-start group/btn shadow-md hover:shadow-lg"
-                        >
-                          <span>Join Session</span>
-                          <ArrowRight
-                            size={16}
-                            className="transform group-hover/btn:translate-x-0.5 transition-transform"
-                          />
-                        </button>
+                      
+                        <div className="flex justify-between mt-4">
+  <button
+    onClick={() => navigate(`/questions/${womenTechSessions[0]._id}`)}
+    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-md hover:shadow-lg"
+  >
+    <span>Join Session</span>
+    <ArrowRight
+      size={16}
+      className="transform group-hover:translate-x-0.5 transition-transform"
+    />
+  </button>
+  
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      copyShareLink(womenTechSessions[0]._id);
+    }}
+    className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-lg text-gray-900 hover:bg-gray-50 hover:text-black transition-all shadow-md hover:shadow-lg group"
+    title="Share Session"
+  >
+    <Share2 size={16} className="transform group-hover:rotate-12 transition-transform duration-300" />
+    <span className="text-sm font-medium">Share Session</span>
+  </button>
+</div>
+                      
                       </div>
                     </>
                   )}
@@ -257,6 +293,16 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                                     session.registrants}{" "}
                                   spots left
                                 </span>
+                                <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyShareLink(session._id);
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all"
+                                title="Share Session"
+                              >
+                                <Share2 size={16} />
+                              </button>
                               </div>
 
                               <div className="text-gray-800 flex items-center gap-1 text-sm font-medium">

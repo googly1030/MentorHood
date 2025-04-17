@@ -1,6 +1,6 @@
-import { Calendar, Clock, ArrowRight, MessageCircle, Users2, Loader2 } from "lucide-react";
+import { Calendar, Clock, ArrowRight, MessageCircle, Users2, Loader2 ,Share2} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from 'sonner';
 interface AMASession {
   _id: string;
   title: string;
@@ -24,6 +24,27 @@ interface AskMeAnythingProps {
   amaSessions: AMASession[];
   loading: boolean;
 }
+
+const copyShareLink = (sessionId: string) => {
+  const baseUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5173'
+    : 'https://mentorhood.guvi.world';
+  
+  const shareUrl = `${baseUrl}/questions/${sessionId}`;
+  
+  navigator.clipboard.writeText(shareUrl)
+    .then(() => {
+      toast.success('Link copied to clipboard!', {
+        duration: 2000,
+        className: 'bg-gray-900 text-white',
+      });
+    })
+    .catch(() => {
+      toast.error('Failed to copy link', {
+        duration: 2000,
+      });
+    });
+};
 
 const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
   const navigate = useNavigate();
@@ -176,18 +197,29 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
                           </div>
                         </div>
 
-                        <button
-                          onClick={() =>
-                            navigate(`/questions/${amaSessions[0]?._id}`)
-                          }
-                          className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg font-medium hover:shadow-lg shadow-gray-200/50 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
-                        >
-                          Register for Session
-                          <ArrowRight
-                            size={16}
-                            className="transform group-hover:translate-x-0.5 transition-transform"
-                          />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => navigate(`/questions/${amaSessions[0]?._id}`)}
+                            className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg font-medium hover:shadow-lg shadow-gray-200/50 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                          >
+                            Register for Session
+                            <ArrowRight
+                              size={16}
+                              className="transform group-hover:translate-x-0.5 transition-transform"
+                            />
+                          </button>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyShareLink(amaSessions[0]?._id);
+                            }}
+                            className="p-3 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all"
+                            title="Share Session"
+                          >
+                            <Share2 size={20} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -281,6 +313,16 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
                                     session.registrants}{" "}
                                   spots
                                 </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyShareLink(session._id);
+                                  }}
+                                  className="p-1 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all"
+                                  title="Share Session"
+                                >
+                                  <Share2 size={14} />
+                                </button>
                               </div>
                             </div>
 
