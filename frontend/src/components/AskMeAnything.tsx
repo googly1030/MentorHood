@@ -50,7 +50,7 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
           </p>
 
           <button
-            onClick={() => navigate("/ama")}
+            onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 px-6 py-3 border border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-full text-gray-800 hover:text-gray-900 hover:border-gray-300 hover:shadow-lg transition-all group mb-16"
           >
             <span className="font-medium">View All AMA Sessions</span>
@@ -297,7 +297,7 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
 
                     <div className="mt-8 flex justify-center">
                       <button
-                        onClick={() => navigate("/ama")}
+                        onClick={() => navigate("/")}
                         className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
                       >
                         <span>See all AMA sessions</span>

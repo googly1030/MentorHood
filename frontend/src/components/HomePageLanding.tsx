@@ -454,7 +454,7 @@ function App() {
               />
             </button>
 
-            <button
+            {/* <button
               onClick={() => navigate("/register")}
               className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 bg-white border border-gray-200 text-gray-800 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-gray-50 transition-all group flex items-center justify-center gap-2"
             >
@@ -462,7 +462,7 @@ function App() {
               <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center transform group-hover:rotate-45 transition-transform">
                 <span className="text-indigo-500 font-bold text-xs">+</span>
               </div>
-            </button>
+            </button> */}
           </div>
 
           {/* Bottom avatars section - mobile optimized */}
