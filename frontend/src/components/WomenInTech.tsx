@@ -148,13 +148,13 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                       <Calendar size={18} className="text-gray-700" />
                       <span>Upcoming Women in Tech Sessions</span>
                     </h3>
-                    <button
+                    {/* <button
                       onClick={() => navigate("/womentech")}
                       className="text-gray-700 text-sm font-medium flex items-center gap-1 hover:text-gray-900 transition-colors"
                     >
                       <span>View all</span>
                       <ArrowRight size={14} />
-                    </button>
+                    </button> */}
                   </div>
 
                   <div className="space-y-4">

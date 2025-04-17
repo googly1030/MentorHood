@@ -229,12 +229,12 @@ function App() {
                 </div>
                 {isCurrentUser && (
                   <button 
-                    onClick={() => navigate('/mentor-dashboard')}
-                    className="flex items-center gap-2 px-4 py-2 text-[#4937e8] hover:text-[#4338ca] font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-                  >
-                    <Settings2 size={18} />
-                    <span>Manage Sessions</span>
-                  </button>
+                  onClick={() => navigate('/mentor-dashboard')}
+                  className="flex items-center gap-2 px-4 py-2 text-[#4937e8] hover:text-[#4338ca] font-medium rounded-lg hover:bg-indigo-50 transition-all duration-200"
+                >
+                  <Settings2 size={18} />
+                  <span>Manage Sessions</span>
+                </button>
                 )}
               </div>
               {services.length > 0 ? (
@@ -302,7 +302,7 @@ function App() {
                 {isCurrentUser && (
                   <button 
                     onClick={() => navigate('/mentor-dashboard')}
-                    className="flex items-center gap-2 px-4 py-2 text-[#4937e8] hover:text-[#4338ca] font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                                    className="flex items-center gap-2 px-4 py-2 text-[#4937e8] hover:text-[#4338ca] font-medium rounded-lg hover:bg-indigo-50 transition-all duration-200"
                   >
                     <Settings2 size={18} />
                     <span>Manage Sessions</span>
