@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
-  Star,
   Users,
+  User,
+  Calendar,
+  Plus,
   Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -494,10 +496,10 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <div>
-              <div className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium mb-3 border border-indigo-100">
+              <div className="inline-block px-3 py-1 bg-gray-900 text-gray-100 rounded-full text-sm font-medium mb-3 border border-gray-800">
                 Vetted & Verified
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-[#4937e8] to-[#4338ca] bg-clip-text text-transparent">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent">
                 Our Expert Mentors
               </h2>
               <p className="text-gray-600 max-w-xl leading-relaxed">
@@ -507,34 +509,38 @@ function App() {
               </p>
             </div>
             <button
-              className="hidden md:flex items-center gap-2 mt-4 md:mt-0 group"
+              className="hidden md:flex items-center gap-3 mt-4 md:mt-0 group relative px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
               onClick={() => navigate("/mentors")}
             >
-              <span className="text-indigo-600 font-medium">
-                View All Mentors
-              </span>
-              <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center transform group-hover:translate-x-1 transition-all">
-                <ArrowRight size={16} className="text-indigo-600" />
+              {/* Button content */}
+              <div className="relative z-10 flex items-center gap-3">
+                <span className="font-medium">View All Mentors</span>
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
+                  <ArrowRight 
+                    size={16} 
+                    className="text-white transform transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" 
+                  />
+                </div>
               </div>
             </button>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-gray-700" />
             </div>
           ) : error ? (
-            <div className="text-center py-20 bg-red-50 rounded-xl border border-red-100">
-              <div className="text-red-500 font-medium">{error}</div>
+            <div className="text-center py-20 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="text-gray-700 font-medium">{error}</div>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-4 px-4 py-2 bg-white border border-red-200 rounded-lg text-red-600 text-sm hover:bg-red-50"
+                className="mt-4 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 text-sm hover:bg-gray-50"
               >
                 Try Again
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
               {allMentors
                 .sort((a, b) => {
                   const dateA = a.created_at
@@ -545,99 +551,122 @@ function App() {
                     : 0;
                   return dateB - dateA;
                 })
-                .slice(0, 8)
+                .slice(0, 6)
                 .map((mentor, index) => (
                   <div
                     key={mentor.userId}
                     ref={(el) => (cardsRef.current[index] = el)}
-                    className={`mentor-card bg-white rounded-xl p-5 border border-gray-100 hover:border-indigo-100 shadow-sm hover:shadow-xl transition-all duration-300 group ${
+                    className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer ${
                       visibleCards[index] ? "visible" : ""
                     }`}
                     onClick={() => navigate(`/profile/${mentor.userId}`)}
                   >
-                    <div className="relative mb-5">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-purple-600/5 rounded-xl -m-1"></div>
-                      <div className="absolute right-2 top-2">
-                        <div className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">
-                          {mentor.totalExperience?.years || 0}+ yrs
+                    {/* Profile Header */}
+                    <div className="relative">
+                      {/* Cover Image */}
+                      <div className="h-28 bg-gradient-to-r from-indigo-600 to-indigo-800"></div>
+                      
+                      {/* Experience Badge */}
+                      <div className="absolute top-4 right-4">
+                        <div className="px-2 py-1 bg-black/70 text-white rounded-full text-xs font-medium backdrop-blur-sm">
+                          {mentor.totalExperience?.years || 0}+ years
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 relative">
+                      
+                      {/* Profile Image */}
+                      <div className="absolute -bottom-10 left-6">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-[#4937e8]/20 to-[#4338ca]/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          <img
-                            src={
-                              mentor.profilePhoto ||
-                              (mentor.name
-                                ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200`
-                                : `https://ui-avatars.com/api/?name=new&background=random&size=200`)
-                            }
-                            alt={mentor.name}
-                            className="w-14 h-14 rounded-full object-cover ring-2 ring-white group-hover:ring-indigo-50 shadow-md transition-all"
-                          />
+                          <div className="w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden">
+                            <img
+                              src={
+                                mentor.profilePhoto ||
+                                (mentor.name
+                                  ? `https://ui-avatars.com/api/?name=${mentor.name}&background=random&size=200`
+                                  : `https://ui-avatars.com/api/?name=new&background=random&size=200`)
+                              }
+                              alt={mentor.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                          </div>
                           <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
                         </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
-                            {mentor.name}
-                          </h3>
-                          <p className="text-sm text-gray-500 line-clamp-1">
-                            {mentor.headline || mentor.primaryExpertise}
-                          </p>
+                      </div>
+                    </div>
+
+                    {/* Profile Content */}
+                    <div className="pt-12 px-6 pb-6">
+                      {/* Name and Title */}
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                          {mentor.name}
+                        </h3>
+                        <p className="text-gray-600 line-clamp-1">
+                          {mentor.headline || mentor.primaryExpertise}
+                        </p>
+                      </div>
+
+                      {/* Skills */}
+                      <div className="space-y-2 mb-6">
+                        <div className="flex flex-wrap gap-2">
+                          {mentor.disciplines?.slice(0, 2).map((discipline, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-medium"
+                            >
+                              {discipline}
+                            </span>
+                          ))}
+                          {mentor.skills?.slice(0, 1).map((skill, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {((mentor.disciplines?.length || 0) + (mentor.skills?.length || 0)) > 3 && (
+                            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium flex items-center gap-1">
+                              <Plus size={12} />
+                              {((mentor.disciplines?.length || 0) + (mentor.skills?.length || 0)) - 3} more
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {mentor.disciplines
-                        ?.slice(0, 3)
-                        .map((discipline, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors"
-                          >
-                            {discipline}
-                          </span>
-                        ))}
-                      {(mentor.disciplines?.length || 0) > 3 && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors">
-                          +{(mentor.disciplines?.length || 0) - 3} more
-                        </span>
-                      )}
-                    </div>
+                      {/* Bio/Description */}
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-6 h-10">
+                        {mentor.bio || `Expert in ${mentor.primaryExpertise} with ${mentor.totalExperience?.years || 0}+ years of experience.`}
+                      </p>
 
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-4 h-10">
-                      {mentor.bio}
-                    </p>
-
-                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-1 text-amber-500">
-                        <Star size={14} fill="currentColor" />
-                        <span className="text-xs font-medium">
-                          {mentor.rating || "4.9"}
-                        </span>
+                      {/* Action Buttons */}
+                      <div className="flex gap-3">
+                        <button className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
+                          <Calendar className="w-4 h-4" />
+                          Book a Session
+                        </button>
+                        <button className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
+                          <User className="w-4 h-4" />
+                          View Profile
+                        </button>
                       </div>
-                      <div className="flex items-center text-indigo-600 text-sm font-medium group-hover:text-indigo-700">
-                        View Profile
-                        <ArrowRight
-                          size={14}
-                          className="ml-1 transform group-hover:translate-x-1 transition-transform"
-                        />
-                      </div>
+                    
                     </div>
                   </div>
                 ))}
             </div>
           )}
 
-          <div className="text-center md:hidden">
+          <div className="flex justify-center items-center w-full px-4 md:hidden">
             <button
-              className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2 mx-auto"
+              className="w-full sm:w-auto group px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
               onClick={() => navigate("/mentors")}
             >
-              <Users size={18} />
-              View All Mentors
-              <ArrowRight size={18} />
+              <Users size={18} className="text-white/90" />
+              <span>View All Mentors</span>
+              <ArrowRight 
+                size={18} 
+                className="transform transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" 
+              />
             </button>
           </div>
         </div>

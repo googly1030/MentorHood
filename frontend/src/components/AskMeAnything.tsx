@@ -230,7 +230,7 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
                       </p>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-8">
                       {amaSessions.slice(1, 4).map((session, idx) => (
                         <div
                           key={idx}
