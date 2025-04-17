@@ -29,7 +29,7 @@ const AskMeAnything = ({ amaSessions, loading }: AskMeAnythingProps) => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 relative overflow-hidden bg-white">
+    <section className="relative py-24 bg-white overflow-hidden">
       {/* Background elements with enhanced depth */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/inspiration-geometry.png')] opacity-[0.02]"></div>
       <div className="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-indigo-100/20 filter blur-3xl"></div>

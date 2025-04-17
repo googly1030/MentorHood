@@ -29,7 +29,7 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 relative overflow-hidden bg-white">
+    <section className="relative py-24 bg-white overflow-hidden">
       {/* Premium background elements with more subtle black/gray styling */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-[0.03]"></div>
       <div className="absolute top-0 left-10 w-96 h-96 rounded-full bg-gradient-to-br from-[#f1f5f9]/40 to-transparent filter blur-3xl"></div>

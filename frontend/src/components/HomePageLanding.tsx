@@ -560,27 +560,45 @@ function App() {
                   <div
                     key={mentor.userId}
                     ref={(el) => (cardsRef.current[index] = el)}
-                    className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer ${
-                      visibleCards[index] ? "visible" : ""
-                    }`}
+                    className={`
+                      flex-none bg-white rounded-xl select-none
+                      shadow-lg hover:shadow-2xl transition-all duration-500
+                      border border-gray-200 hover:border-indigo-200
+                      group overflow-visible relative
+                      transform-gpu
+                      scale-100 hover:scale-105
+                      z-0 hover:z-50
+                      ${visibleCards[index] ? "visible" : ""}
+                    `}
                     onClick={() => navigate(`/profile/${mentor.userId}`)}
                   >
                     {/* Profile Header */}
                     <div className="relative">
-                      {/* Cover Image */}
-                      <div className="h-28 bg-gradient-to-r from-indigo-600 to-indigo-800"></div>
+                      {/* Modern geometric pattern header */}
+                      <div className="h-28 relative overflow-hidden bg-gray-50">
+                        <div className="absolute inset-0 opacity-[0.03]">
+                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')]"></div>
+                        </div>
+                        
+                        {/* Decorative shapes */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-gray-900/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-indigo-500/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                        
+                        {/* Subtle border */}
+                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                      </div>
                       
-                      {/* Experience Badge */}
+                      {/* Experience Badge - Updated styling */}
                       <div className="absolute top-4 right-4">
-                        <div className="px-2 py-1 bg-black/70 text-white rounded-full text-xs font-medium backdrop-blur-sm">
+                        <div className="px-3 py-1.5 bg-white/95 text-gray-900 rounded-full text-xs font-medium shadow-sm border border-gray-200/50 backdrop-blur-sm group-hover:bg-gray-900 group-hover:text-white transition-colors duration-300">
                           {mentor.totalExperience?.years || 0}+ years
                         </div>
                       </div>
                       
-                      {/* Profile Image */}
+                      {/* Profile Image - Enhanced styling */}
                       <div className="absolute -bottom-10 left-6">
                         <div className="relative">
-                          <div className="w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden">
+                          <div className="w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden group-hover:ring-4 group-hover:ring-indigo-100 transition-all duration-300">
                             <img
                               src={
                                 mentor.profilePhoto ||
@@ -589,10 +607,10 @@ function App() {
                                   : `https://ui-avatars.com/api/?name=new&background=random&size=200`)
                               }
                               alt={mentor.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                             />
                           </div>
-                          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-sm"></div>
                         </div>
                       </div>
                     </div>
@@ -642,9 +660,9 @@ function App() {
                         {mentor.bio || `Expert in ${mentor.primaryExpertise} with ${mentor.totalExperience?.years || 0}+ years of experience.`}
                       </p>
 
-                      {/* Action Buttons */}
+                      {/* Action Buttons - Changed book session button to black */}
                       <div className="flex gap-3">
-                        <button className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
+                        <button className="flex-1 bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-black transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
                           <Calendar className="w-4 h-4" />
                           Book a Session
                         </button>
@@ -672,6 +690,7 @@ function App() {
                 className="transform transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" 
               />
             </button>
+            
           </div>
         </div>
       </div>

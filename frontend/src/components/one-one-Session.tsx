@@ -100,7 +100,7 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
   const row2Sessions = sortedSessions.filter((_, i) => i % 2 === 1);
 
   return (
-    <section className="relative py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+    <section className="relative py-24 bg-white overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
@@ -130,7 +130,7 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
           
           <button
             onClick={() => navigate("/mentors?tab=one-on-one")}
-            className="mt-6 md:mt-0 group relative px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+            className="mt-6 md:mt-0 group relative px-6 py-3 bg-gray-900 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 overflow-hidden"
             data-aos="fade-up"
             data-aos-delay="200"
           >
@@ -140,6 +140,7 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
                 <ArrowRight size={14} className="text-white transform group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
               </div>
             </div>
+            <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-indigo-600 to-indigo-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
           </button>
         </div>
 
