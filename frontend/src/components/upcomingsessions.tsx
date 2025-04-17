@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { ArrowRight, Calendar, Clock, Users, Users2 } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Users, Users2,Share2 } from "lucide-react";
+import { toast } from 'sonner';
 import { useNavigate } from "react-router-dom";
 
 interface Session {
@@ -55,6 +56,28 @@ const MENTOR_AVATARS = [
 "https://guvi-mentorhood.s3.ap-south-1.amazonaws.com/profile-photos/5bf97dd0-22cc-43ca-9f29-b36dd47ba388-praveen.jpg",
 "https://guvi-mentorhood.s3.ap-south-1.amazonaws.com/profile-photos/22130ebb-f59c-404a-a1c9-e3308c55cfeb-arun bro.jpg",
 ];
+
+const copyShareLink = (sessionId: string) => {
+  // Use window.location.origin to get the base URL dynamically
+  const baseUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5173'
+    : 'https://mentorhood.guvi.world';
+
+  const shareUrl = `${baseUrl}/booking/${sessionId}`;
+  
+  navigator.clipboard.writeText(shareUrl)
+    .then(() => {
+      toast.success('Link copied to clipboard!', {
+        duration: 2000,
+        className: 'bg-gray-900 text-white',
+      });
+    })
+    .catch(() => {
+      toast.error('Failed to copy link', {
+        duration: 2000,
+      });
+    });
+};
 
 interface UpcomingSessionsProps {
   groupSessions: Session[];
@@ -300,19 +323,29 @@ const UpcomingSessions = ({ groupSessions, mentors }: UpcomingSessionsProps) => 
                           </div>
                         </div>
                       </div>
-
-                      <button
-                        onClick={() =>
-                          navigate(`/booking/${session.sessionId}`)
-                        }
-                        className="w-full py-3 bg-black text-white text-sm rounded-xl hover:bg-gray-800 group-hover:bg-indigo-600 transition-all flex items-center justify-center gap-1.5 shine-effect"
-                      >
-                        Book Your Spot
-                        <ArrowRight
-                          size={14}
-                          className="transform group-hover:translate-x-1 transition-transform"
-                        />
-                      </button>
+                      <div className="flex gap-2">
+  <button
+    onClick={() => navigate(`/booking/${session.sessionId}`)}
+    className="flex-1 py-3 bg-black text-white text-sm rounded-xl hover:bg-gray-800 group-hover:bg-indigo-600 transition-all flex items-center justify-center gap-1.5 shine-effect"
+  >
+    Book Your Spot
+    <ArrowRight
+      size={14}
+      className="transform group-hover:translate-x-1 transition-transform"
+    />
+  </button>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      copyShareLink(session.sessionId);
+    }}
+    className="p-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-center"
+    title="Share Session"
+  >
+    <Share2 size={18} />
+  </button>
+</div>
+                      
                     </div>
                   </div>
                 );

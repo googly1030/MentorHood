@@ -6,6 +6,7 @@ import {
   Calendar,
   Plus,
   Loader2,
+  Share2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import img from "../image.webp";
@@ -22,6 +23,7 @@ import OneOneSession from "./one-one-Session";
 import UpcomingSessions from "./upcomingsessions";
 import AskMeAnything from "./AskMeAnything";
 import  WomenInTech  from './WomenInTech';
+import { Toaster, toast } from 'sonner';
 
 interface Session {
   sessionId: string;
@@ -119,6 +121,28 @@ function App() {
   const [groupSessions, setGroupSessions] = useState<Session[]>([]);
 
   // Create separate handling functions for each container
+
+  const copyShareLink = (userId: string) => {
+    // Use window.location.hostname to determine the base URL
+    const baseUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5173'
+      : 'https://mentorhood.guvi.world';
+  
+    const shareUrl = `${baseUrl}/profile/${userId}?tab=services`;
+    
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        toast.success('Link copied to clipboard!', {
+          duration: 2000,
+          className: 'bg-gray-900 text-white',
+        });
+      })
+      .catch(() => {
+        toast.error('Failed to copy link', {
+          duration: 2000,
+        });
+      });
+  };
 
   useEffect(() => {
     let rafId: number;
@@ -309,6 +333,12 @@ function App() {
 
   return (
     <div className="min-h-screen">
+       <Toaster 
+        position="top-center"
+        expand={false}
+        richColors
+        closeButton
+      />
       <img
         src={img}
         alt="Background"
@@ -482,7 +512,7 @@ function App() {
                 </div>
               ))}
               <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-indigo-500 font-bold text-xs sm:text-sm shadow-md">
-                500+
+                10+
               </div>
             </div>
             <div className="text-xs sm:text-sm text-gray-600 font-medium text-center">
@@ -662,13 +692,29 @@ function App() {
 
                       {/* Action Buttons - Changed book session button to black */}
                       <div className="flex gap-3">
-                        <button className="flex-1 bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-black transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
-                          <Calendar className="w-4 h-4" />
-                          Book a Session
-                        </button>
+                      <button 
+                        className="flex-1 bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-black transition-colors duration-200 flex items-center justify-center gap-2 text-sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent the parent onClick from firing
+                          navigate(`/profile/${mentor.userId}?tab=services`);
+                        }}
+                      >
+                        <Calendar className="w-4 h-4" />
+                        Book a Session
+                      </button>
                         <button className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm">
                           <User className="w-4 h-4" />
                           View Profile
+                        </button>
+                        <button
+                      className="p-1 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyShareLink(mentor.userId);
+                          }}
+                          title="Share Profile"
+                        >
+                          <Share2 className="w-4 h-4" />
                         </button>
                       </div>
                     

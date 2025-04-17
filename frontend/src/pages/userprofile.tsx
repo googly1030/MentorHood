@@ -57,6 +57,23 @@ function App() {
   };
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab');
+    
+    if (tabParam === 'services') {
+      setActiveTab(TabType.SERVICES);
+    }
+  }, []);
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab');
+    
+    if (tabParam === 'services') {
+      setActiveTab(TabType.SERVICES);
+    }
+  }, []);
+
+  useEffect(() => {
     const checkUser = () => {
       const userData = localStorage.getItem('user');
       if (userData) {
@@ -630,8 +647,11 @@ function App() {
           {/* Navigation */}
           <div className="flex justify-between items-center mt-8 border-b border-gray-200">
             <div className="flex gap-8">
-              <button 
-                onClick={() => setActiveTab(TabType.OVERVIEW)}
+             <button 
+                onClick={() => {
+                  setActiveTab(TabType.OVERVIEW);
+                  navigate(`/profile/${mentorId}`);
+                }}
                 className={`pb-4 font-medium ${
                   activeTab === TabType.OVERVIEW 
                     ? 'text-teal-600 border-b-2 border-teal-600' 
@@ -641,7 +661,10 @@ function App() {
                 Overview
               </button>
               <button 
-                onClick={() => setActiveTab(TabType.SERVICES)}
+                onClick={() => {
+                  setActiveTab(TabType.SERVICES);
+                  navigate(`/profile/${mentorId}?tab=services`);
+                }}
                 className={`pb-4 font-medium ${
                   activeTab === TabType.SERVICES 
                     ? 'text-teal-600 border-b-2 border-teal-600' 

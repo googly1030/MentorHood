@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
-import { ArrowRight, Clock, Calendar } from "lucide-react";
+import { ArrowRight, Clock, Calendar, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 interface Session {
@@ -57,6 +58,30 @@ interface OneOneSessionProps {
   mentors: Mentor[];
 }
 
+const copyShareLink = (sessionId: string) => {
+  // Use window.location.origin to get the base URL dynamically
+  const baseUrl =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5173"
+      : "https://mentorhood.guvi.world";
+
+  const shareUrl = `${baseUrl}/booking/${sessionId}`;
+
+  navigator.clipboard
+    .writeText(shareUrl)
+    .then(() => {
+      toast.success("Link copied to clipboard!", {
+        duration: 2000,
+        className: "bg-gray-900 text-white",
+      });
+    })
+    .catch(() => {
+      toast.error("Failed to copy link", {
+        duration: 2000,
+      });
+    });
+};
+
 const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
   const navigate = useNavigate();
   const row1Ref = useRef<HTMLDivElement>(null);
@@ -105,7 +130,7 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]"></div>
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-      
+
       {/* Remove these two div elements
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-200/30 rounded-full filter opacity-50"></div>
       <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full filter opacity-40"></div>
@@ -120,14 +145,15 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
               <span>1:1 Personalized Sessions</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent leading-tight">
-              Accelerate Your Growth with<br className="hidden md:block" /> One-on-One Mentorship
+              Accelerate Your Growth with
+              <br className="hidden md:block" /> One-on-One Mentorship
             </h2>
             <p className="text-gray-600 max-w-xl leading-relaxed text-lg">
               Get undivided attention and personalized guidance from industry
               experts tailored to your specific needs and career goals.
             </p>
           </div>
-          
+
           <button
             onClick={() => navigate("/mentors?tab=one-on-one")}
             className="mt-6 md:mt-0 group relative px-6 py-3 bg-gray-900 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 overflow-hidden"
@@ -137,7 +163,10 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
             <div className="relative z-10 flex items-center gap-3">
               <span className="font-medium">View All Sessions</span>
               <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
-                <ArrowRight size={14} className="text-white transform group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
+                <ArrowRight
+                  size={14}
+                  className="text-white transform group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300"
+                />
               </div>
             </div>
             <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-indigo-600 to-indigo-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -147,17 +176,17 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
         {/* Auto-scrolling rows */}
         <div className="space-y-16">
           {/* Row 1 - Left to Right */}
-          <div 
+          <div
             className="relative py-8" // Added vertical padding
-            data-aos="fade-up" 
+            data-aos="fade-up"
             data-aos-delay="300"
             onMouseEnter={() => setIsRow1Hovered(true)}
             onMouseLeave={() => setIsRow1Hovered(false)}
           >
             <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
             <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
-            
-            <div 
+
+            <div
               ref={row1Ref}
               className="flex gap-6 overflow-x-auto overflow-y-visible hide-scrollbar px-5" // Removed pb-4 and added overflow-y-visible
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -169,17 +198,17 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
           </div>
 
           {/* Row 2 - Right to Left */}
-          <div 
+          <div
             className="relative py-8" // Added vertical padding
-            data-aos="fade-up" 
+            data-aos="fade-up"
             data-aos-delay="400"
             onMouseEnter={() => setIsRow2Hovered(true)}
             onMouseLeave={() => setIsRow2Hovered(false)}
           >
             <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
             <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
-            
-            <div 
+
+            <div
               ref={row2Ref}
               className="flex gap-6 overflow-x-auto overflow-y-visible hide-scrollbar px-5" // Removed pb-4 and added overflow-y-visible
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -192,9 +221,14 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 text-center" data-aos="fade-up" data-aos-delay="500">
+        <div
+          className="mt-16 text-center"
+          data-aos="fade-up"
+          data-aos-delay="500"
+        >
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-            Looking for a specific expertise? Explore our curated list of expert mentors.
+            Looking for a specific expertise? Explore our curated list of expert
+            mentors.
           </p>
           <button
             onClick={() => navigate("/mentors")}
@@ -213,9 +247,9 @@ const OneOneSession = ({ oneOnOneSessions, mentors }: OneOneSessionProps) => {
 
 // Helper function to generate card rows
 function generateCardRows(
-  sessions: Session[], 
-  mentors: Mentor[], 
-  navigate: ReturnType<typeof useNavigate>, 
+  sessions: Session[],
+  mentors: Mentor[],
+  navigate: ReturnType<typeof useNavigate>,
   reverse: boolean
 ) {
   return sessions.map((session) => {
@@ -224,7 +258,7 @@ function generateCardRows(
 
     return (
       <div
-        key={`${session.sessionId}-${reverse ? 'reverse' : 'normal'}`}
+        key={`${session.sessionId}-${reverse ? "reverse" : "normal"}`}
         className={`
           flex-none w-[300px] select-none bg-white rounded-xl 
           shadow-lg hover:shadow-2xl transition-all duration-500 
@@ -234,18 +268,16 @@ function generateCardRows(
           scale-100 hover:scale-105
           z-0 hover:z-50
           my-4 
-          ${reverse ? '' : ''}
+          ${reverse ? "" : ""}
         `}
       >
-      
-        
         {/* Popular tag - for some sessions */}
         {session.isPaid && (
           <div className="absolute top-3 right-3 px-2 py-1 bg-gray-900/90 text-gray-100 text-xs font-medium rounded-md z-10 shadow-md">
             Popular
           </div>
         )}
-        
+
         {/* Card content */}
         <div className="p-6">
           {/* Mentor info */}
@@ -263,7 +295,7 @@ function generateCardRows(
               </div>
               <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
-            
+
             <div>
               <h3 className="font-bold text-gray-900 group-hover:text-gray-800 transition-colors text-lg">
                 {mentor.name}
@@ -274,13 +306,13 @@ function generateCardRows(
               {/* Removed the ratings/reviews section */}
             </div>
           </div>
-          
+
           {/* Session details */}
           <div className="mb-5">
             <h4 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-indigo-700 transition-colors line-clamp-1">
               {session.sessionName}
             </h4>
-            
+
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Clock size={14} className="text-gray-500" />
@@ -324,20 +356,32 @@ function generateCardRows(
                 <p className="text-xs text-gray-500">One-time payment</p>
               )}
             </div>
-            
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/booking/${session.sessionId}`);
-              }}
-              className="relative overflow-hidden px-4 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-800 group-hover:bg-indigo-600 transition-colors flex items-center gap-2 shadow-md"
-            >
-              <Calendar size={14} className="text-white/80" />
-              <span>Book Now</span>
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/booking/${session.sessionId}`);
+                }}
+                className="relative overflow-hidden px-4 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-800 group-hover:bg-indigo-600 transition-colors flex items-center gap-2 shadow-md"
+              >
+                <Calendar size={14} className="text-white/80" />
+                <span>Book Now</span>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyShareLink(session.sessionId);
+                }}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                title="Share Session"
+              >
+                <Share2 size={16} />
+              </button>
+            </div>
           </div>
         </div>
-        
+
         {/* Hover overlay with gradient effect */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-indigo-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
       </div>
