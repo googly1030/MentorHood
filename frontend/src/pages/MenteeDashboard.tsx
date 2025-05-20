@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, BookOpen, ArrowUpRight, Trophy, ChevronRight, User , BarChart2, Award, Plus } from 'lucide-react';
+import { Calendar, Clock, BookOpen, ArrowUpRight, Trophy, ChevronRight, User, BarChart2, Award, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/api';
+import TokenDisplay from '../components/TokenDisplay';
 
 // Define types for our data
 interface User {
@@ -106,6 +107,11 @@ function MenteeDashboard() {
     }
   };
 
+  // Add this handler to navigate to token history
+  const navigateToTokenHistory = () => {
+    navigate('/tokens/history');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -178,7 +184,7 @@ function MenteeDashboard() {
             </ol>
           </nav>
         </div>
-        
+      
         {/* Header Section */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-sm border border-gray-100 relative overflow-hidden">
           {/* Decorative elements */}
@@ -194,9 +200,17 @@ function MenteeDashboard() {
                   </div>
                   <h1 className="text-3xl font-bold text-gray-800">Welcome back, {user.name}!</h1>
                 </div>
-                <p className="text-gray-600 md:ml-14">
-                  Track your mentorship journey and manage your upcoming sessions
-                </p>
+                <div className="flex flex-col md:flex-row md:items-center md:ml-14 gap-2 md:gap-4">
+                  <p className="text-gray-600">
+                    Track your mentorship journey and manage your upcoming sessions
+                  </p>
+                  <TokenDisplay 
+                    className="px-3 py-2 bg-amber-50 rounded-full border border-amber-100" 
+                    onClick={() => navigate('/tokens/history')}
+                    showWarning={true}  
+                    warningThreshold={100}  
+                  />
+                </div>
               </div>
               <button 
                 onClick={() => navigate('/mentors')}

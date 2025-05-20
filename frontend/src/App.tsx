@@ -17,10 +17,11 @@ import MentorDashboard from './pages/MentorDashboard';
 import CreateSession from './pages/CreateSession';
 import MenteeDashboard from './pages/MenteeDashboard';
 import EditSession from './pages/EditSession';
-import EditProfile from './pages/editprofile';
 import EditMentorProfile from './pages/EditMentorProfile';
 import AMASessionform from './pages/AMASessionform';
 import CreateAMASession from './pages/AMASessionform';
+import TokenHistory from './pages/TokenHistory';
+
 
 function App() {
   return (
@@ -103,6 +104,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/create-ama-session" element={<CreateAMASession />} />
+            <Route path="/tokens/history" element={<TokenHistory />} />
           </Routes>
         </main>
         <Footer />
