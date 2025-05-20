@@ -332,8 +332,8 @@ const BookingDetails: React.FC = () => {
       // Add explicit token deduction request
       if (session.tokens && session.tokens > 0) {
         try {
-          // Make a dedicated request to deduct tokens
-          const deductResponse = await fetch(`${API_URL}/tokens/deduct`, {
+          // Make a dedicated request to spend tokens with user_id as query parameter
+          const spendResponse = await fetch(`${API_URL}/tokens/spend?user_id=${userData.userId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -341,19 +341,19 @@ const BookingDetails: React.FC = () => {
             },
             credentials: 'include',
             body: JSON.stringify({
-              user_id: userData.userId,
               amount: session.tokens,
-              reason: `Booking session: ${session.sessionName}`
+              description: `Booking session: ${session.sessionName}`,
+              usage_type: "mentoring_sessions"
             })
           });
           
-          if (!deductResponse.ok) {
-            const errorData = await deductResponse.json();
-            throw new Error(errorData.detail || 'Failed to deduct tokens');
+          if (!spendResponse.ok) {
+            const errorData = await spendResponse.json();
+            throw new Error(errorData.detail || 'Failed to spend tokens');
           }
         } catch (error) {
-          console.error('Error deducting tokens:', error);
-          toast.error('Failed to deduct tokens. Please try again.');
+          console.error('Error spending tokens:', error);
+          toast.error('Failed to spend tokens. Please try again.');
           setBookingState({ ...bookingState, isLoading: false });
           return;
         }
