@@ -36,13 +36,13 @@ const DAYS = [
   'THURSDAYS', 'FRIDAYS', 'SATURDAYS'
 ];
 
-const TOKEN_CONVERSION_RATE = 10; 
+export const TOKEN_CONVERSION_RATE = 1;
 
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-const calculateTokens = (price: string): number => {
+export const calculateTokens = (price: string): number => {
   const numericPrice = parseFloat(price) || 0;
   return Math.round(numericPrice * TOKEN_CONVERSION_RATE);
 };
