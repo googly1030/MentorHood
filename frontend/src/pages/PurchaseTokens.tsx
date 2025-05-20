@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import TokenPackageCard from '../components/TokenPackageCard';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import { ChevronLeft, ShoppingCart, Zap, AlertTriangle } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
@@ -14,7 +13,6 @@ export type TokenPackage = {
   tokens: number;
   price: number;
   popular?: boolean;
-  savings?: number;
   description: string;
 };
 
@@ -58,38 +56,28 @@ const TokenPurchase: React.FC = () => {
   // Get user data for role check
   const userData = getUserData();
   
-  // Sample token packages
+  // Updated token packages (removing savings percentage)
   const tokenPackages: TokenPackage[] = [
     {
       id: 'basic',
       name: 'Starter',
-      tokens: 20,
-      price: 99,
+      tokens: 400,
+      price: 299,
       description: 'Perfect for exploring mentorship with occasional sessions.',
-    },
-    {
-      id: 'standard',
-      name: 'Growth',
-      tokens: 50,
-      price: 199,
-      popular: true,
-      savings: 15,
-      description: 'Our most popular option for regular mentorship sessions.',
     },
     {
       id: 'premium',
       name: 'Pro',
-      tokens: 120,
-      price: 399,
-      savings: 25,
+      tokens: 800,
+      price: 699,
+      popular: true, 
       description: 'Best value for dedicated learning and frequent guidance.',
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
-      tokens: 300,
-      price: 899,
-      savings: 35,
+      tokens: 1100,
+      price: 999,
       description: 'Complete solution for teams and intensive mentorship needs.',
     }
   ];
@@ -104,7 +92,6 @@ const TokenPurchase: React.FC = () => {
       }
       
       try {
-        // Using the correct API endpoint - change from /tokens/user/${userData.userId} to /tokens/balance
         const response = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`, {
           method: 'GET',
           headers: {
@@ -129,7 +116,7 @@ const TokenPurchase: React.FC = () => {
     };
     
     fetchTokenData();
-  }, [userData?.userId]); // Only depend on userId, not entire userData object
+  }, [userData?.userId]);
 
   const handlePackageSelect = (pkg: TokenPackage) => {
     setSelectedPackage(pkg);
@@ -142,7 +129,6 @@ const TokenPurchase: React.FC = () => {
       const loadingToast = toast.loading('Processing your purchase...');
       
       try {
-        // Pass user_id as a query parameter, not in the body
         const response = await fetch(`${API_URL}/tokens/add?user_id=${userData.userId}`, {
           method: 'POST',
           headers: {
@@ -240,23 +226,27 @@ const TokenPurchase: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Toaster position="top-center" expand={true} richColors closeButton />
       
+      {/* Improved header with integrated back button */}
       <div className="bg-indigo-600 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center">
-            <Link to="/mentee-dashboard" className="text-indigo-100 hover:text-white flex items-center mr-4">
-              <ChevronLeft className="h-5 w-5" />
-              <span>Back to Dashboard</span>
-            </Link>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button onClick={() => navigate('/mentee-dashboard')} className="text-indigo-100 hover:text-white flex items-center">
+                <ChevronLeft className="h-5 w-5" />
+                <span>Back to Dashboard</span>
+              </button>
+            </div>
             <h1 className="text-2xl font-bold text-white">Purchase Tokens</h1>
+            <div className="w-32"></div> {/* Spacer for centering */}
           </div>
-          <p className="mt-2 text-indigo-100 max-w-2xl">
+          <p className="mt-2 text-indigo-100 max-w-2xl mx-auto text-center">
             Buy tokens to book mentoring sessions with top industry experts. The more tokens you buy, the more you save.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress indicator - improved UI */}
+        {/* Progress indicator */}
         {currentStep < 3 && (
           <div className="mb-10">
             {/* Step circles and connecting lines */}
@@ -272,7 +262,7 @@ const TokenPurchase: React.FC = () => {
                 }}
               ></div>
               
-              {/* Step circles - positioned absolutely for better alignment */}
+              {/* Step circles */}
               <div className="relative flex justify-between">
                 {/* Step 1 */}
                 <div className="flex flex-col items-center">
@@ -339,11 +329,9 @@ const TokenPurchase: React.FC = () => {
                     {tokenData.balance} 
                     <span className="text-sm ml-1 font-normal">tokens</span>
                   </p>
-                  {tokenData.expiry_date && (
-                    <p className="text-xs text-indigo-600 mt-2">
-                      Expires: {new Date(tokenData.expiry_date).toLocaleDateString()}
-                    </p>
-                  )}
+                  <p className="text-xs text-indigo-600 mt-2">
+                    Lifetime access
+                  </p>
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-4">
@@ -374,11 +362,7 @@ const TokenPurchase: React.FC = () => {
                 </div>
               </div>
               
-
-              
               <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-end">
-  
-                
                 <button 
                   onClick={() => navigate('/tokens/history')}
                   className="text-indigo-600 text-sm font-medium hover:text-indigo-800 flex items-center"
@@ -399,39 +383,136 @@ const TokenPurchase: React.FC = () => {
               <p className="text-gray-600 max-w-2xl mx-auto">Select the token package that best fits your mentorship needs. More tokens mean more 1-on-1 time with experts.</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Updated grid to 3 columns for large screens */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {tokenPackages.map((pkg) => (
-                <TokenPackageCard 
+                <div 
                   key={pkg.id}
-                  package={pkg}
-                  onSelect={() => handlePackageSelect(pkg)}
-                />
+                  className={`relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-lg ${pkg.popular ? 'ring-2 ring-blue-500' : 'border border-blue-100'}`}
+                >
+                  
+                  {pkg.popular && (
+                    <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-3 py-1 tracking-wide">
+                      BEST VALUE
+                    </div>
+                  )}
+                  
+                  <div className="bg-white h-full flex flex-col">
+                    {/* Card header */}
+                    <div className={`p-5 ${pkg.popular ? 'bg-blue-50' : 'bg-blue-25'}`}>
+                      <h3 className="text-xl font-bold text-blue-900">{pkg.name}</h3>
+                      <div className="flex items-baseline mt-2">
+                        <span className="text-3xl font-bold text-blue-700">₹{pkg.price}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Token count highlight */}
+                    <div className="py-5 bg-white border-y border-blue-100">
+                      <div className="flex items-center px-5">
+                        <div className="flex-shrink-0">
+                          <div className="h-14 w-14 rounded-full bg-blue-50 flex items-center justify-center">
+                            <span className="text-xl font-bold text-blue-600">{pkg.tokens}</span>
+                          </div>
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <div className="flex justify-between items-baseline">
+                            <div>
+                              <span className="text-lg font-medium text-gray-900">tokens</span>
+                              <p className="text-sm text-blue-700 mt-1">
+                                Value: <span className="font-semibold">₹{(pkg.price / pkg.tokens).toFixed(2)}</span>/token
+                              </p>
+                            </div>
+                            <div className="text-sm text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                              {pkg.tokens >= 1000 ? 'High Value' : pkg.tokens >= 700 ? 'Good Value' : 'Standard'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Card content */}
+                    <div className="p-5 flex-grow flex flex-col">
+                      <p className="text-blue-800 text-sm mb-4">{pkg.description}</p>
+                      
+                      {/* Benefits list */}
+                      <ul className="space-y-2 flex-grow">
+                        <li className="flex items-start">
+                          <div className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span className="ml-2 text-sm text-blue-800">
+                            {pkg.id === 'basic' && 'Access to emerging mentors'}
+                            {pkg.id === 'standard' && 'Access to all mentor levels'}
+                            {pkg.id === 'premium' && 'Priority booking with mentors'}
+                            {pkg.id === 'enterprise' && 'VIP access to all mentors'}
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <div className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span className="ml-2 text-sm text-blue-800">
+                            {pkg.id === 'basic' && '3-5 mentoring sessions'}
+                            {pkg.id === 'standard' && '5-10 mentoring sessions'}
+                            {pkg.id === 'premium' && '10-15 mentoring sessions'}
+                            {pkg.id === 'enterprise' && '15+ mentoring sessions'}
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <div className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <span className="ml-2 text-sm text-blue-800">Lifetime access to tokens</span>
+                        </li>
+                      </ul>
+                      
+                      {/* Action button */}
+                      <button
+                        onClick={() => handlePackageSelect(pkg)}
+                        className={`w-full py-3 px-4 rounded-lg text-white font-medium mt-4 transition-all duration-200 ${
+                          pkg.popular 
+                            ? 'bg-blue-600 hover:bg-blue-700 shadow-md' 
+                            : 'bg-blue-500 hover:bg-blue-600'
+                        }`}
+                      >
+                        Select Package
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
 
-            <div className="mt-10 bg-indigo-50 border border-indigo-100 rounded-lg p-6">
+            {/* Updated Token Value Calculator section */}
+            <div className="mt-10 bg-blue-50 border border-blue-100 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-indigo-900 mb-3 flex items-center">
                 <Zap className="h-5 w-5 mr-2 text-indigo-500" />
-                Token Value Calculator
+                Mentor Experience Level Token Guide
               </h3>
               <p className="text-indigo-700 mb-4">
-                Maximize your mentoring sessions with the right token package:
+                Average token costs vary based on mentor experience level:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                  <h4 className="font-medium text-indigo-900 mb-2">30-minute Session</h4>
-                  <p className="text-indigo-800 text-2xl font-bold mb-1">10 tokens</p>
-                  <p className="text-gray-500 text-sm">Perfect for quick questions and focused advice</p>
+                  <h4 className="font-medium text-indigo-900 mb-2">Emerging Mentors</h4>
+                  <p className="text-indigo-800 text-2xl font-bold mb-1">300-500 tokens</p>
+                  <p className="text-gray-500 text-sm">Mentors with 2-5 years of experience</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                  <h4 className="font-medium text-indigo-900 mb-2">60-minute Session</h4>
-                  <p className="text-indigo-800 text-2xl font-bold mb-1">18 tokens</p>
-                  <p className="text-gray-500 text-sm">Ideal for deeper discussions and problem-solving</p>
+                  <h4 className="font-medium text-indigo-900 mb-2">Experienced Professionals</h4>
+                  <p className="text-indigo-800 text-2xl font-bold mb-1">700 - 900 tokens</p>
+                  <p className="text-gray-500 text-sm">Mentors with 5-10 years of experience</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                  <h4 className="font-medium text-indigo-900 mb-2">90-minute Session</h4>
-                  <p className="text-indigo-800 text-2xl font-bold mb-1">25 tokens</p>
-                  <p className="text-gray-500 text-sm">Best for comprehensive mentoring and projects</p>
+                  <h4 className="font-medium text-indigo-900 mb-2">Industry Leaders</h4>
+                  <p className="text-indigo-800 text-2xl font-bold mb-1">1000 - 1300 tokens</p>
+                  <p className="text-gray-500 text-sm">Senior mentors with 10+ years of experience</p>
                 </div>
               </div>
             </div>
@@ -466,13 +547,6 @@ const TokenPurchase: React.FC = () => {
                     <span className="text-gray-600">Tokens</span>
                     <span className="text-gray-900 font-medium">{selectedPackage.tokens}</span>
                   </div>
-                  
-                  {selectedPackage.savings && (
-                    <div className="flex justify-between mb-2 pb-2 border-b border-gray-100">
-                      <span className="text-green-600">Savings</span>
-                      <span className="text-green-600 font-medium">{selectedPackage.savings}%</span>
-                    </div>
-                  )}
                   
                   <div className="flex justify-between mt-4 mb-6">
                     <span className="text-gray-900 font-bold">Total</span>
@@ -516,11 +590,12 @@ const TokenPurchase: React.FC = () => {
                 Your tokens have been added to your account. You can now use them to book mentoring sessions.
               </p>
               
+
               <div className="bg-indigo-50 rounded-lg p-6 mb-8">
                 <h3 className="text-lg font-medium text-indigo-900 mb-4">Updated Token Balance</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700">Available Tokens:</span>
-                  <span className="text-2xl font-bold text-indigo-700">{tokenData.remaining_tokens}</span>
+                  <span className="text-2xl font-bold text-indigo-700">{tokenData.balance || 0}</span>
                 </div>
               </div>
               

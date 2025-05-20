@@ -924,7 +924,6 @@ export function ReviewForm({ formData, timeSlots, onBack, onSubmit, finalText }:
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 col-span-2">
                   <p className="text-sm font-medium text-gray-600 mb-1">Pricing</p>
                   <p className="text-base text-gray-800 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-gray-500" />
                     {formData.isPaid ? (
                       <>
                         Rs {formData.price} <span className="text-indigo-600 text-sm">({formData.tokens} tokens)</span>

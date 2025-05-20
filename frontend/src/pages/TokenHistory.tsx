@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/api';
 import { getUserData } from '../utils/auth';
-import { Coins, ArrowDownCircle, ArrowUpCircle, Calendar, ChevronLeft } from 'lucide-react';
+import { Coins, ArrowDownCircle, ArrowUpCircle, Calendar, ChevronLeft, Filter, ArrowUpDown } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 
 interface Transaction {
@@ -28,16 +28,25 @@ interface TokenData {
   subscription_status: string;
 }
 
+// Group transactions by date
+type GroupedTransactions = {
+  [date: string]: Transaction[];
+};
+
 const TokenHistory = () => {
   const navigate = useNavigate();
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [transactionsToShow, setTransactionsToShow] = useState<Transaction[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState<'all' | 'credit' | 'debit'>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const itemsPerPage = 6;
+  
   const userData = getUserData();
-  // Use a ref to track if we've already fetched the data
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Prevent multiple fetches
     if (hasFetched.current) return;
     
     const fetchTokenHistory = async () => {
@@ -47,7 +56,7 @@ const TokenHistory = () => {
       }
 
       try {
-        hasFetched.current = true; // Mark as fetched before the request
+        hasFetched.current = true;
         const response = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`);
         
         if (!response.ok) {
@@ -65,44 +74,81 @@ const TokenHistory = () => {
     };
 
     fetchTokenHistory();
-  }, [userData?.userId, navigate]); // Add specific dependency instead of entire userData object
+  }, [userData?.userId, navigate]);
+
+  // Effect to handle filtering and pagination
+  useEffect(() => {
+    if (!tokenData?.transactions) return;
+    
+    // Apply filters
+    let filtered = [...tokenData.transactions];
+    
+    if (filter !== 'all') {
+      filtered = filtered.filter(t => t.type === filter);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.timestamp).getTime();
+      const dateB = new Date(b.timestamp).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
+    setTransactionsToShow(filtered);
+  }, [tokenData, filter, sortOrder]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric', 
       month: 'short', 
-      day: 'numeric',
+      day: 'numeric'
+    });
+  };
+  
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
-  const calculateTimeRemaining = (expiryDateString: string) => {
-    const now = new Date();
-    const expiryDate = new Date(expiryDateString);
-    const diffTime = expiryDate.getTime() - now.getTime();
-    
-    if (diffTime <= 0) return 'Expired';
-    
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays > 30) {
-      const diffMonths = Math.floor(diffDays / 30);
-      return `${diffMonths} month${diffMonths > 1 ? 's' : ''} left`;
-    }
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} left`;
+  const groupTransactionsByDate = (transactions: Transaction[]): GroupedTransactions => {
+    return transactions.reduce((groups, transaction) => {
+      const date = formatDate(transaction.timestamp);
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(transaction);
+      return groups;
+    }, {} as GroupedTransactions);
   };
+
+  // Get paginated data
+  const getCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return transactionsToShow.slice(startIndex, endIndex);
+  };
+
+  // Total pages for pagination
+  const totalPages = transactionsToShow.length > 0 
+    ? Math.ceil(transactionsToShow.length / itemsPerPage) 
+    : 1;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8 flex justify-center items-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-t-2 border-b-2 border-amber-500 animate-spin mx-auto"></div>
+          <div className="w-12 h-12 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin mx-auto"></div>
           <p className="text-gray-600 mt-4">Loading token history...</p>
         </div>
       </div>
     );
   }
+
+  const groupedTransactions = groupTransactionsByDate(getCurrentPageData());
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -117,34 +163,25 @@ const TokenHistory = () => {
         </button>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 bg-gradient-to-r from-amber-50 to-amber-100 border-b border-gray-200">
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-amber-100 rounded-xl">
-                <Coins size={24} className="text-amber-600" />
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Coins size={24} className="text-blue-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-800">Your Token Balance</h1>
             </div>
             <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4">
               <span className="text-4xl font-bold text-gray-900">
-                {tokenData?.balance || 0}
+                {tokenData?.balance || 0} tokens
               </span>
-              <div className="flex flex-col">
-                <span className="text-gray-600">of {tokenData?.purchased || 0} purchased tokens</span>
-                {tokenData?.expiry_date && (
-                  <span className="text-sm text-gray-500">
-                    {calculateTimeRemaining(tokenData.expiry_date)} | Expires {formatDate(tokenData.expiry_date)}
-                  </span>
-                )}
-              </div>
             </div>
-
             {/* Usage summary */}
             {tokenData?.usage && (
-              <div className="mt-6 pt-4 border-t border-amber-200/50">
+              <div className="mt-6 pt-4 border-t border-blue-200/50">
                 <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Token Usage</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(tokenData.usage).map(([key, value]) => (
-                    <div key={key} className="bg-white rounded-xl p-4 border border-amber-100">
+                    <div key={key} className="bg-white rounded-xl p-4 border border-blue-100">
                       <h3 className="text-sm font-medium text-gray-700 capitalize mb-1">{key.replace('_', ' ')}</h3>
                       <div className="flex items-end gap-2">
                         <span className="text-xl font-bold">{value.remaining}</span>
@@ -152,7 +189,7 @@ const TokenHistory = () => {
                       </div>
                       <div className="w-full h-2 bg-gray-100 rounded-full mt-2 overflow-hidden">
                         <div 
-                          className="h-full bg-amber-500 rounded-full" 
+                          className="h-full bg-blue-500 rounded-full" 
                           style={{width: `${(value.used / value.total * 100) || 0}%`}}
                         />
                       </div>
@@ -164,45 +201,103 @@ const TokenHistory = () => {
           </div>
 
           <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Transaction History</h2>
-            
-            {tokenData?.transactions && tokenData.transactions.length > 0 ? (
-              <div className="space-y-4">
-                {tokenData.transactions.map((transaction, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Transaction History</h2>
+              
+              <div className="flex gap-2">
+                <div className="relative">
+                  <select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value as 'all' | 'credit' | 'debit')}
+                    className="appearance-none bg-white border border-gray-200 rounded-lg py-2 px-3 pl-9 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <div className="flex items-center gap-3">
-                      {transaction.type === 'credit' ? (
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <ArrowDownCircle size={20} className="text-green-600" />
-                        </div>
-                      ) : (
-                        <div className="p-2 bg-red-100 rounded-lg">
-                          <ArrowUpCircle size={20} className="text-red-600" />
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-gray-800">{transaction.description}</p>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar size={12} />
-                            <span>{formatDate(transaction.timestamp)}</span>
-                          </div>
-                          {transaction.usage_type && (
-                            <div className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
-                              {transaction.usage_type}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    <option value="all">All transactions</option>
+                    <option value="credit">Credits only</option>
+                    <option value="debit">Debits only</option>
+                  </select>
+                  <Filter size={16} className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                </div>
+                
+                <button 
+                  onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                  className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg py-2 px-3 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <ArrowUpDown size={16} className="text-gray-400" />
+                  {sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}
+                </button>
+              </div>
+            </div>
+            
+            {transactionsToShow.length > 0 ? (
+              <div>
+                {/* Transactions grouped by date */}
+                {Object.entries(groupedTransactions).map(([date, transactions]) => (
+                  <div key={date} className="mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="h-px flex-grow bg-gray-100"></div>
+                      <h3 className="text-sm font-medium text-gray-500">{date}</h3>
+                      <div className="h-px flex-grow bg-gray-100"></div>
                     </div>
-                    <div className={`font-bold ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.type === 'credit' ? '+' : '-'}{transaction.amount}
+                    
+                    <div className="space-y-2">
+                      {transactions.map((transaction, idx) => (
+                        <div 
+                          key={idx}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 ${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'} rounded-lg`}>
+                              {transaction.type === 'credit' ? (
+                                <ArrowDownCircle size={18} className="text-green-600" />
+                              ) : (
+                                <ArrowUpCircle size={18} className="text-red-600" />
+                              )}
+                            </div>
+                            <div className="flex-grow min-w-0">
+                              <p className="font-medium text-gray-800 text-sm truncate">{transaction.description}</p>
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  <span>{formatTime(transaction.timestamp)}</span>
+                                </div>
+                                {transaction.usage_type && (
+                                  <div className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                                    {transaction.usage_type}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className={`font-bold text-sm ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.type === 'credit' ? '+' : '-'}{transaction.amount}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6 flex items-center justify-center gap-2">
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 rounded border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1 rounded border border-gray-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-8">
