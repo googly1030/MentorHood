@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["sessions"]
 )
 
-TOKEN_CONVERSION_RATE = 10
+TOKEN_CONVERSION_RATE = 1
 
 @router.post("/create")
 async def create_session(session: SessionCreate):
