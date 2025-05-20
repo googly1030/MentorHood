@@ -10,11 +10,25 @@ router = APIRouter(
     tags=["sessions"]
 )
 
+TOKEN_CONVERSION_RATE = 10
+
 @router.post("/create")
 async def create_session(session: SessionCreate):
     collection = get_collection("sessions")
     
     session_dict = session.model_dump()
+    
+    # Ensure tokens are calculated correctly based on price
+    if session_dict.get("isPaid", False):
+        try:
+            price = float(session_dict.get("price", "0"))
+            tokens = round(price * TOKEN_CONVERSION_RATE)
+            session_dict["tokens"] = tokens
+        except (ValueError, TypeError):
+            session_dict["tokens"] = 0
+    else:
+        session_dict["tokens"] = 0
+    
     session_dict.update({
         "sessionId": str(uuid.uuid4()),
         "created_at": datetime.now(UTC),
@@ -39,6 +53,18 @@ async def update_session(session_id: str, session: SessionCreate):
         raise HTTPException(status_code=404, detail="Session not found")
     
     session_dict = session.model_dump()
+    
+    # Ensure tokens are calculated correctly based on price
+    if session_dict.get("isPaid", False):
+        try:
+            price = float(session_dict.get("price", "0"))
+            tokens = round(price * TOKEN_CONVERSION_RATE)
+            session_dict["tokens"] = tokens
+        except (ValueError, TypeError):
+            session_dict["tokens"] = 0
+    else:
+        session_dict["tokens"] = 0
+    
     session_dict.update({
         "updated_at": datetime.now(UTC),
         "sessionId": session_id

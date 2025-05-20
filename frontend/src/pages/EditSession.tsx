@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, CheckCircle, Calendar, Settings, MessageSquare, Sparkles, AlertTriangle } from 'lucide-react';
-import { SessionForm, AvailabilityForm, ReviewForm } from './CreateSession';
+import { SessionForm, AvailabilityForm, ReviewForm, calculateTokens } from './CreateSession';
 import { getUserData } from '../utils/auth';
 import { toast } from 'sonner';
 import { API_URL } from '../utils/api';
@@ -17,6 +17,7 @@ interface FormData {
   showOnProfile: boolean;
   isPaid: boolean;
   price: string;
+  tokens: number;
 }
 
 interface TimeRange {
@@ -42,7 +43,6 @@ function EditSession() {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   
-  // Initialize step from URL parameter, default to 1 if not provided
   const [step, setStep] = useState(parseInt(searchParams.get('step') || '1'));
   const [formData, setFormData] = useState<FormData>({
     sessionName: '',
@@ -54,7 +54,8 @@ function EditSession() {
     allowMenteeTopics: false,
     showOnProfile: true,
     isPaid: false,
-    price: '0'
+    price: '0',
+    tokens: 0 
   });
 
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(
@@ -76,6 +77,11 @@ function EditSession() {
         const data = await response.json();
         if (data.status === 'success') {
           const session = data.session;
+          
+          // Calculate tokens or use existing ones
+          const price = session.price?.toString() || '0';
+          const tokens = session.tokens || calculateTokens(price);
+          
           setFormData({
             sessionName: session.sessionName,
             description: session.description || '',
@@ -86,7 +92,8 @@ function EditSession() {
             allowMenteeTopics: session.allowMenteeTopics || false,
             showOnProfile: session.showOnProfile || true,
             isPaid: session.isPaid || false,
-            price: session.price?.toString() || '0'
+            price: price,
+            tokens: tokens // Set tokens from API or calculate them
           });
           setTimeSlots(session.timeSlots || DAYS.map(day => ({
             day,
@@ -117,8 +124,14 @@ function EditSession() {
         return;
       }
 
-      const sessionData = {
+      // Ensure tokens are properly calculated before submission
+      const finalFormData = {
         ...formData,
+        tokens: formData.isPaid ? calculateTokens(formData.price) : 0
+      };
+
+      const sessionData = {
+        ...finalFormData,
         userId: userData.userId,
         timeSlots: timeSlots
       };
