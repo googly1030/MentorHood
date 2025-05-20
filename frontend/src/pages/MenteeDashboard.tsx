@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, BookOpen, ArrowUpRight, Trophy, ChevronRight, User, BarChart2, Award, Plus } from 'lucide-react';
+import { Calendar, Clock, BookOpen, ArrowUpRight, Trophy, ChevronRight, User, BarChart2, Award, Plus, Coins } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/api';
 import TokenDisplay from '../components/TokenDisplay';
@@ -200,26 +200,59 @@ function MenteeDashboard() {
                   </div>
                   <h1 className="text-3xl font-bold text-gray-800">Welcome back, {user.name}!</h1>
                 </div>
-                <div className="flex flex-col md:flex-row md:items-center md:ml-14 gap-2 md:gap-4">
-                  <p className="text-gray-600">
-                    Track your mentorship journey and manage your upcoming sessions
-                  </p>
+                <p className="md:ml-14 text-gray-600 mb-2">
+                  Track your mentorship journey and manage your upcoming sessions
+                </p>
+              </div>
+                          {/* Action buttons moved to their own section */}
+            <div className="flex justify-end mb-6">
+              <button 
+                onClick={() => navigate('/mentors')}
+                className="bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 transform hover:-translate-y-1 group"
+              >
+                <User size={18} className="text-white/80" />
+                Find New Mentors
+                <ArrowUpRight size={18} className="transform group-hover:translate-x-1 group-hover:translate-y--1 transition-transform" />
+              </button>
+            </div>
+            </div>
+
+            {/* Token summary and actions - moved to a separate section for better visibility */}
+            <div className="flex flex-col md:flex-row items-center gap-6 p-5 bg-gradient-to-r from-amber-50 to-amber-100/30 rounded-xl border border-amber-100 mb-8">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <div className="p-3 bg-amber-100 rounded-full">
+                  <Coins size={24} className="text-amber-600" />
+                </div>
+                <div>
                   <TokenDisplay 
-                    className="px-3 py-2 bg-amber-50 rounded-full border border-amber-100" 
-                    onClick={() => navigate('/tokens/history')}
+                    className="text-lg font-semibold" 
                     showWarning={true}  
                     warningThreshold={100}  
                   />
+                  <p className="text-sm text-gray-600">Use tokens to book mentoring sessions</p>
                 </div>
               </div>
-              <button 
-                onClick={() => navigate('/mentors')}
-                className="mt-4 md:mt-0 bg-gradient-to-r from-[#4937e8] to-[#4338ca] text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 transform hover:-translate-y-1 group"
-              >
-                Find New Mentors
-                <ArrowUpRight size={20} className="transform group-hover:translate-x-1 group-hover:translate-y--1 transition-transform" />
-              </button>
+              
+              <div className="flex gap-3 md:ml-auto">
+                <button 
+                  onClick={() => navigate('/tokens/history')}
+                  className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors flex items-center gap-2"
+                >
+                  <BarChart2 size={16} className="text-gray-500" />
+                  Token History
+                </button>
+
+                <button 
+                  onClick={() => navigate('/purchase-tokens')}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-sm hover:shadow-md transition-all flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Buy Tokens
+                </button>
+              </div>
             </div>
+
+
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">

@@ -185,7 +185,7 @@ async def spend_tokens(user_id: str, amount: int = Body(...), description: str =
 
 @router.post("/add")
 async def add_tokens(
-    user_id: str, 
+    user_id: str = Query(..., description="User ID to add tokens to"),  # Changed from Body to Query
     amount: int = Body(...), 
     description: str = Body(...),
     plan_id: str = Body("standard"),

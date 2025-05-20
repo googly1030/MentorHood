@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/api';
 import { getUserData } from '../utils/auth';
@@ -33,8 +33,13 @@ const TokenHistory = () => {
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [loading, setLoading] = useState(true);
   const userData = getUserData();
+  // Use a ref to track if we've already fetched the data
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple fetches
+    if (hasFetched.current) return;
+    
     const fetchTokenHistory = async () => {
       if (!userData || !userData.userId) {
         navigate('/login');
@@ -42,6 +47,7 @@ const TokenHistory = () => {
       }
 
       try {
+        hasFetched.current = true; // Mark as fetched before the request
         const response = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`);
         
         if (!response.ok) {
@@ -59,7 +65,7 @@ const TokenHistory = () => {
     };
 
     fetchTokenHistory();
-  }, [userData, navigate]);
+  }, [userData?.userId, navigate]); // Add specific dependency instead of entire userData object
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
