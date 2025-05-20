@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/api';
 import { getUserData } from '../utils/auth';
-import { Coins, ArrowDownCircle, ArrowUpCircle, Calendar, ChevronLeft, Filter, ArrowUpDown } from 'lucide-react';
+import { Coins, ArrowDownCircle, ArrowUpCircle, ChevronLeft, Filter, ArrowUpDown } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 
 interface Transaction {
@@ -41,7 +41,7 @@ const TokenHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<'all' | 'credit' | 'debit'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const itemsPerPage = 6;
+  const itemsPerPage =8;
   
   const userData = getUserData();
   const hasFetched = useRef(false);
@@ -175,29 +175,7 @@ const TokenHistory = () => {
                 {tokenData?.balance || 0} tokens
               </span>
             </div>
-            {/* Usage summary */}
-            {tokenData?.usage && (
-              <div className="mt-6 pt-4 border-t border-blue-200/50">
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Token Usage</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(tokenData.usage).map(([key, value]) => (
-                    <div key={key} className="bg-white rounded-xl p-4 border border-blue-100">
-                      <h3 className="text-sm font-medium text-gray-700 capitalize mb-1">{key.replace('_', ' ')}</h3>
-                      <div className="flex items-end gap-2">
-                        <span className="text-xl font-bold">{value.remaining}</span>
-                        <span className="text-sm text-gray-500">/ {value.total} tokens</span>
-                      </div>
-                      <div className="w-full h-2 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500 rounded-full" 
-                          style={{width: `${(value.used / value.total * 100) || 0}%`}}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </div>
 
           <div className="p-6">
