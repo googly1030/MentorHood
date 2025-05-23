@@ -10,9 +10,20 @@ import {
   Calendar as CalendarIcon,
   X,
   Mail,
+  Coins,
 } from "lucide-react";
 import { Question } from "../types/question";
 import { API_URL } from "../utils/api";
+import { toast } from "sonner";
+import { getUserData } from "../utils/auth";
+
+// Token data interface
+interface TokenData {
+  balance: number;
+  purchased: number;
+  used: number;
+  status?: string;
+}
 
 // New interface for session details
 interface SessionDetails {
@@ -32,6 +43,8 @@ interface SessionDetails {
   maxRegistrants: number;
   isWomanTech: boolean;
   tag: string;
+  tokenPrice?: number;
+  isPaid?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -48,40 +61,70 @@ export default function QuestionSection() {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  // const [upvotedQuestions, setUpvotedQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"timestamp" | "upvotes">("timestamp");
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
-  const [email, setEmail] = useState(
-    JSON.parse(localStorage.getItem("user") || "{}").email || ""
-  );
+  const [email, setEmail] = useState("");
   const [isEmailSent] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const registrationEmail =
-    JSON.parse(localStorage.getItem("user") || "{}").email || "";
+  const [registrationEmail, setRegistrationEmail] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(
-    null
-  );
+  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const [showRegistrationSuccessModal, setShowRegistrationSuccessModal] =
-    useState(false);
+  const [showRegistrationSuccessModal, setShowRegistrationSuccessModal] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showInsufficientTokensModal, setShowInsufficientTokensModal] = useState<boolean>(false);
+  
+  // Token-related state
+  const [tokenData, setTokenData] = useState<TokenData | null>(null);
+  const [loadingTokens, setLoadingTokens] = useState(true);
+  const [hasEnoughTokens, setHasEnoughTokens] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load upvoted questions from localStorage on component mount
-  // useEffect(() => {
-  //   const storedUpvotes = localStorage.getItem('upvotedQuestions');
-  //   if (storedUpvotes) {
-  //     setUpvotedQuestions(JSON.parse(storedUpvotes));
-  //   }
-  // }, []);
+  // Load user data when component mounts
+  useEffect(() => {
+    const userData = getUserData();
+    if (userData) {
+      setEmail(userData.email || "");
+      setRegistrationEmail(userData.email || "");
+      setUserId(userData.userId || null);
+    }
+  }, []);
+
+  // Fetch token balance from API
+  useEffect(() => {
+    const fetchUserTokens = async () => {
+      if (!userId) {
+        setLoadingTokens(false);
+        return;
+      }
+
+      try {
+        setLoadingTokens(true);
+        const response = await fetch(`${API_URL}/tokens/balance?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch token data');
+        }
+        
+        const data = await response.json();
+        setTokenData(data);
+      } catch (error) {
+        console.error('Error fetching token balance:', error);
+        toast.error('Could not load your token balance');
+      } finally {
+        setLoadingTokens(false);
+      }
+    };
+
+    fetchUserTokens();
+  }, [userId]);
 
   // Fetch session details when component mounts
   useEffect(() => {
     const fetchSessionDetails = async () => {
-      const sessionId = params.sessionId;
       if (!sessionId) {
         setSessionError("No session ID provided");
         setSessionLoading(false);
@@ -104,10 +147,10 @@ export default function QuestionSection() {
 
         const data = await response.json();
         setSessionDetails(data);
-        setSessionLoading(false);
       } catch (error) {
         console.error("Error fetching session details:", error);
         setSessionError("An error occurred while loading session details");
+      } finally {
         setSessionLoading(false);
       }
     };
@@ -115,121 +158,151 @@ export default function QuestionSection() {
     fetchSessionDetails();
   }, [sessionId]);
 
+  // Check if user has enough tokens when token data or session details change
+  useEffect(() => {
+    if (sessionDetails?.isPaid && sessionDetails?.tokenPrice && tokenData) {
+      setHasEnoughTokens(tokenData.balance >= sessionDetails.tokenPrice);
+    }
+  }, [sessionDetails, tokenData]);
+
+  // Check if user is already registered when component mounts
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (!sessionId || !email) return;
+
+      try {
+        const response = await fetch(
+          `${API_URL}/questionnaires/check-registration/${sessionId}/${email}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.is_registered) {
+            // User is already registered, update UI accordingly
+            setIsRegistered(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking registration status:", error);
+      }
+    };
+
+    checkRegistrationStatus();
+  }, [sessionId, email]);
+
   // Fetch questions when component mounts, category changes, or sort order changes
   useEffect(() => {
     fetchQuestions();
   }, [activeCategory, sortBy]);
 
-  // Filter questions based on active category
-  const filteredQuestions =
-    activeCategory === "all"
-      ? questions
-      : questions.filter((q) => q.category_id === activeCategory);
+  // Check if user has enough tokens to register for the session
+  const checkUserTokens = () => {
+    // Get session token price (default to 0 if free session)
+    const tokenPrice = sessionDetails?.tokenPrice || 0;
 
-  // const handleUpvote = async (questionId: string) => {
-  //   try {
-  //     // Call the upvote API
-  //     const response = await fetch(
-  //       `${API_URL}/questionnaires/${questionId}/upvote`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to upvote question");
-  //     }
-
-  //     const updatedQuestion = await response.json();
-
-  //     // Update the questions state with the updated question
-  //     setQuestions((prev) =>
-  //       prev.map((q) => (q._id === questionId ? updatedQuestion : q))
-  //     );
-
-  //     // Update the upvotedQuestions state and localStorage
-  //     let newUpvotedQuestions: string[];
-  //     if (upvotedQuestions.includes(questionId)) {
-  //       newUpvotedQuestions = upvotedQuestions.filter((id) => id !== questionId);
-  //     } else {
-  //       newUpvotedQuestions = [...upvotedQuestions, questionId];
-  //     }
-  //     setUpvotedQuestions(newUpvotedQuestions);
-  //     localStorage.setItem('upvotedQuestions', JSON.stringify(newUpvotedQuestions));
-  //   } catch (error) {
-  //     console.error("Error upvoting question:", error);
-  //   }
-  // };
-
-  const handleQuestionClick = (question: Question) => {
-    setCurrentQuestion(question);
-    setIsAnswerModalOpen(true);
-  };
-
-  useEffect(() => {
-    const userKey = localStorage.getItem("user");
-    if (userKey) {
-      // You can use the userKey here for authentication or other purposes
-      const userObj = JSON.parse(userKey);
-      setEmail(userObj.email);
+    if (sessionDetails?.isPaid && tokenPrice > (tokenData?.balance || 0)) {
+      setShowInsufficientTokensModal(true);
+      return false;
     }
-  }, []);
+    return true;
+  };
 
   const handleViewAnswers = (question: Question) => {
     // Navigate to the answers page
     navigate(`/questions/${question._id}/answers`);
   };
 
+  const handleQuestionClick = (question: Question) => {
+    setCurrentQuestion(question);
+    setIsAnswerModalOpen(true);
+  };
+
+  const fetchQuestions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/questionnaires/?category_id=${activeCategory}&sort_by=${sortBy}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch questions");
+      }
+      const questionnaires = await response.json();
+      setQuestions(questionnaires);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const submitQuestion = async () => {
     if (!title.trim() || !content.trim()) return;
 
     // Get user details from localStorage
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userData = getUserData();
+    if (!userData) {
+      toast.error('You must be logged in to ask a question');
+      return;
+    }
+    
     const author = {
-      id: user.userId || "current-user",
-      name: user.username || "Current User",
-      initials: user.username
-        ? user.username.substring(0, 2).toUpperCase()
+      id: userData.userId || "current-user",
+      name: userData.username || "Current User",
+      initials: userData.username
+        ? userData.username.substring(0, 2).toUpperCase()
         : "CU",
     };
 
-    const response = await fetch(`${API_URL}/questionnaires/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: title,
-        content: content,
-        category_id: activeCategory,
-        session_id: sessionId,
-        author: author,
-      }),
-    });
-    const newQuestionnaire = await response.json();
-
-    setQuestions((prev) => [newQuestionnaire, ...prev]);
-    setTitle("");
-    setContent("");
-    setIsAskModalOpen(false);
+    try {
+      const response = await fetch(`${API_URL}/questionnaires/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userData.token}`
+        },
+        body: JSON.stringify({
+          title: title,
+          content: content,
+          category_id: activeCategory,
+          session_id: sessionId,
+          author: author,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to post question");
+      }
+      
+      const newQuestionnaire = await response.json();
+      setQuestions((prev) => [newQuestionnaire, ...prev]);
+      setTitle("");
+      setContent("");
+      setIsAskModalOpen(false);
+      toast.success("Question posted successfully!");
+    } catch (error) {
+      console.error("Error posting question:", error);
+      toast.error("Failed to post question. Please try again.");
+    }
   };
 
   const submitAnswer = async () => {
     if (!currentQuestion || !answer.trim()) return;
 
     try {
+      const userData = getUserData();
+      if (!userData) {
+        toast.error('You must be logged in to answer questions');
+        return;
+      }
+      
       // Create the answer object
       const answerData = {
         content: answer,
         author: {
-          id: JSON.parse(localStorage.getItem("user") || "{}").userId,
-          name: JSON.parse(localStorage.getItem("user") || "{}").username,
-          initials: JSON.parse(localStorage.getItem("user") || "{}")
-            .username.substring(0, 2)
-            .toUpperCase(),
+          id: userData.userId,
+          name: userData.username || "User",
+          initials: userData.username
+            ? userData.username.substring(0, 2).toUpperCase()
+            : "U",
         },
         question_id: currentQuestion._id,
       };
@@ -241,6 +314,7 @@ export default function QuestionSection() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${userData.token}`
           },
           body: JSON.stringify(answerData),
         }
@@ -260,26 +334,10 @@ export default function QuestionSection() {
       setAnswer("");
       setIsAnswerModalOpen(false);
       setCurrentQuestion(null);
+      toast.success("Answer submitted successfully!");
     } catch (error) {
       console.error("Error submitting answer:", error);
-    }
-  };
-
-  const fetchQuestions = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `${API_URL}/questionnaires/?category_id=${activeCategory}&sort_by=${sortBy}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch questions");
-      }
-      const questionnaires = await response.json();
-      setQuestions(questionnaires);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    } finally {
-      setIsLoading(false);
+      toast.error("Failed to submit answer. Please try again.");
     }
   };
 
@@ -310,73 +368,111 @@ export default function QuestionSection() {
       }
     } catch (error) {
       console.error("Error joining waitlist:", error);
-      // Show error message to user
-      alert(error instanceof Error ? error.message : "Registration failed");
+      toast.error(error instanceof Error ? error.message : "Registration failed");
     }
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsRegistering(true);
-    try {
-      const response = await fetch(`${API_URL}/registrations/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: registrationEmail,
-          session_id: sessionId,
-          name: "", // Optional fields
-          company: "",
-          role: "",
-        }),
-      });
+// Update the handleRegisterSubmit function with the corrected API call
+const handleRegisterSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Registration failed");
-      }
+  // First check if the user has enough tokens
+  if (!checkUserTokens()) {
+    return;
+  }
 
-      setIsRegistered(true);
-      // Show registration success modal
-      setShowRegistrationSuccessModal(true);
-    } catch (error) {
-      console.error("Error registering for session:", error);
-      // Show error message to user
-      alert(error instanceof Error ? error.message : "Registration failed");
-    } finally {
+  setIsRegistering(true);
+  try {
+    const tokenPrice = sessionDetails?.tokenPrice || 0;
+    const userData = getUserData();
+    
+    if (!userData || !userData.userId) {
+      toast.error("You need to be logged in to register");
       setIsRegistering(false);
+      return;
     }
-  };
 
-  // Check if user is already registered when component mounts
-  useEffect(() => {
-    const checkRegistrationStatus = async () => {
-      if (!sessionId || !email) return;
-
+    // If this is a paid session, spend tokens first
+    if (sessionDetails?.isPaid && tokenPrice > 0) {
       try {
-        const response = await fetch(
-          `${API_URL}/questionnaires/check-registration/${sessionId}/${email}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.is_registered) {
-            // User is already registered, update UI accordingly
-            setIsRegistered(true);
-          }
+        // Properly format the URL with user_id as a query parameter
+        const spendResponse = await fetch(`${API_URL}/tokens/spend?user_id=${userData.userId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userData.token}`
+          },
+          body: JSON.stringify({
+            amount: tokenPrice,
+            description: `Registration for AMA session: ${sessionDetails.title}`,
+            usage_type: "ama_sessions"
+          })
+        });
+        
+        if (!spendResponse.ok) {
+          const errorData = await spendResponse.json();
+          throw new Error(errorData.detail || 'Failed to spend tokens');
         }
       } catch (error) {
-        console.error("Error checking registration status:", error);
+        console.error('Error spending tokens:', error);
+        toast.error('Failed to spend tokens. Please try again.');
+        setIsRegistering(false);
+        return;
       }
-    };
+    }
 
-    checkRegistrationStatus();
-  }, [sessionId, email]);
+    // Now register for the session
+    const response = await fetch(`${API_URL}/registrations/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${userData.token}`
+      },
+      body: JSON.stringify({
+        email: registrationEmail,
+        session_id: sessionId,
+        tokenPrice: tokenPrice,
+        user_id: userData.userId,
+        name: userData.username || "",
+        company: "",
+        role: "",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Registration failed");
+    }
+
+    // Refresh token balance after successful registration
+    try {
+      const tokenResponse = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`);
+      if (tokenResponse.ok) {
+        const tokenData = await tokenResponse.json();
+        setTokenData(tokenData);
+      }
+    } catch (error) {
+      console.error("Error refreshing token balance:", error);
+    }
+
+    setIsRegistered(true);
+    setShowRegistrationSuccessModal(true);
+  } catch (error) {
+    console.error("Error registering for session:", error);
+    toast.error(error instanceof Error ? error.message : "Registration failed");
+  } finally {
+    setIsRegistering(false);
+  }
+};
+
+    const filteredQuestions =
+    activeCategory === "all"
+      ? questions
+      : questions.filter((q) => q.category_id === activeCategory);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section - Reused from AllMentors */}
+      {/* Hero Section */}
       <div className="hero-section relative">
         <div className="mx-auto px-8 flex justify-center items-center flex-col relative z-[2] pt-4">
           <h1 className="text-6xl font-bold mb-4 max-w-3xl text-center mx-auto">
@@ -454,56 +550,130 @@ export default function QuestionSection() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {/* Add Token Price information if paid session */}
+                  {sessionDetails.isPaid && (
+                    <div className="flex items-center gap-3">
+                      <div className="bg-orange-50 p-2 rounded-full">
+                        <Coins size={20} className="text-orange-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Price</p>
+                        <p className="font-medium">
+                          {sessionDetails.tokenPrice} tokens
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <p className="text-gray-700 mb-6">
                   {sessionDetails.description}
                 </p>
 
+                {/* Token balance display with loading state */}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-sm text-gray-600">
+                    Your token balance:
+                  </span>
+                  {loadingTokens ? (
+                    <div className="animate-pulse bg-gray-200 h-5 w-20 rounded"></div>
+                  ) : tokenData ? (
+                    <span className="font-medium">{tokenData.balance} tokens</span>
+                  ) : (
+                    <span className="text-gray-500">Not available</span>
+                  )}
+                </div>
+
+                {/* Registration Status and Buttons */}
                 <div className="flex flex-wrap gap-4">
                   {isRegistered ? (
+                    <>
+                      <button
+                        disabled
+                        className="px-6 py-3 rounded-xl bg-gray-300 text-white 
+                        transition-all duration-300 transform shadow-lg 
+                        flex items-center gap-2 font-medium cursor-not-allowed"
+                      >
+                        <Check size={18} />
+                        Already Registered
+                      </button>
+
+                      {/* Enable Ask Question button only after registration */}
+                      <button
+                        onClick={() => setIsAskModalOpen(true)}
+                        className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                        transition-all duration-200 flex items-center gap-2 font-medium"
+                      >
+                        <MessageSquare size={18} />
+                        Ask a Question
+                      </button>
+                    </>
+                  ) : loadingTokens ? (
                     <button
                       disabled
                       className="px-6 py-3 rounded-xl bg-gray-300 text-white 
-                        transition-all duration-300 transform shadow-lg 
-                        flex items-center gap-2 font-medium cursor-not-allowed"
+                      transition-all duration-300 transform shadow-lg 
+                      flex items-center gap-2 font-medium cursor-not-allowed"
                     >
-                      <Check size={18} />
-                      Already Registered
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      Loading...
                     </button>
                   ) : (
                     <button
                       onClick={handleRegisterSubmit}
-                      disabled={isRegistering}
-                      className="px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-800 
+                      disabled={isRegistering || !hasEnoughTokens}
+                      className={`px-6 py-3 rounded-xl text-white 
                         transition-all duration-300 transform hover:scale-105 shadow-lg 
-                        flex items-center gap-2 font-medium"
+                        flex items-center gap-2 font-medium ${
+                          isRegistering || !hasEnoughTokens 
+                            ? "bg-gray-400 cursor-not-allowed" 
+                            : "bg-black hover:bg-gray-800"
+                        }`}
                     >
                       {isRegistering ? (
                         <>
                           <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
                           Registering...
                         </>
+                      ) : !hasEnoughTokens ? (
+                        <>
+                          <Coins size={18} />
+                          Insufficient Tokens
+                        </>
                       ) : (
                         <>
                           <CalendarIcon size={18} />
-                          Register Now
+                          {sessionDetails.isPaid && sessionDetails.tokenPrice
+                            ? `Register (${sessionDetails.tokenPrice} tokens)`
+                            : "Register Now (Free)"}
                         </>
                       )}
                     </button>
                   )}
+                  
+                  {/* Add Buy Tokens button when user doesn't have enough */}
+               {!loadingTokens && !hasEnoughTokens && !isRegistered && (
+  <a
+    href="/purchase-tokens"
+    className="px-6 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 
+      transition-all duration-200 flex items-center gap-2 font-medium"
+  >
+    <Coins size={18} />
+    Buy Tokens
+  </a>
+)}
                 </div>
               </div>
             </div>
           ) : null}
         </div>
 
-        {/* UPDATED: Sort By and Ask Question Button */}
+        {/* Sort Section */}
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-12 mt-8">
-            {/* Sort Options - Moved to replace All Questions filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 font-medium">
-                Sort by:
-              </span>
+              <span className="text-sm text-gray-600 font-medium">Sort by:</span>
               <button
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
                   sortBy === "timestamp"
@@ -528,20 +698,16 @@ export default function QuestionSection() {
               </button>
             </div>
 
-            {/* Add Ask Question Button at right end */}
-            <button
-              onClick={() => setIsAskModalOpen(true)}
-              className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 
-                transition-all duration-200 flex items-center gap-2 font-medium"
-            >
-              <MessageSquare size={16} />
-              Ask a Question
-            </button>
+            {!isRegistered && (
+              <div className="text-gray-600 italic">
+                Please register for this session to ask questions
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Questions Grid - No changes needed */}
+      {/* Questions Grid */}
       <div className="max-w-6xl mx-auto px-4 pb-16">
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
@@ -579,28 +745,6 @@ export default function QuestionSection() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex space-x-3">
-                    {/* <button
-                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm border ${
-                        upvotedQuestions.includes(question._id)
-                          ? "bg-black text-white border-black"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                      onClick={() => handleUpvote(question._id)}
-                      disabled={upvotedQuestions.includes(question._id)}
-                    >
-                      <ArrowUp
-                        size={16}
-                        className={
-                          upvotedQuestions.includes(question._id)
-                            ? "text-white"
-                            : ""
-                        }
-                      />
-                      <span>
-                        Upvote {question.upvotes > 0 && `(${question.upvotes})`}
-                      </span>
-                    </button> */}
-
                     <button
                       className="flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-200 hover:bg-gray-50"
                       onClick={() => handleQuestionClick(question)}
@@ -729,7 +873,7 @@ export default function QuestionSection() {
         </div>
       )}
 
-      {/* Add Waitlist Modal */}
+      {/* Waitlist Modal */}
       {isWaitlistModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
@@ -766,6 +910,7 @@ export default function QuestionSection() {
                       required
                       placeholder="Enter your email"
                       value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 
                         focus:outline-none focus:ring-2 focus:ring-[#4937e8]"
                     />
@@ -780,44 +925,6 @@ export default function QuestionSection() {
                 </form>
               </>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
-            <div className="text-center">
-              <div className="mb-4">
-                <Check size={48} className="mx-auto text-green-500" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                Registration Successful!
-              </h3>
-              <p className="text-gray-600">
-                We've sent a confirmation email with all the details. Check your
-                inbox!
-              </p>
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-                <Mail size={14} />
-                <span>{email}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Registration Modal */}
-      {isRegisterModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
-            <button
-              onClick={() => setIsRegisterModalOpen(false)}
-              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-            >
-              ×
-            </button>
           </div>
         </div>
       )}
@@ -838,6 +945,24 @@ export default function QuestionSection() {
                 confirmation email with all the details has been sent to your
                 inbox.
               </p>
+              
+              {sessionDetails?.isPaid && sessionDetails.tokenPrice && tokenData && (
+                <div className="mb-6 p-4 bg-blue-50 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Coins size={18} className="text-blue-600" />
+                    <span className="font-medium text-blue-800">Tokens Used</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-700">Session cost:</span>
+                    <span className="font-medium text-blue-800">{sessionDetails.tokenPrice} tokens</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1 pt-2 border-t border-blue-200">
+                    <span className="text-blue-700">Remaining balance:</span>
+                    <span className="font-medium text-blue-800">{tokenData.balance} tokens</span>
+                  </div>
+                </div>
+              )}
+              
               <div className="mb-6 flex items-center justify-center gap-2 text-sm text-gray-500">
                 <Mail size={14} />
                 <span>{registrationEmail}</span>
@@ -857,6 +982,62 @@ export default function QuestionSection() {
                 >
                   <Mail className="w-4 h-4" />
                   Check Email
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Insufficient Tokens Modal */}
+      {showInsufficientTokensModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
+            <button
+              onClick={() => setShowInsufficientTokensModal(false)}
+              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+
+            <div className="text-center">
+              <div className="mb-4 text-orange-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mx-auto"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Insufficient Tokens
+              </h3>
+              <p className="text-gray-600 mb-6">
+                You don't have enough tokens to register for this session. You
+                need {sessionDetails?.tokenPrice} tokens but have {tokenData?.balance || 0} tokens.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowInsufficientTokensModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Close
+                </button>
+                <a
+                  href="/purchase-tokens" 
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Buy Tokens
                 </a>
               </div>
             </div>

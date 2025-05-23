@@ -49,6 +49,21 @@ const copyShareLink = (sessionId: string) => {
 
 const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
   const navigate = useNavigate();
+  
+  // Sort sessions by creation date (newest first)
+  const sortedSessions = [...womenTechSessions].sort((a, b) => {
+    // Use created_at for sorting
+    const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+    const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+    return dateB.getTime() - dateA.getTime();
+  });
+  
+  // Get the latest 4 sessions
+  const latestSessions = sortedSessions.slice(0, 4);
+  
+  // For the UI, we'll use the first session as featured, and the rest for the list
+  const featuredSession = latestSessions.length > 0 ? latestSessions[0] : null;
+  const additionalSessions = latestSessions.slice(1);
 
   return (
     <section className="relative py-24 bg-white overflow-hidden">
@@ -79,7 +94,7 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
 
           {/* Updated avatars with enhanced styling */}
           <div className="flex justify-center -space-x-4 mb-10">
-            {womenTechSessions.slice(0, 5).map((session, idx) => (
+            {latestSessions.slice(0, 4).map((session, idx) => (
               <div
                 key={idx}
                 className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
@@ -114,7 +129,7 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
               <div className="flex flex-col md:flex-row h-full relative">
                 {/* Left side with enhanced black gradient */}
                 <div className="w-full md:w-[40%] relative group overflow-hidden">
-                  {womenTechSessions.length > 0 && (
+                  {featuredSession && (
                     <>
                       {/* Enhanced gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 z-10"></div>
@@ -122,8 +137,8 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                       {/* Background image with animated zoom */}
                       <div className="absolute inset-0 bg-gray-100 overflow-hidden">
                         <img
-                          src={womenTechSessions[0].mentor.image}
-                          alt={womenTechSessions[0].mentor.name}
+                          src={featuredSession.mentor.image}
+                          alt={featuredSession.mentor.name}
                           className="w-full h-full object-cover object-center transform scale-100 group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                         <div className="absolute inset-0 bg-black/20"></div>
@@ -136,41 +151,39 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                           Featured Speaker
                         </span>
                         <h3 className="text-3xl md:text-4xl font-bold text-white mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                          {womenTechSessions[0].mentor.name}
+                          {featuredSession.mentor.name}
                         </h3>
                         <p className="text-gray-200 font-medium mb-3">
-                          {womenTechSessions[0].mentor.role}
+                          {featuredSession.mentor.role}
                         </p>
                         <p className="text-white/90 text-sm mb-5 line-clamp-3">
-                          {womenTechSessions[0].title}
+                          {featuredSession.title}
                         </p>
 
-                      
                         <div className="flex justify-between mt-4">
-  <button
-    onClick={() => navigate(`/questions/${womenTechSessions[0]._id}`)}
-    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-md hover:shadow-lg"
-  >
-    <span>Join Session</span>
-    <ArrowRight
-      size={16}
-      className="transform group-hover:translate-x-0.5 transition-transform"
-    />
-  </button>
-  
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      copyShareLink(womenTechSessions[0]._id);
-    }}
-    className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-lg text-gray-900 hover:bg-gray-50 hover:text-black transition-all shadow-md hover:shadow-lg group"
-    title="Share Session"
-  >
-    <Share2 size={16} className="transform group-hover:rotate-12 transition-transform duration-300" />
-    <span className="text-sm font-medium">Share Session</span>
-  </button>
-</div>
-                      
+                          <button
+                            onClick={() => navigate(`/questions/${featuredSession._id}`)}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-md hover:shadow-lg"
+                          >
+                            <span>Join Session</span>
+                            <ArrowRight
+                              size={16}
+                              className="transform group-hover:translate-x-0.5 transition-transform"
+                            />
+                          </button>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyShareLink(featuredSession._id);
+                            }}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-lg text-gray-900 hover:bg-gray-50 hover:text-black transition-all shadow-md hover:shadow-lg group"
+                            title="Share Session"
+                          >
+                            <Share2 size={16} className="transform group-hover:rotate-12 transition-transform duration-300" />
+                            <span className="text-sm font-medium">Share Session</span>
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}
@@ -182,7 +195,7 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                   <div className="border-b border-gray-200 mb-5 flex items-center justify-between">
                     <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
                       <Calendar size={18} className="text-gray-700" />
-                      <span>Upcoming Women in Tech Sessions</span>
+                      <span>Latest Women in Tech Sessions</span>
                     </h3>
                     <button
                       onClick={() => navigate("/")}
@@ -194,7 +207,7 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                   </div>
 
                   <div className="space-y-4">
-                    {womenTechSessions.slice(0, 3).map((session, idx) => (
+                    {additionalSessions.map((session, idx) => (
                       <div
                         key={idx}
                         className="group cursor-pointer"
@@ -294,15 +307,15 @@ const WomenInTech = ({ womenTechSessions, loading }: WomenInTechProps) => {
                                   spots left
                                 </span>
                                 <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyShareLink(session._id);
-                                }}
-                                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all"
-                                title="Share Session"
-                              >
-                                <Share2 size={16} />
-                              </button>
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyShareLink(session._id);
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all"
+                                  title="Share Session"
+                                >
+                                  <Share2 size={16} />
+                                </button>
                               </div>
 
                               <div className="text-gray-800 flex items-center gap-1 text-sm font-medium">

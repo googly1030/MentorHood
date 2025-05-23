@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Clock, Video, Mail,  Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
+import { ArrowLeft, Clock, Video, Mail, Calendar, Star, MapPin, Globe, ChevronLeft, ChevronRight, Loader2, Check, Coins, AlertCircle } from 'lucide-react';
 import { format, addDays, isSameDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { API_URL } from '../utils/api';
+import { getUserData } from '../utils/auth';
 
 interface Timezone {
   value: string;
@@ -23,6 +24,7 @@ interface TimeSlot {
   timeRanges: TimeRange[];
 }
 
+// Update your Session interface to include tokens
 interface Session {
   sessionName: string;
   description: string;
@@ -35,6 +37,7 @@ interface Session {
   showOnProfile: boolean;
   isPaid: boolean;
   price: string;
+  tokens?: number; // Add tokens field
   timeSlots: TimeSlot[];
   userId: string;
   mentorName?: string;
@@ -91,6 +94,13 @@ interface BookingResponse {
   _id: string;
 }
 
+// Add tokenData interface
+interface TokenData {
+  balance: number;
+  purchased: number;
+  used: number;
+}
+
 const BookingDetails: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -112,10 +122,52 @@ const BookingDetails: React.FC = () => {
     timezone: string;
   } | null>(null);
   const [bookedDates, setBookedDates] = useState<Set<string>>(new Set());
+  
+  // Add token-related state
+  const [tokenData, setTokenData] = useState<TokenData | null>(null);
+  const [hasEnoughTokens, setHasEnoughTokens] = useState(true);
+  const [loadingTokens, setLoadingTokens] = useState(true);
 
   // Generate dates for next 14 days starting from tomorrow
   const dates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1));
 
+  // Add useEffect to fetch user token balance
+  useEffect(() => {
+    const fetchUserTokens = async () => {
+      const userData = getUserData();
+      if (!userData || !userData.userId) {
+        setLoadingTokens(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userData.token}`
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch token data');
+        }
+
+        const data = await response.json();
+        setTokenData(data);
+        
+        // Don't check hasEnoughTokens here - we'll do that in another effect
+      } catch (error) {
+        console.error('Error fetching token balance:', error);
+      } finally {
+        setLoadingTokens(false);
+      }
+    };
+
+    fetchUserTokens();
+  }, []); // Empty dependency array, only run once on mount
+
+  // Then, modify the session fetch useEffect to not depend on tokenData
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -126,6 +178,7 @@ const BookingDetails: React.FC = () => {
         const data = await response.json();
         if (data.status === 'success') {
           setSession(data.session);
+          // Don't check hasEnoughTokens here - we'll do that in another effect
         } else {
           throw new Error('Failed to fetch session');
         }
@@ -141,7 +194,14 @@ const BookingDetails: React.FC = () => {
     if (sessionId) {
       fetchSession();
     }
-  }, [sessionId, navigate]);
+  }, [sessionId, navigate]); // Only depend on sessionId and navigate
+
+  // Add a new useEffect to check token balance when either session or tokenData changes
+  useEffect(() => {
+    if (session?.tokens && tokenData) {
+      setHasEnoughTokens(tokenData.balance >= session.tokens);
+    }
+  }, [session?.tokens, tokenData]);
 
   useEffect(() => {
     const checkBookingStatus = async () => {
@@ -232,13 +292,26 @@ const BookingDetails: React.FC = () => {
 
   const handleBooking = async () => {
     if (!session || !selectedDate || !selectedTime) return;
+    
+    // Double-check token balance before proceeding
+    if (session.tokens && tokenData && tokenData.balance < session.tokens) {
+      toast.error(`Not enough tokens. You need ${session.tokens} tokens to book this session.`);
+      setHasEnoughTokens(false);
+      return;
+    }
 
     setBookingState({ ...bookingState, isLoading: true });
     
     try {
       // Get user details from localStorage
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userEmail = user.email || '';
+      const userData = getUserData();
+      if (!userData) {
+        toast.error('You must be logged in to book a session');
+        navigate('/login');
+        return;
+      }
+      
+      const userEmail = userData.email || '';
       
       // Prepare session data to send with the request
       const sessionData = {
@@ -252,21 +325,56 @@ const BookingDetails: React.FC = () => {
           image: session.mentorImage || 'https://via.placeholder.com/50'
         },
         tag: session.sessionType || '',
-        _id: sessionId
+        _id: sessionId,
+        tokens: session.tokens // Include token information
       };
       
+      // Add explicit token deduction request
+      if (session.tokens && session.tokens > 0) {
+        try {
+          // Make a dedicated request to spend tokens with user_id as query parameter
+          const spendResponse = await fetch(`${API_URL}/tokens/spend?user_id=${userData.userId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userData.token}`
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              amount: session.tokens,
+              description: `Booking session: ${session.sessionName}`,
+              usage_type: "mentoring_sessions"
+            })
+          });
+          
+          if (!spendResponse.ok) {
+            const errorData = await spendResponse.json();
+            throw new Error(errorData.detail || 'Failed to spend tokens');
+          }
+        } catch (error) {
+          console.error('Error spending tokens:', error);
+          toast.error('Failed to spend tokens. Please try again.');
+          setBookingState({ ...bookingState, isLoading: false });
+          return;
+        }
+      }
+      
+      // Proceed with booking creation
       const response = await fetch(`${API_URL}/bookings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userData.token}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           session_id: sessionId,
           date: selectedDate.toISOString(),
           time: selectedTime,
           timezone: selectedTimezone.value,
           email: userEmail,
-          session_data: sessionData
+          session_data: sessionData,
+          user_id: userData.userId // Include user ID for reference
         }),
       });
 
@@ -276,6 +384,27 @@ const BookingDetails: React.FC = () => {
       }
 
       const data = await response.json();
+      
+      // Refresh token data after successful booking
+      if (session.tokens && userData.userId) {
+        try {
+          const tokenResponse = await fetch(`${API_URL}/tokens/balance?user_id=${userData.userId}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userData.token}`
+            },
+            credentials: 'include',
+          });
+          
+          if (tokenResponse.ok) {
+            const updatedTokenData = await tokenResponse.json();
+            setTokenData(updatedTokenData);
+          }
+        } catch (error) {
+          console.error('Error updating token balance:', error);
+        }
+      }
+      
       setBookingState({
         isLoading: false,
         isSuccess: true,
@@ -480,18 +609,71 @@ const BookingDetails: React.FC = () => {
               </div>
             </div>
 
+            {/* Token Information */}
+            {session && session.tokens && (
+              <div className="mb-8">
+                <h3 className="text-lg font-medium mb-4">Token Information</h3>
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-100 rounded-full">
+                      <Coins size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-blue-800 font-medium">Token Cost</p>
+                      <p className="text-lg font-bold text-blue-700">{session.tokens} tokens</p>
+                    </div>
+                  </div>
+                  
+                  {!loadingTokens && tokenData && (
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-200">
+                      <span className="text-blue-800">Your Balance:</span>
+                      <span className={`font-medium ${hasEnoughTokens ? 'text-green-600' : 'text-red-600'}`}>
+                        {tokenData.balance} tokens
+                      </span>
+                    </div>
+                  )}
+                  
+                  {!loadingTokens && !hasEnoughTokens && (
+                    <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-100 flex items-start gap-2">
+                      <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-red-700 font-medium">Not enough tokens</p>
+                        <p className="text-xs text-red-600">
+                          You need {(session.tokens || 0) - (tokenData?.balance || 0)} more tokens to book this session.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Booking Button or Already Booked State */}
             {selectedDate && isDateAlreadyBooked(selectedDate) ? (
               <div className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 text-lg font-medium flex items-center justify-center gap-2 border border-gray-200">
                 <Check className="w-5 h-5 text-green-600" />
                 Already Booked
               </div>
+            ) : !hasEnoughTokens && !loadingTokens ? (
+              <div className="space-y-4">
+                <div className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 text-md font-medium flex items-center justify-center gap-2 border border-gray-200 cursor-not-allowed">
+                  <AlertCircle size={18} className="text-red-500" />
+                  Not Enough Tokens
+                </div>
+                <button
+                  onClick={() => navigate('/purchase-tokens')}
+                  className="w-full py-3 rounded-xl text-white text-md font-medium transition-all duration-300 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Coins size={16} />
+                  Buy More Tokens
+                </button>
+              </div>
             ) : (
               <button
-                disabled={!selectedDate || !selectedTime || bookingState.isLoading}
+                disabled={!selectedDate || !selectedTime || bookingState.isLoading || !hasEnoughTokens}
                 onClick={handleBooking}
                 className={`w-full py-4 rounded-xl text-white text-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-                  selectedDate && selectedTime && !bookingState.isLoading
+                  selectedDate && selectedTime && !bookingState.isLoading && hasEnoughTokens
                     ? 'bg-black hover:bg-gray-800'
                     : 'bg-gray-300 cursor-not-allowed'
                 }`}
@@ -499,7 +681,7 @@ const BookingDetails: React.FC = () => {
                 {bookingState.isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : selectedDate && selectedTime ? (
-                  `Book Session • ${session.isPaid ? `₹${session.price}` : 'Free'}`
+                  `Book Session • ${session && session.tokens ? `${session.tokens} tokens` : (session?.isPaid ? `₹${session?.price}` : 'Free')}`
                 ) : (
                   'Select date and time to continue'
                 )}
@@ -581,6 +763,26 @@ const BookingDetails: React.FC = () => {
                       <p className="text-gray-600 mb-6">
                         Your session has been scheduled for {selectedDate && format(selectedDate, 'MMMM d, yyyy')} at {selectedTime}
                       </p>
+                      
+                      {session && session.tokens > 0 && (
+                        <div className="w-full p-4 bg-blue-50 rounded-xl mb-6">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Coins className="w-5 h-5 text-blue-600" />
+                            <span className="font-medium text-blue-800">Tokens Used</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-700">Session cost:</span>
+                            <span className="font-medium text-blue-800">{session.tokens} tokens</span>
+                          </div>
+                          {tokenData && (
+                            <div className="flex justify-between items-center mt-1 pt-2 border-t border-blue-200">
+                              <span className="text-blue-700">Remaining balance:</span>
+                              <span className="font-medium text-blue-800">{tokenData.balance} tokens</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <div className="w-full p-4 bg-gray-50 rounded-xl mb-6">
                         <div className="flex items-center gap-3 mb-2">
                           <Mail className="w-5 h-5 text-gray-700" />
@@ -599,20 +801,6 @@ const BookingDetails: React.FC = () => {
                           Check Email
                         </a>
                       </div>
-                      {/* <div className="w-full p-4 bg-gray-50 rounded-xl mb-6">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Video className="w-5 h-5 text-gray-700" />
-                          <span className="font-medium">Meeting Link</span>
-                        </div>
-                        <a 
-                          href={bookingState.meeting_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 text-sm break-all"
-                        >
-                          {bookingState.meeting_link}
-                        </a>
-                      </div> */}
 
                       <button
                         onClick={() => navigate('/')}

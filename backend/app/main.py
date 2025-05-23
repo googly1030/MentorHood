@@ -12,6 +12,7 @@ from app.routes import registration as registration_routes
 from app.routes import booking as booking_routes
 from app.routes import dashboard
 from app.routes import upload
+from app.routes import tokens  # Add this with your other imports
 
 # Add this near the start of your application
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,7 @@ app.include_router(registration_routes.router)
 app.include_router(booking_routes.router)
 app.include_router(dashboard.router)
 app.include_router(upload.router)
+app.include_router(tokens.router) 
 
 @app.get("/")
 def read_root():

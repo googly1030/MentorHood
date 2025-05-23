@@ -39,6 +39,7 @@ class SessionBase(BaseModel):
     showOnProfile: Optional[bool] = None
     isPaid: Optional[bool] = None
     price: Optional[str] = None
+    tokens: Optional[int] = None 
     mentorId: Optional[str] = None
     sessionId: Optional[str] = None
 

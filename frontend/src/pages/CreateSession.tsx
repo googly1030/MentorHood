@@ -16,6 +16,7 @@ interface FormData {
   showOnProfile: boolean;
   isPaid: boolean;
   price: string;
+  tokens : number;
 }
 
 interface TimeSlot {
@@ -35,8 +36,15 @@ const DAYS = [
   'THURSDAYS', 'FRIDAYS', 'SATURDAYS'
 ];
 
+export const TOKEN_CONVERSION_RATE = 1;
+
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+export const calculateTokens = (price: string): number => {
+  const numericPrice = parseFloat(price) || 0;
+  return Math.round(numericPrice * TOKEN_CONVERSION_RATE);
 };
 
 export function SessionForm({ formData, setFormData, onNext }: {
@@ -257,7 +265,7 @@ export function SessionForm({ formData, setFormData, onNext }: {
                   ${!formData.isPaid 
                     ? 'bg-green-50 border-2 border-green-200 ring-2 ring-green-100'
                     : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'}`}
-                onClick={() => setFormData({ ...formData, isPaid: false, price: '0' })}
+                onClick={() => setFormData({ ...formData, isPaid: false, price: '0', tokens: 0 })}
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                   !formData.isPaid ? 'bg-green-100' : 'bg-gray-100'
@@ -284,7 +292,15 @@ export function SessionForm({ formData, setFormData, onNext }: {
                   ${formData.isPaid 
                     ? 'bg-indigo-50 border-2 border-indigo-200 ring-2 ring-indigo-100'
                     : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'}`}
-                onClick={() => setFormData({ ...formData, isPaid: true, price: formData.price || '50' })}
+                onClick={() => {
+                  const defaultPrice = formData.price || '50';
+                  setFormData({ 
+                    ...formData, 
+                    isPaid: true, 
+                    price: defaultPrice,
+                    tokens: calculateTokens(defaultPrice)
+                  });
+                }}
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                   formData.isPaid ? 'bg-indigo-100' : 'bg-gray-100'
@@ -323,7 +339,14 @@ export function SessionForm({ formData, setFormData, onNext }: {
                     type="number"
                     min="1"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) => {
+                      const newPrice = e.target.value;
+                      setFormData({ 
+                        ...formData, 
+                        price: newPrice,
+                        tokens: calculateTokens(newPrice)
+                      });
+                    }}
                     className="w-full px-4 py-3.5 bg-white border border-indigo-200 rounded-xl
                       focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-300
                       hover:border-indigo-300 pl-16"
@@ -334,19 +357,33 @@ export function SessionForm({ formData, setFormData, onNext }: {
                     <span className="text-gray-300">|</span>
                   </div>
                 </div>
+                <div className="mt-2 text-sm text-indigo-600">
+                  <div className="flex items-center gap-1.5">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-indigo-500">
+                      <path d="M12 2L14.4 9.6H22L15.8 14.4L18.2 22L12 17.2L5.8 22L8.2 14.4L2 9.6H9.6L12 2Z" fill="currentColor"/>
+                    </svg>
+                    <span>
+                      Equivalent to <span className="font-semibold">{calculateTokens(formData.price)} tokens</span>
+                    </span>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {[25, 50, 100, 200].map(price => (
                     <button
                       key={price}
                       type="button"
-                      onClick={() => setFormData({ ...formData, price: price.toString() })}
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        price: price.toString(),
+                        tokens: calculateTokens(price.toString())
+                      })}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                         formData.price === price.toString() 
                           ? 'bg-indigo-200 text-indigo-700 border border-indigo-300' 
                           : 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-100'
                       }`}
                     >
-                      Rs {price}
+                      Rs {price} ({price * TOKEN_CONVERSION_RATE} tokens)
                     </button>
                   ))}
                 </div>
@@ -887,8 +924,11 @@ export function ReviewForm({ formData, timeSlots, onBack, onSubmit, finalText }:
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 col-span-2">
                   <p className="text-sm font-medium text-gray-600 mb-1">Pricing</p>
                   <p className="text-base text-gray-800 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-gray-500" />
-                    {formData.isPaid ? `Rs ${formData.price}` : 'Free Session'}
+                    {formData.isPaid ? (
+                      <>
+                        Rs {formData.price} <span className="text-indigo-600 text-sm">({formData.tokens} tokens)</span>
+                      </>
+                    ) : 'Free Session'}
                   </p>
                 </div>
               </div>
@@ -1049,7 +1089,8 @@ function CreateSession() {
     allowMenteeTopics: false,
     showOnProfile: true,
     isPaid: false,
-    price: '0'
+    price: '0',
+    tokens: 0  
   });
 
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(
@@ -1069,8 +1110,13 @@ function CreateSession() {
         return;
       }
 
-      const sessionData = {
+      const finalFormData = {
         ...formData,
+        tokens: formData.isPaid ? calculateTokens(formData.price) : 0
+      };
+
+      const sessionData = {
+        ...finalFormData,
         userId: userData.userId,
         timeSlots: timeSlots
       };

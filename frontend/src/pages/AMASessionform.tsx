@@ -1,6 +1,6 @@
 import { 
   ArrowRight, Clock, Users, MessageSquare, Calendar, User, Sparkles, 
-  Plus, Minus, CheckCircle, Star, Info, Video, Globe, ArrowLeft, HelpCircle, AlertTriangle
+  Plus, Minus, CheckCircle, Star, Info, Video, Globe, ArrowLeft, HelpCircle, AlertTriangle, DollarSign
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,7 @@ export interface FormData {
     sessionType?: string;
     isPaid?: boolean;
     price?: number;
+    tokenPrice?: number;
     topics: string[];
 }
 
@@ -71,6 +72,12 @@ export function AMASessionform({ formData, setFormData, onNext }: {
       questions: formData.questions.filter((_, i) => i !== index)
     });
   };
+
+    const convertPriceToTokens = (price: number): number => {
+  // Define your conversion rate here (e.g., 1 token = Rs 10)
+  const conversionRate = 1;
+  return Math.ceil(price / conversionRate);
+};
 
   return (
     <div className="p-8 lg:p-10 bg-white rounded-2xl relative overflow-hidden">
@@ -531,6 +538,151 @@ export function AMASessionform({ formData, setFormData, onNext }: {
             </div>
           </div>
 
+          {/* Pricing Section */}
+          <div className="bg-white p-7 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group">
+            <div className="flex items-start mb-5">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-base font-medium text-gray-800">Session Pricing</h3>
+                <p className="text-sm text-gray-500">Decide if your session will be free or paid</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <label 
+                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl cursor-pointer transition-all
+                    ${!formData.isPaid 
+                      ? 'bg-green-50 border-2 border-green-200 ring-2 ring-green-100'
+                      : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'}`}
+                  onClick={() => setFormData({ ...formData, isPaid: false, price: 0, tokenPrice: 0 })}
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    !formData.isPaid ? 'bg-green-100' : 'bg-gray-100'
+                  }`}>
+                    <Globe className={`w-5 h-5 ${!formData.isPaid ? 'text-green-600' : 'text-gray-500'}`} />
+                  </div>
+                  <div className="text-center">
+                    <span className={`text-sm font-medium ${!formData.isPaid ? 'text-green-700' : 'text-gray-700'}`}>
+                      Free Session
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">Available to all mentees</p>
+                  </div>
+                  <input 
+                    type="radio" 
+                    name="isPaid" 
+                    className="sr-only"
+                    checked={!formData.isPaid}
+                    onChange={() => {}}
+                  />
+                </label>
+                
+                <label 
+                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl cursor-pointer transition-all
+                    ${formData.isPaid 
+                      ? 'bg-indigo-50 border-2 border-indigo-200 ring-2 ring-indigo-100'
+                      : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'}`}
+                  onClick={() => {
+                    const newPrice = formData.price || 50;
+                    setFormData({ 
+                      ...formData, 
+                      isPaid: true, 
+                      price: newPrice,
+                      tokenPrice: convertPriceToTokens(newPrice)
+                    })
+                  }}
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    formData.isPaid ? 'bg-indigo-100' : 'bg-gray-100'
+                  }`}>
+                    <DollarSign className={`w-5 h-5 ${formData.isPaid ? 'text-indigo-600' : 'text-gray-500'}`} />
+                  </div>
+                  <div className="text-center">
+                    <span className={`text-sm font-medium ${formData.isPaid ? 'text-indigo-700' : 'text-gray-700'}`}>
+                      Paid Session
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">Charge for your expertise</p>
+                  </div>
+                  <input 
+                    type="radio" 
+                    name="isPaid" 
+                    className="sr-only"
+                    checked={formData.isPaid}
+                    onChange={() => {}}
+                  />
+                </label>
+              </div>
+
+              {formData.isPaid && (
+                <div className="mt-4 bg-indigo-50/50 rounded-xl p-5 border border-indigo-100">
+                  <div className="mb-2">
+                    <label htmlFor="price" className="block text-sm font-medium text-indigo-700 mb-1">
+                      Set Your Price
+                    </label>
+                    <p className="text-xs text-indigo-600/80 mb-3">
+                      Choose a price that reflects the value of your expertise
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="price"
+                      type="number"
+                      min="1"
+                      value={formData.price}
+                      onChange={(e) => {
+                        const newPrice = parseInt(e.target.value) || 0;
+                        setFormData({ 
+                          ...formData, 
+                          price: newPrice,
+                          tokenPrice: convertPriceToTokens(newPrice)
+                        });
+                      }}
+                      className="w-full px-4 py-3.5 bg-white border border-indigo-200 rounded-xl
+                        focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-300
+                        hover:border-indigo-300 pl-16"
+                      placeholder="Enter session price"
+                    />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-600 font-medium flex items-center gap-2">
+                      <span className="text-indigo-700">Rs</span>
+                      <span className="text-gray-300">|</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {[25, 50, 100, 200].map(price => (
+                      <button
+                        key={price}
+                        type="button"
+                        onClick={() => setFormData({ 
+                          ...formData, 
+                          price: price,
+                          tokenPrice: convertPriceToTokens(price)
+                        })}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                          formData.price === price 
+                            ? 'bg-indigo-200 text-indigo-700 border border-indigo-300' 
+                            : 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-100'
+                        }`}
+                      >
+                        Rs {price}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-indigo-100/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-indigo-700">Token Price:</span>
+                      <span className="font-semibold text-indigo-800">{formData.tokenPrice} tokens</span>
+                    </div>
+                    <p className="text-xs text-indigo-600/70 mt-1">
+                      Mentees will pay this amount in tokens
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Footer Action Buttons */}
           <div className="flex justify-end pt-8 mt-8 border-t border-gray-100">
             <button
@@ -770,7 +922,7 @@ interface ReviewFormProps {
 }
 
 // ReviewForm component with enhanced styling
-function ReviewForm({ formData , onBack, onSubmit, finalText }: ReviewFormProps) {
+function ReviewForm({ formData, onBack, onSubmit, finalText }: ReviewFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -780,8 +932,14 @@ function ReviewForm({ formData , onBack, onSubmit, finalText }: ReviewFormProps)
 
     try {
       await onSubmit();
-    } catch  {
-      setError('An error occurred while creating the session. Please try again.');
+      // If we get here, submission was successful
+    } catch (error) {
+      console.error('Submission error details:', error);
+      setError(
+        error instanceof Error 
+          ? `Error: ${error.message}` 
+          : 'An error occurred while creating the session. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -862,6 +1020,16 @@ function ReviewForm({ formData , onBack, onSubmit, finalText }: ReviewFormProps)
                     <span>{formData.maxRegistrants} participants</span>
                   </div>
                 </div>
+
+                {/* Pricing Info - Added Section */}
+                {formData.isPaid && (
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Session Pricing</p>
+                    <div className="flex items-center gap-2 text-gray-900">
+                      <span>Rs {formData.price} / {formData.tokenPrice} tokens</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -995,8 +1163,11 @@ export default function CreateAMASession() {
     sessionType: '',
     isPaid: false,
     price: 0,
+    tokenPrice: 0,
     topics: []
   });
+
+
 
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
     { day: 'Monday', available: false, timeRanges: [] },
@@ -1008,48 +1179,54 @@ export default function CreateAMASession() {
     { day: 'Sunday', available: false, timeRanges: [] }
   ]);
   
-  const handleSubmit = async () => {
-    try {
-      // Format the data according to the API requirements
-      const sessionData = {
-        title: formData.title,
-        description: formData.description,
-        mentor: formData.mentor,
-        date: formData.date,
-        time: formData.time,
-        duration: String(formData.duration), // Convert to string
-        registrants: formData.registrants,
-        maxRegistrants: formData.maxRegistrants,
-        questions: formData.questions,
-        isWomanTech: formData.isWomanTech,
-        sessionName: formData.sessionName,
-        sessionType: formData.sessionType,
-        isPaid: formData.isPaid,
-        price: Number(formData.price),
-        topics: formData.topics,
-        timeSlots: timeSlots.filter(slot => slot.available)
-      };
-  
+const handleSubmit = async () => {
+  try {
+    // Format the data according to the API requirements
+    const sessionData = {
+      title: formData.title,
+      description: formData.description,
+      mentor: formData.mentor,
+      date: formData.date,
+      time: formData.time,
+      duration: String(formData.duration),
+      registrants: formData.registrants,
+      maxRegistrants: formData.maxRegistrants,
+      questions: formData.questions,
+      isWomanTech: formData.isWomanTech,
+      sessionName: formData.sessionName,
+      sessionType: formData.sessionType,
+      isPaid: formData.isPaid,
+      price: Number(formData.price),
+      tokenPrice: Number(formData.tokenPrice),
+      topics: formData.topics,
+      timeSlots: timeSlots.filter(slot => slot.available)
+    };
 
-      const response = await fetch(`${API_URL}/ama-sessions`, { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(sessionData),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-      }
-      // Navigate to dashboard after successful creation
-      navigate('/mentor-dashboard');
-    } catch (error) {
-      console.error('Error creating AMA session:', error);
-      throw error;
+    console.log('Submitting AMA session:', sessionData);
+
+    const response = await fetch(`${API_URL}/ama-sessions`, { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sessionData),
+    });
+
+    const responseData = await response.json();
+    
+    if (!response.ok) {
+      console.error('Server error response:', responseData);
+      throw new Error(responseData.detail || `Server returned ${response.status}`);
     }
-  };
+    
+    console.log('AMA session created successfully:', responseData);
+    // Navigate to dashboard after successful creation
+    navigate('/mentor-dashboard');
+  } catch (error) {
+    console.error('Error creating AMA session:', error);
+    throw error; // Re-throw so the ReviewForm can catch it
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">

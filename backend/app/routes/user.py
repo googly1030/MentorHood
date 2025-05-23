@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, status, Body
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from typing import List, Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from app.models.user import User, UserModel
 from app.database import get_user, create_user, update_user, delete_user, user_collection, user_profile_collection, get_collection
-from bson import ObjectId  # Add this import at the top
+from bson import ObjectId  
 import uuid
 
 # Create password context
@@ -170,8 +170,54 @@ async def register(user: UserCreate):
                 detail="Failed to create mentor profile"
             )
         
+        tokens_data = None
+        if role == "user":
+            tokens_collection = get_collection("tokens")
+            
+            # Create improved token record with 500 initial tokens
+            current_time = datetime.now(UTC)
+            expiry_date = current_time + timedelta(days=365)  # Tokens valid for 1 year
+            
+            token_record = {
+                "userId": user_dict["userId"],
+                "plan_id": "welcome-bonus",
+                "plan_type": "Free",
+                "subscription_status": "active",
+                "purchased_date": current_time,
+                "expiry_date": expiry_date,
+                "purchased_tokens": 500,
+                "used_tokens": 0,
+                "remaining_tokens": 500,
+                "usage": {
+                    "mentoring_sessions": {
+                        "total": 500,
+                        "used": 0,
+                        "remaining": 500
+                    }
+                },
+                "transactions": [
+                    {
+                        "type": "credit",
+                        "amount": 500,
+                        "description": "Welcome bonus for new user",
+                        "timestamp": current_time
+                    }
+                ],
+                "created_at": current_time,
+                "last_updated": current_time
+            }
+            
+            token_result = await tokens_collection.insert_one(token_record)
+            
+            if token_result.inserted_id:
+                tokens_data = {
+                    "balance": 500,
+                    "message": "Welcome tokens added to your account",
+                    "expiry_date": expiry_date
+                }
+        
         # Return user data without password
-        return {
+        response_data = {
             "id": str(result.inserted_id),
             "userId": user_dict["userId"],
             "email": user.email,
@@ -180,13 +226,19 @@ async def register(user: UserCreate):
             "onBoarded": user_dict["onBoarded"],
             "created_at": user_dict["created_at"]
         }
+        
+        # Add tokens data to response if available
+        if tokens_data:
+            response_data["tokens"] = tokens_data
+            
+        return response_data
     # except Exception as e:
     #     raise HTTPException(
     #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     #         detail=f"Could not register user: {str(e)}"
     #     )
 
-# Update the login function to properly handle password fields
+
 @router.post("/login", response_model=UserResponse)
 async def login(user: UserLogin):
     try:

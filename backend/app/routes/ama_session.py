@@ -40,7 +40,7 @@ async def create_ama_session(session: AMASessionCreate):
     # Add timestamps
     session_dict["created_at"] = datetime.utcnow()
     session_dict["updated_at"] = datetime.utcnow()
-    
+    print('session_dict', session_dict)
     # Insert the session with the generated ID
     await collection.insert_one(session_dict)
     
