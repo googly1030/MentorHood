@@ -384,7 +384,7 @@ const TokenPurchase: React.FC = () => {
             </div>
             
             {/* Updated grid to 3 columns for large screens */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
               {tokenPackages.map((pkg) => (
                 <div 
                   key={pkg.id}
